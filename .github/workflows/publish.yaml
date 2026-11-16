@@ -1,0 +1,26 @@
+# Publishes to pub.dev when a version tag such as v0.4.0 is pushed.
+# One-time setup after the first manual `flutter pub publish`:
+# pub.dev > telephony_kit > Admin > Automated publishing > enable GitHub
+# Actions for mohamadElEaswy/telephony_kit with tag pattern v{{version}}.
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+*'
+
+jobs:
+  publish:
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter analyze
+      - run: flutter test
+      - run: flutter pub publish --force
