@@ -104,7 +104,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         onChanged: _refresh,
       );
     }
-    final pages = [const KeypadPage(), const RecentsPage(), const DevicePage()];
+    final pages = [
+      const KeypadPage(),
+      const RecentsPage(),
+      const ContactsPage(),
+      const DevicePage(),
+    ];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Phone'),
