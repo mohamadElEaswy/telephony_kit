@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "dev.telephonykit.telephony_kit_example"
-    compileSdk = flutter.compileSdkVersion
+    // permission_handler_android needs API 37 to compile.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
