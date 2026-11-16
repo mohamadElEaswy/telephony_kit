@@ -46,25 +46,46 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   StreamSubscription<CallEvent>? _subscription;
   List<PhoneCall> _calls = const [];
 
+  /// Numbers from dial intents, shown on the keypad.
+  final _dialRequests = ValueNotifier<String?>(null);
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _requestPermissions();
     _refresh();
+    _takeDialNumber();
     _subscription = telephony.callEvents.listen((_) => _refresh());
+  }
+
+  /// Shows the number of a dial intent (a tapped tel: link) on the keypad.
+  void _takeDialNumber() {
+    String? number;
+    try {
+      number = telephony.takeDialNumber();
+    } on TelephonyException {
+      number = null;
+    }
+    if (number == null || !mounted) return;
+    setState(() => _tab = 0);
+    _dialRequests.value = number;
   }
 
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _subscription?.cancel();
+    _dialRequests.dispose();
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) _refresh();
+    if (state == AppLifecycleState.resumed) {
+      _refresh();
+      _takeDialNumber();
+    }
   }
 
   Future<void> _requestPermissions() async {
@@ -105,7 +126,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       );
     }
     final pages = [
-      const KeypadPage(),
+      KeypadPage(dialRequests: _dialRequests),
       const RecentsPage(),
       const ContactsPage(),
       const DevicePage(),
@@ -187,7 +208,10 @@ class _DefaultDialerBanner extends StatelessWidget {
 // -----------------------------------------------------------------------------
 
 class KeypadPage extends StatefulWidget {
-  const KeypadPage({super.key});
+  const KeypadPage({super.key, required this.dialRequests});
+
+  /// Numbers to show, from dial intents.
+  final ValueNotifier<String?> dialRequests;
 
   @override
   State<KeypadPage> createState() => _KeypadPageState();
@@ -206,6 +230,22 @@ class _KeypadPageState extends State<KeypadPage> {
     } on TelephonyException {
       _accounts = const [];
     }
+    _number = widget.dialRequests.value ?? '';
+    widget.dialRequests.value = null;
+    widget.dialRequests.addListener(_showRequested);
+  }
+
+  @override
+  void dispose() {
+    widget.dialRequests.removeListener(_showRequested);
+    super.dispose();
+  }
+
+  void _showRequested() {
+    final number = widget.dialRequests.value;
+    if (number == null) return;
+    widget.dialRequests.value = null;
+    setState(() => _number = number);
   }
 
   void _call() {

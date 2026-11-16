@@ -35,7 +35,7 @@ class TelephonyKit {
   int get _sdkInt => android.Build$VERSION.SDK_INT;
 
   T _service<T extends JObject>(JString? name, JType<T> type) {
-    final service = _context.getSystemService(name);
+    final service = _context.getSystemService$1(name);
     if (service == null) {
       throw TelephonyException('System service $name is not available.');
     }
@@ -112,10 +112,10 @@ class TelephonyKit {
     if (_sdkInt >= 29) return _requestRole(android.RoleManager.ROLE_DIALER);
     final activity = _activity();
     if (activity == null) return false;
-    final intent = android.Intent.new$2(
+    final intent = android.Intent.new$3(
       android.TelecomManager.ACTION_CHANGE_DEFAULT_DIALER,
     );
-    intent.putExtra$8(
+    intent.putExtra$18(
       android.TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
       _context.packageName,
     );
@@ -168,9 +168,26 @@ class TelephonyKit {
     final uri = android.Uri.parse(
       'tel:${Uri.encodeComponent(number)}'.toJString(),
     );
-    final intent = android.Intent.new$3(android.Intent.ACTION_DIAL, uri);
+    final intent = android.Intent.new$4(android.Intent.ACTION_DIAL, uri);
     intent.addFlags(android.Intent.FLAG_ACTIVITY_NEW_TASK);
     _context.startActivity(intent);
+  });
+
+  /// The number from the dial intent that opened the app, or null.
+  ///
+  /// As the default dialer, the app receives `ACTION_DIAL` and `tel:` links
+  /// when the user taps a phone number elsewhere, or when the app itself
+  /// calls [openDialer]. Call this when the app starts and resumes, and show
+  /// the number on the keypad. Each intent is returned once.
+  ///
+  /// The activity must keep the latest intent (call `setIntent` in
+  /// `onNewIntent`) and Flutter deep linking must be off, or Flutter tries
+  /// to open the number as a route. See the README.
+  String? takeDialNumber() => _guard('Reading dial intent', () {
+    final activity = _activity();
+    if (activity == null) return null;
+    final number = _str(android.DialIntents.takeNumber(activity));
+    return number.isEmpty ? null : number;
   });
 
   /// Places a call to [number] straight away.
@@ -459,9 +476,9 @@ class TelephonyKit {
     final resolver = _context.contentResolver;
     if (resolver == null) return 0;
     final values = android.ContentValues()
-      ..put$3('new'.toJString(), 0.toJInteger())
-      ..put$3('is_read'.toJString(), 1.toJInteger());
-    return resolver.update(
+      ..put$5('new'.toJString(), 0.toJInteger())
+      ..put$5('is_read'.toJString(), 1.toJInteger());
+    return resolver.update$1(
       android.Uri.parse('content://call_log/calls'.toJString()),
       values,
       'type = 3 AND new = 1'.toJString(),
@@ -472,7 +489,7 @@ class TelephonyKit {
   int _delete(String uri, String where, List<String> args) {
     final resolver = _context.contentResolver;
     if (resolver == null) return 0;
-    return resolver.delete(
+    return resolver.delete$1(
       android.Uri.parse(uri.toJString()),
       where.toJString(),
       JArray.of(JString.type, [for (final a in args) a.toJString()]),
@@ -515,7 +532,7 @@ class TelephonyKit {
     final resolver = _context.contentResolver;
     if (resolver == null || number.trim().isEmpty) return false;
     final values = android.ContentValues()
-      ..put('original_number'.toJString(), number.trim().toJString());
+      ..put$8('original_number'.toJString(), number.trim().toJString());
     return resolver.insert(
           android.Uri.parse(_blockedUri.toJString()),
           values,
@@ -826,8 +843,8 @@ class TelephonyKit {
     int limit = 100,
   }) {
     final resolver = _context.contentResolver;
-    if (resolver == null) return const [];
-    final cursor = resolver.query(
+    if (resolver == null) return [];
+    final cursor = resolver.query$1(
       android.Uri.parse(uri.toJString()),
       JArray.of(JString.type, [for (final p in projection) p.toJString()]),
       selection?.toJString(),
@@ -838,7 +855,7 @@ class TelephonyKit {
             ]),
       sortOrder?.toJString(),
     );
-    if (cursor == null) return const [];
+    if (cursor == null) return [];
     try {
       final columns = [
         for (final p in projection) cursor.getColumnIndex(p.toJString()),
