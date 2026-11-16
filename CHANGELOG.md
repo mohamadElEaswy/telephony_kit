@@ -1,3 +1,21 @@
+## Unreleased
+
+* `takeDialNumber()` reads the number of the dial intent (`tel:` link) that
+  opened the app. The example shows it on the keypad instead of crashing on
+  an unknown Flutter route.
+* `searchCallLog` fills `CallLogEntry.id` and `isNew` (deleting single
+  entries works).
+* `searchContacts` finds partial numbers anywhere in a number (`650` finds
+  `+1 650-555-6789`).
+* `canBlockNumbers` is only true for the default dialer or SMS app.
+* `sendUssd` fails after a timeout (30 seconds by default) when the network
+  does not reply.
+* Conference changes are reported on `callEvents`; `swapCalls` only resumes
+  the held call and lets Telecom hold the active one.
+* Bindings regenerated; overload suffixes changed in the private bindings.
+* Example: in-call screen shows over pushed pages, conferences show as
+  "Conference (n)", Messages shows an empty state.
+
 ## 0.3.0
 
 * Incoming call notification with answer and decline buttons that shows full

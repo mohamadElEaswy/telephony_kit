@@ -127,6 +127,28 @@ activity:
 Adding `android:showWhenLocked="true"` and `android:turnScreenOn="true"` to the
 activity lets the incoming call screen show over the lock screen.
 
+Once the app is the default dialer, tapping a phone number anywhere (and
+`openDialer`) opens your activity with a `tel:` uri. Read it with
+`takeDialNumber()` when the app starts and resumes, and show it on your keypad.
+For that, turn off Flutter deep linking in the activity, or Flutter tries to
+open the number as a route:
+
+```xml
+<meta-data
+    android:name="flutter_deeplinking_enabled"
+    android:value="false" />
+```
+
+and keep the latest intent in `MainActivity`:
+
+```java
+@Override
+protected void onNewIntent(@NonNull Intent intent) {
+  super.onNewIntent(intent);
+  setIntent(intent);
+}
+```
+
 **2. The in-call service.** Declare the service that ships with the package
 inside `<application>`:
 
