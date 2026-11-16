@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Proximity sensor: the screen turns off near the ear while a call is
+  active or dialing on the earpiece or a wired headset (not while ringing,
+  on speaker or Bluetooth). `proximitySensorEnabled` (default true),
+  `isProximityLockHeld`. The package now declares `WAKE_LOCK`.
 * Missed call notifications: declare `TelephonyKitMissedCallReceiver` for
   `android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION` (exported, with
   `android:permission="android.permission.MODIFY_PHONE_STATE"` so only

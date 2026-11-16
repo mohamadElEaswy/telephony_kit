@@ -5218,6 +5218,105 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
     ).check();
   }
 
+  static final _id_set$proximitySensorEnabled = _class.staticMethodId(
+    r'setProximitySensorEnabled',
+    r'(Z)V',
+  );
+
+  static final _set$proximitySensorEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setProximitySensorEnabled(boolean enabled)`
+  ///
+  /// Whether the screen turns off when the phone is near the ear during a
+  ///call (default true). Only applies to calls that are active or dialing
+  ///with audio on the earpiece or a wired headset.
+  static set proximitySensorEnabled(core$_.bool enabled) {
+    final _$$classRef = _class.reference;
+    _set$proximitySensorEnabled(
+      _$$classRef.pointer,
+      _id_set$proximitySensorEnabled.pointer,
+      enabled ? 1 : 0,
+    ).check();
+  }
+
+  static final _id_get$isProximitySensorEnabled = _class.staticMethodId(
+    r'isProximitySensorEnabled',
+    r'()Z',
+  );
+
+  static final _get$isProximitySensorEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public boolean isProximitySensorEnabled()`
+  static core$_.bool get isProximitySensorEnabled {
+    final _$$classRef = _class.reference;
+    return _get$isProximitySensorEnabled(
+      _$$classRef.pointer,
+      _id_get$isProximitySensorEnabled.pointer,
+    ).boolean;
+  }
+
+  static final _id_get$isProximityLockHeld = _class.staticMethodId(
+    r'isProximityLockHeld',
+    r'()Z',
+  );
+
+  static final _get$isProximityLockHeld =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public boolean isProximityLockHeld()`
+  ///
+  /// True while the proximity wake lock is held (the screen may be off).
+  static core$_.bool get isProximityLockHeld {
+    final _$$classRef = _class.reference;
+    return _get$isProximityLockHeld(
+      _$$classRef.pointer,
+      _id_get$isProximityLockHeld.pointer,
+    ).boolean;
+  }
+
   static final _id_get$isServiceBound = _class.staticMethodId(
     r'isServiceBound',
     r'()Z',

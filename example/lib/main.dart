@@ -618,6 +618,15 @@ class DevicePage extends StatelessWidget {
                 setState(() => telephony.missedCallNotificationsEnabled = v),
           ),
         ),
+        StatefulBuilder(
+          builder: (context, setState) => SwitchListTile(
+            title: const Text('Screen off near ear'),
+            subtitle: const Text('Uses the proximity sensor during calls'),
+            value: telephony.proximitySensorEnabled,
+            onChanged: (v) =>
+                setState(() => telephony.proximitySensorEnabled = v),
+          ),
+        ),
         const Divider(),
         const NetworkSection(),
         const Divider(),

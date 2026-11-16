@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
 import android.telecom.InCallService;
@@ -41,6 +42,8 @@ public final class CallManager {
   private static int nextId = 1;
   private static boolean lastMuted = false;
   private static int lastRoute = CallAudioState.ROUTE_EARPIECE;
+  private static boolean proximityEnabled = true;
+  private static PowerManager.WakeLock proximityLock;
 
   // ---------------------------------------------------------------------------
   // Configuration
@@ -67,6 +70,26 @@ public final class CallManager {
     showNotifications = enabled;
     Context ctx = appContext;
     if (!enabled && ctx != null) CallNotifications.cancel(ctx);
+  }
+
+  /**
+   * Whether the screen turns off when the phone is near the ear during a
+   * call (default true). Only applies to calls that are active or dialing
+   * with audio on the earpiece or a wired headset.
+   */
+  public static void setProximitySensorEnabled(boolean enabled) {
+    proximityEnabled = enabled;
+    mainHandler.post(CallManager::updateProximity);
+  }
+
+  public static boolean isProximitySensorEnabled() {
+    return proximityEnabled;
+  }
+
+  /** True while the proximity wake lock is held (the screen may be off). */
+  public static boolean isProximityLockHeld() {
+    PowerManager.WakeLock lock = proximityLock;
+    return lock != null && lock.isHeld();
   }
 
   /** True while the system is bound to {@link TelephonyKitInCallService}. */
@@ -474,6 +497,8 @@ public final class CallManager {
         service = null;
       }
     }
+    PowerManager.WakeLock proximity = proximityLock;
+    if (proximity != null && proximity.isHeld()) proximity.release();
   }
 
   @SuppressWarnings("deprecation")
@@ -560,6 +585,7 @@ public final class CallManager {
     lastAudioState = state;
     lastMuted = state.isMuted();
     lastRoute = state.getRoute();
+    updateProximity();
     CallEventListener l = currentListener();
     if (l != null) l.onAudioStateChanged(lastMuted, lastRoute);
   }
@@ -592,6 +618,7 @@ public final class CallManager {
   /** Shows the notification for the most relevant call, or clears it. */
   @SuppressWarnings("deprecation")
   private static void updateNotification() {
+    updateProximity();
     Context ctx = appContext;
     if (ctx == null) return;
     if (!showNotifications) {
@@ -623,6 +650,55 @@ public final class CallManager {
           ctx, liveId, callerLabel(liveId), status, getConnectTimeMillis(liveId));
     } else {
       CallNotifications.cancel(ctx);
+    }
+  }
+
+  /**
+   * Holds the proximity wake lock while a call is active or dialing on the
+   * earpiece or a wired headset, and releases it otherwise. Must run on the
+   * main thread.
+   */
+  @SuppressWarnings("deprecation")
+  private static void updateProximity() {
+    boolean want = false;
+    if (proximityEnabled
+        && lastRoute != CallAudioState.ROUTE_SPEAKER
+        && lastRoute != CallAudioState.ROUTE_BLUETOOTH) {
+      synchronized (lock) {
+        for (Call c : calls.values()) {
+          int state = c.getState();
+          if (state == Call.STATE_ACTIVE
+              || state == Call.STATE_DIALING
+              || state == Call.STATE_CONNECTING) {
+            want = true;
+            break;
+          }
+        }
+      }
+    }
+    if (want) {
+      if (proximityLock == null) {
+        Context ctx = appContext;
+        if (ctx == null) return;
+        PowerManager pm = ctx.getSystemService(PowerManager.class);
+        if (pm == null
+            || !pm.isWakeLockLevelSupported(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK)) {
+          return;
+        }
+        proximityLock =
+            pm.newWakeLock(PowerManager.PROXIMITY_SCREEN_OFF_WAKE_LOCK, "telephony_kit:proximity");
+        proximityLock.setReferenceCounted(false);
+      }
+      if (!proximityLock.isHeld()) {
+        try {
+          proximityLock.acquire();
+        } catch (SecurityException ignored) {
+          // WAKE_LOCK permission missing.
+        }
+      }
+    } else if (proximityLock != null && proximityLock.isHeld()) {
+      // Keep the screen off until the phone leaves the ear.
+      proximityLock.release(PowerManager.RELEASE_FLAG_WAIT_FOR_NO_PROXIMITY);
     }
   }
 

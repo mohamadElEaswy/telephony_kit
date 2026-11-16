@@ -1045,6 +1045,24 @@ class TelephonyKit {
   set showCallNotifications(bool value) =>
       android.CallManager.showCallNotifications = value;
 
+  /// Whether the screen turns off when the phone is held to the ear during
+  /// a call. Defaults to true.
+  ///
+  /// The package holds Android's proximity wake lock while a call is active
+  /// or dialing with audio on the earpiece or a wired headset, so the cheek
+  /// cannot press buttons. It is released while ringing, on speaker or
+  /// Bluetooth, and when the last call ends. Uses the `WAKE_LOCK`
+  /// permission, which the package declares.
+  bool get proximitySensorEnabled =>
+      android.CallManager.isProximitySensorEnabled;
+
+  set proximitySensorEnabled(bool value) =>
+      android.CallManager.proximitySensorEnabled = value;
+
+  /// Whether the proximity wake lock is held right now, so the screen turns
+  /// off when something is near the sensor.
+  bool get isProximityLockHeld => android.CallManager.isProximityLockHeld;
+
   /// Holds the active call and resumes the held one (call waiting).
   bool swapCalls() => android.CallManager.swapCalls();
 
