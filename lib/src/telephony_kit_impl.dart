@@ -515,8 +515,10 @@ class TelephonyKit {
       });
 
   /// Marks all new missed calls as seen, which clears the missed call
-  /// badge. Returns how many changed. Needs `TelephonyPermission.writeCallLog`.
+  /// badge and the missed call notification. Returns how many changed.
+  /// Needs `TelephonyPermission.writeCallLog`.
   int markMissedCallsRead() => _guard('Marking missed calls read', () {
+    android.MissedCallNotifications.clear(_context);
     final resolver = _context.contentResolver;
     if (resolver == null) return 0;
     final values = android.ContentValues()
@@ -539,6 +541,36 @@ class TelephonyKit {
       JArray.of(JString.type, [for (final a in args) a.toJString()]),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Missed call notification
+  // ---------------------------------------------------------------------------
+
+  /// Whether the package shows the missed call notification. Defaults to
+  /// true and is saved on the device.
+  ///
+  /// As the default dialer, Android asks the app to show missed call
+  /// notifications instead of showing its own. This needs
+  /// `TelephonyKitMissedCallReceiver` in the manifest (see the README). The
+  /// notification shows the count and last caller, opens the app when
+  /// tapped and has a "Call back" button. When off, no missed call
+  /// notification is shown at all.
+  bool get missedCallNotificationsEnabled => _guard(
+    'Reading missed call notification setting',
+    () => android.MissedCallNotifications.isEnabled(_context),
+  );
+
+  set missedCallNotificationsEnabled(bool value) => _guard(
+    'Changing missed call notification setting',
+    () => android.MissedCallNotifications.setEnabled(_context, value),
+  );
+
+  /// Removes the missed call notification and resets Android's missed call
+  /// count. [markMissedCallsRead] also does this.
+  void clearMissedCallNotification() => _guard(
+    'Clearing missed call notification',
+    () => android.MissedCallNotifications.clear(_context),
+  );
 
   // ---------------------------------------------------------------------------
   // System block list

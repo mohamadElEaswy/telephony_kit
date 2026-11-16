@@ -7211,6 +7211,138 @@ final class $DialIntents$Type$ extends jni$_.JType<DialIntents> {
   String get signature => r'Ldev/telephonykit/telephony_kit/DialIntents;';
 }
 
+/// from: `dev.telephonykit.telephony_kit.MissedCallNotifications`
+///
+/// The missed call notification. As the default dialer the app is asked to
+///show it through TelephonyKitMissedCallReceiver; Telecom then does not
+///show its own.
+extension type MissedCallNotifications._(jni$_.JObject _$this)
+    implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/MissedCallNotifications',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<MissedCallNotifications> type =
+      $MissedCallNotifications$Type$();
+  static final _id_isEnabled = _class.staticMethodId(
+    r'isEnabled',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isEnabled(android.content.Context context)`
+  ///
+  /// Whether the package shows missed call notifications (default true).
+  static core$_.bool isEnabled(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isEnabled(
+      _$$classRef.pointer,
+      _id_isEnabled.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+
+  static final _id_setEnabled = _class.staticMethodId(
+    r'setEnabled',
+    r'(Landroid/content/Context;Z)V',
+  );
+
+  static final _setEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setEnabled(android.content.Context context, boolean enabled)`
+  ///
+  /// Turns missed call notifications on or off. Off also clears the current one.
+  static void setEnabled(Context? context, core$_.bool enabled) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _setEnabled(
+      _$$classRef.pointer,
+      _id_setEnabled.pointer,
+      _$context.pointer,
+      enabled ? 1 : 0,
+    ).check();
+  }
+
+  static final _id_clear = _class.staticMethodId(
+    r'clear',
+    r'(Landroid/content/Context;)V',
+  );
+
+  static final _clear =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void clear(android.content.Context context)`
+  ///
+  /// Removes the notification and tells Telecom the missed calls were seen.
+  static void clear(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _clear(_$$classRef.pointer, _id_clear.pointer, _$context.pointer).check();
+  }
+}
+
+final class $MissedCallNotifications$Type$
+    extends jni$_.JType<MissedCallNotifications> {
+  @jni$_.internal
+  const $MissedCallNotifications$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature =>
+      r'Ldev/telephonykit/telephony_kit/MissedCallNotifications;';
+}
+
 /// from: `dev.telephonykit.telephony_kit.NetworkEventListener`
 ///
 /// Receives radio and network changes from NetworkMonitor.

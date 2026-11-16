@@ -609,6 +609,15 @@ class DevicePage extends StatelessWidget {
         _row('Voice capable', info.isVoiceCapable ? 'Yes' : 'No'),
         _row('SIM slots', '${info.slotCount}'),
         _row('Default dialer', telephony.defaultDialerPackage ?? '-'),
+        StatefulBuilder(
+          builder: (context, setState) => SwitchListTile(
+            title: const Text('Missed call notifications'),
+            subtitle: const Text('Shown while this is the default dialer'),
+            value: telephony.missedCallNotificationsEnabled,
+            onChanged: (v) =>
+                setState(() => telephony.missedCallNotificationsEnabled = v),
+          ),
+        ),
         const Divider(),
         const NetworkSection(),
         const Divider(),

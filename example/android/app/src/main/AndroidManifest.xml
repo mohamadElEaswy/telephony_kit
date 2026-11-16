@@ -73,6 +73,18 @@
             </intent-filter>
         </service>
 
+        <!-- Shows the missed call notification while this app is the
+             default dialer (Android sends it here instead of showing its
+             own). -->
+        <receiver
+            android:name="dev.telephonykit.telephony_kit.TelephonyKitMissedCallReceiver"
+            android:permission="android.permission.MODIFY_PHONE_STATE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
+            </intent-filter>
+        </receiver>
+
         <!-- Applies telephony_kit's block rules to incoming calls. -->
         <service
             android:name="dev.telephonykit.telephony_kit.TelephonyKitCallScreeningService"

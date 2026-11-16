@@ -1,5 +1,12 @@
 ## Unreleased
 
+* Missed call notifications: declare `TelephonyKitMissedCallReceiver` for
+  `android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION` (exported, with
+  `android:permission="android.permission.MODIFY_PHONE_STATE"` so only
+  Telecom can send it; see the example manifest). As the default dialer the
+  app then shows the missed call notification (count, last caller, Call back
+  button) instead of the system. `missedCallNotificationsEnabled`,
+  `clearMissedCallNotification()`; `markMissedCallsRead()` clears it too.
 * SIM choice for outgoing calls: while a call is in
   `CallState.selectPhoneAccount` (multi SIM, no default SIM), read
   `PhoneCall.selectablePhoneAccounts` and call

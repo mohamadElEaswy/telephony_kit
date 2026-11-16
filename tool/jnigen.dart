@@ -116,6 +116,7 @@ const _systemOnly = {
   '${_ownPackage}TelephonyKitInCallService',
   '${_ownPackage}TelephonyKitCallScreeningService',
   '${_ownPackage}CallActionReceiver',
+  '${_ownPackage}TelephonyKitMissedCallReceiver',
 };
 
 final class _AllowListVisitor extends Visitor {
