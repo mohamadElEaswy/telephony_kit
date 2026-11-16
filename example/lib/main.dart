@@ -101,9 +101,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void _refresh() {
     if (!mounted) return;
+    final calls = telephony.calls.where((c) => c.state.isLive).toList();
+    if (_calls.isEmpty && calls.isNotEmpty) {
+      // The in-call screen replaces this page's body, so close pages,
+      // dialogs and sheets opened on top of it (Messages, Blocking).
+      Navigator.of(context).popUntil((route) => route.isFirst);
+    }
     setState(() {
       _isDefaultDialer = telephony.isDefaultDialer;
-      _calls = telephony.calls.where((c) => c.state.isLive).toList();
+      _calls = calls;
     });
   }
 
