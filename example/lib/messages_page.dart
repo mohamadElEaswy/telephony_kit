@@ -71,29 +71,35 @@ class _MessagesPageState extends State<MessagesPage> {
     } else {
       try {
         final messages = _telephony.searchSms(query: _query, limit: 200);
-        body = ListView.builder(
-          itemCount: messages.length,
-          itemBuilder: (context, i) {
-            final m = messages[i];
-            return ListTile(
-              leading: Icon(
-                m.type == SmsType.sent ? Icons.call_made : Icons.call_received,
-              ),
-              title: Text(m.address),
-              subtitle: Text(
-                m.body,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              trailing: Text(
-                '${m.date.toLocal()}'.split(' ').first,
-                style: TextStyle(
-                  fontWeight: m.isRead ? FontWeight.normal : FontWeight.bold,
-                ),
-              ),
-            );
-          },
-        );
+        body = messages.isEmpty
+            ? const Center(child: Text('No messages found.'))
+            : ListView.builder(
+                itemCount: messages.length,
+                itemBuilder: (context, i) {
+                  final m = messages[i];
+                  return ListTile(
+                    leading: Icon(
+                      m.type == SmsType.sent
+                          ? Icons.call_made
+                          : Icons.call_received,
+                    ),
+                    title: Text(m.address),
+                    subtitle: Text(
+                      m.body,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    trailing: Text(
+                      '${m.date.toLocal()}'.split(' ').first,
+                      style: TextStyle(
+                        fontWeight: m.isRead
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+              );
       } on TelephonyException catch (e) {
         body = Center(child: Text(e.message));
       }
