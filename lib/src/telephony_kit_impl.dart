@@ -534,10 +534,23 @@ class TelephonyKit {
 
   /// Whether this app may use the system block list. True for the default
   /// dialer and default SMS app.
-  bool get canBlockNumbers => _guard(
-    'Checking block list access',
-    () => android.BlockedNumberContract.canCurrentUserBlockNumbers(_context),
-  );
+  ///
+  /// `BlockedNumberContract.canCurrentUserBlockNumbers` only says whether the
+  /// current user may block numbers at all, so the app's roles are checked
+  /// too. Without them, the provider throws a SecurityException.
+  bool get canBlockNumbers => _guard('Checking block list access', () {
+    if (!android.BlockedNumberContract.canCurrentUserBlockNumbers(_context)) {
+      return false;
+    }
+    if (isDefaultDialer) return true;
+    if (_sdkInt < 29) return false;
+    final roles = _service(
+      android.Context.ROLE_SERVICE,
+      android.RoleManager.type,
+    );
+    // RoleManager.ROLE_SMS
+    return roles.isRoleHeld('android.app.role.SMS'.toJString());
+  });
 
   /// Numbers on the system block list, which every app and the phone itself
   /// respect. Only the default dialer or SMS app may read it.
