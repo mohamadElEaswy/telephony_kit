@@ -1,4 +1,7 @@
-## Unreleased
+## 0.4.0
+
+* Agent support: `AGENTS.md` for contributors and an agent skill in
+  `skills/telephony-kit/` for apps that use the package.
 
 * Which SIM a call uses: `PhoneCall.phoneAccount` (id, carrier label, slot;
   `displayName` such as `SIM 2 · Vodafone`). `PhoneAccount.slotIndex` is

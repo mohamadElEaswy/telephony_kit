@@ -37,7 +37,8 @@ USSD codes and send SMS.
 | USSD codes such as `*100#` | `CALL_PHONE`, Android 8.0+ |
 | Send SMS / search SMS | `SEND_SMS` / `READ_SMS` |
 | Default dialer and call screening roles | nothing |
-| Call events, answer, reject, hang up, hold, DTMF, mute, audio routes and Bluetooth, swap, merge and conference, call notifications | the app is the default dialer and declares the in-call service |
+| Call events, answer, reject (with a text), hang up, hold, DTMF, mute, audio routes and Bluetooth, swap, merge and conference, SIM choice, why a call ended, pause digits, proximity screen off, call and missed call notifications | the app is the default dialer and declares the in-call service |
+| Emergency number check | nothing |
 | Call screening with block rules | default dialer or call screening role, and the screening service declared |
 | System block list | the app is the default dialer |
 
@@ -49,7 +50,7 @@ throw.
 
 ```yaml
 dependencies:
-  telephony_kit: ^0.3.0
+  telephony_kit: ^0.4.0
 ```
 
 Minimum Android version is API 24 (Android 7.0).
@@ -212,8 +213,12 @@ telephony.callEvents.listen((event) {
       print('${call.isIncoming ? 'Incoming' : 'Outgoing'}: ${call.number}');
     case CallStateChanged(:final callId, :final state):
       print('$callId is now $state');
+    case CallDisconnected(:final callId, :final cause):
+      print('$callId ended: ${cause.displayText}');   // "Busy", "Call failed" ...
     case CallRemoved(:final callId):
-      print('$callId ended');
+      print('$callId removed');
+    case PostDialWait(:final callId, :final remaining):
+      telephony.call(callId).continuePostDial(true); // send "$remaining"
     case AudioStateChanged(:final muted, :final route):
       print('muted: $muted, route: $route');
   }
@@ -247,6 +252,73 @@ On Android 13+ also request `POST_NOTIFICATIONS` at runtime. Turn them off
 with `telephony.showCallNotifications = false` if you build your own. When a
 call starts ringing the service also tries to open your launcher activity;
 turn that off with `telephony.launchAppOnIncomingCall = false`.
+
+### Choosing the SIM (dual SIM)
+
+When the phone has no default SIM for calls, an outgoing call waits in
+`CallState.selectPhoneAccount` until your app picks one:
+
+```dart
+if (call.state == CallState.selectPhoneAccount) {
+  final options = call.selectablePhoneAccounts;   // PhoneAccount: id, label, slotIndex
+  showPicker(options.map((a) => a.displayName));  // "SIM 1 · Vodafone"
+  call.selectPhoneAccount(options.first.id, setDefault: false);
+}
+print(call.phoneAccount?.displayName);            // the SIM this call uses
+```
+
+`getPhoneAccountDetails()` lists every calling account with its label and
+slot, for your own SIM selector before dialing.
+
+### Rejecting with a message
+
+```dart
+call.reject(message: "Can't talk now, I'll call you back.");
+print(call.cannedTextResponses);  // the user's replies from phone settings
+print(telephony.quickReplies);    // package defaults, which you can replace
+```
+
+Android sends the text itself, so no SMS permission is needed.
+
+### Why a call ended, pause digits and emergency numbers
+
+- `call.disconnectCause` (also in the `CallDisconnected` event) has a `code`
+  (`DisconnectCode.busy`, `rejected`, `error` ...), Android's `label` and
+  `description`, `displayText` for the UI and `isFailure`. It stays readable
+  for the last 20 calls.
+- A `;` in a dialed number (for example `0223456789;1234`) sends a
+  `PostDialWait` event; answer with `call.continuePostDial(true)`. A `,`
+  pauses and continues by itself.
+- `telephony.isEmergencyNumber('112')` checks the local emergency list.
+  Call screening never blocks or silences emergency numbers.
+
+### Proximity sensor
+
+During a call on the earpiece the package keeps a proximity wake lock, so
+the screen turns off near the ear and your cheek cannot press buttons. It is
+released on speaker, Bluetooth, while ringing and after the call. Turn it off
+with `telephony.proximitySensorEnabled = false`.
+
+### Missed call notifications
+
+As the default dialer, Android asks your app to show missed call
+notifications. Declare the receiver inside `<application>`:
+
+```xml
+<receiver
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitMissedCallReceiver"
+    android:permission="android.permission.MODIFY_PHONE_STATE"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
+    </intent-filter>
+</receiver>
+```
+
+The `MODIFY_PHONE_STATE` permission means only the system phone service can
+trigger it. The notification shows the count and last caller with a Call
+back button. `markMissedCallsRead()` and `clearMissedCallNotification()`
+clear it, and `missedCallNotificationsEnabled = false` turns it off.
 
 ### Several calls and conferences
 

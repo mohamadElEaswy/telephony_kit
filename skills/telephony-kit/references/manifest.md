@@ -81,6 +81,19 @@ Inside `<application>`:
 </service>
 ```
 
+For missed call notifications, also inside `<application>`:
+
+```xml
+<receiver
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitMissedCallReceiver"
+    android:permission="android.permission.MODIFY_PHONE_STATE"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.telecom.action.SHOW_MISSED_CALLS_NOTIFICATION" />
+    </intent-filter>
+</receiver>
+```
+
 In `MainActivity`, keep the newest dial intent so `takeDialNumber()` sees it:
 
 ```kotlin
@@ -110,5 +123,5 @@ Inside `<application>`:
 Android binds it when the app is the default dialer, or after
 `requestCallScreeningRole()` (Android 10+).
 
-The package's own manifest already declares the notification button receiver;
-nothing else is needed for notifications.
+The package's own manifest already declares `WAKE_LOCK` (proximity screen
+off) and the notification button receiver.

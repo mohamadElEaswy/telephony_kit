@@ -25,26 +25,36 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 | `void openDialer(String number)` | No permission |
 | `void placeCall(String number, {String? phoneAccountId})` | CALL_PHONE |
 | `List<String> getPhoneAccounts()` | Account ids, usually one per SIM |
+| `List<PhoneAccount> getPhoneAccountDetails()` | `id`, `label`, `slotIndex` (Android 11+), `displayName` |
+| `bool isEmergencyNumber(String number)` | |
 | `bool get isInCall` | Any app; READ_PHONE_STATE |
 
 ## Calls (default dialer only)
 
 | Member | Notes |
 | --- | --- |
-| `Stream<CallEvent> get callEvents` | `CallAdded`, `CallStateChanged`, `CallRemoved`, `AudioStateChanged` (sealed) |
+| `Stream<CallEvent> get callEvents` | `CallAdded`, `CallStateChanged`, `CallDisconnected(callId, cause)`, `CallRemoved`, `PostDialWait(callId, remaining)`, `AudioStateChanged` (sealed) |
 | `List<PhoneCall> get calls` / `PhoneCall call(String id)` | |
 | `set showCallNotifications(bool)` / `set launchAppOnIncomingCall(bool)` | Both default true |
 | `bool get isMuted`, `bool setMuted(bool)`, `bool setSpeakerOn(bool)` | |
 | `AudioRoute get audioRoute`, `Set<AudioRoute> get supportedAudioRoutes`, `bool setAudioRoute(AudioRoute)` | |
 | `List<BluetoothAudioDevice> get bluetoothDevices`, `bool selectBluetoothDevice(String address)` | Android 9+ |
 | `bool swapCalls()` | Call waiting |
+| `bool proximitySensorEnabled` (get/set), `bool get isProximityLockHeld` | Default on |
+| `bool missedCallNotificationsEnabled` (get/set), `void clearMissedCallNotification()` | Needs the missed call receiver |
+| `List<String> quickReplies` | Default reject-with-message texts, settable |
 | `bool get isInCallServiceBound` | |
 
 `PhoneCall`: `id`, `state` (`CallState`), `number`, `displayName`,
-`isIncoming`, `connectedAt`, `answer()`, `reject()`, `hangUp()`, `hold()`,
+`isIncoming`, `connectedAt`, `answer()`, `reject({String? message})`,
+`cannedTextResponses`, `hangUp()`, `hold()`,
 `unhold()`, `playDtmf(digit)`, `stopDtmf()`, `isConference`, `canMerge`,
 `canSwap`, `children`, `parent`, `merge()`, `conferenceWith(other)`, `swap()`,
-`splitFromConference()`. Actions return `false` if the call is gone.
+`splitFromConference()`, `phoneAccount`, `selectablePhoneAccounts`,
+`selectPhoneAccount(id, {setDefault})`, `disconnectCause`
+(`DisconnectCause`: `code`, `label`, `description`, `reason`, `displayText`,
+`isFailure`), `postDialRemaining`, `continuePostDial(bool)`. Actions return
+`false` if the call is gone.
 
 `CallState`: `newCall, dialing, ringing, holding, active, disconnected,
 selectPhoneAccount, connecting, disconnecting, pulling, audioProcessing,

@@ -42,7 +42,12 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Place a call (pick SIM) | `placeCall(number, phoneAccountId: id)` + `getPhoneAccounts()` |
 | Become the dialer | `isDefaultDialer`, `requestDefaultDialer()` |
 | React to calls | `callEvents` stream, `calls`, `call(id)` |
-| Control a call | `PhoneCall.answer/reject/hangUp/hold/unhold/playDtmf/stopDtmf` |
+| Control a call | `PhoneCall.answer/reject(message:)/hangUp/hold/unhold/playDtmf/stopDtmf` |
+| Dual SIM | `PhoneCall.selectablePhoneAccounts` + `selectPhoneAccount(id)` in `CallState.selectPhoneAccount`; `PhoneCall.phoneAccount`; `getPhoneAccountDetails()` |
+| Why a call ended | `CallDisconnected` event, `PhoneCall.disconnectCause.displayText` |
+| Extensions (`;`) | `PostDialWait` event, `PhoneCall.continuePostDial(true)` |
+| Emergency | `isEmergencyNumber(number)` |
+| Notifications | `showCallNotifications`, `missedCallNotificationsEnabled`, `clearMissedCallNotification()`, `proximitySensorEnabled` |
 | Mute / audio | `setMuted`, `setSpeakerOn`, `supportedAudioRoutes`, `setAudioRoute`, `bluetoothDevices`, `selectBluetoothDevice` |
 | Several calls | `swapCalls()`, `PhoneCall.merge/conferenceWith/swap/splitFromConference/children/parent` |
 | Search call log | `searchCallLog(query:, types:, from:, to:, limit:)` |
@@ -71,6 +76,13 @@ telephony.callEvents.listen((_) {
 });
 ```
 
+**Handle every call state.** Besides ringing and active, show a SIM picker
+for `CallState.selectPhoneAccount`, a "Send remaining digits?" prompt on
+`PostDialWait`, and `disconnectCause.displayText` briefly when a call ends
+with `isFailure`. An exhaustive `switch` over `CallEvent` must cover
+`CallAdded`, `CallStateChanged`, `CallDisconnected`, `CallRemoved`,
+`PostDialWait` and `AudioStateChanged`.
+
 **Errors.** Android failures (missing permission, no role) throw
 `TelephonyException`. Check `hasPermission(TelephonyPermission.x)` first and
 catch around each call. Control methods on `PhoneCall` return `false` when the
@@ -95,6 +107,11 @@ Set them once from settings UI; do not rewrite them on every app start.
   play the ringtone yourself, or incoming calls ring silently.
 - Without `flutter_deeplinking_enabled=false`, tapping a phone number in other
   apps opens your app with an unknown route and crashes navigation.
+- Missed call notifications need `TelephonyKitMissedCallReceiver` in the
+  manifest, protected by `MODIFY_PHONE_STATE`; without it the system shows
+  its own.
+- Never block emergency numbers in your own logic; check
+  `isEmergencyNumber` first (the package's screening already does).
 - `canBlockNumbers` and the system block list need the default dialer or SMS
   role; fall back to `screening.blockNumber`.
 - Silencing calls needs Android 10+, USSD needs Android 8+, Bluetooth device
