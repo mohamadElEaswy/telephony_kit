@@ -306,6 +306,17 @@ final class CallRemoved extends CallEvent {
   final String callId;
 }
 
+/// A call ended, with the reason. Sent just before [CallRemoved].
+final class CallDisconnected extends CallEvent {
+  const CallDisconnected(this.callId, this.cause);
+
+  /// The call's id.
+  final String callId;
+
+  /// Why the call ended.
+  final DisconnectCause cause;
+}
+
 /// Mute or the audio route changed.
 final class AudioStateChanged extends CallEvent {
   const AudioStateChanged({required this.muted, required this.route});
@@ -315,6 +326,113 @@ final class AudioStateChanged extends CallEvent {
 
   /// Where audio is played.
   final AudioRoute route;
+}
+
+/// Kinds of call endings, mirroring `android.telecom.DisconnectCause` codes.
+enum DisconnectCode {
+  unknown(0),
+
+  /// The call failed, for example no network.
+  error(1),
+
+  /// The user hung up.
+  local(2),
+
+  /// The other side hung up.
+  remote(3),
+
+  /// The outgoing call was canceled before it connected.
+  canceled(4),
+
+  /// An incoming call was not answered.
+  missed(5),
+
+  /// An incoming call was rejected.
+  rejected(6),
+
+  /// The other side was busy.
+  busy(7),
+
+  /// The call is not allowed, for example by call barring.
+  restricted(8),
+
+  /// Another reason, see [DisconnectCause.reason].
+  other(9),
+
+  connectionManagerNotSupported(10),
+
+  /// The call was answered on another device.
+  answeredElsewhere(11),
+
+  /// The call was moved to another device.
+  callPulled(12);
+
+  const DisconnectCode(this.value);
+
+  /// The raw Android value.
+  final int value;
+
+  /// Converts a raw `android.telecom.DisconnectCause` code.
+  static DisconnectCode fromValue(int value) =>
+      DisconnectCode.values.firstWhere(
+        (c) => c.value == value,
+        orElse: () => DisconnectCode.unknown,
+      );
+}
+
+/// Why a call ended.
+class DisconnectCause {
+  const DisconnectCause({
+    required this.code,
+    this.label = '',
+    this.description = '',
+    this.reason = '',
+  });
+
+  /// The kind of ending.
+  final DisconnectCode code;
+
+  /// A short text from Android to show the user, such as "Busy". Often
+  /// empty.
+  final String label;
+
+  /// A longer explanation from Android to show the user. Often empty.
+  final String description;
+
+  /// A technical reason for logs, not for the user.
+  final String reason;
+
+  /// True when the call ended because of a problem rather than someone
+  /// hanging up: [DisconnectCode.error], [DisconnectCode.busy],
+  /// [DisconnectCode.restricted] or [DisconnectCode.other].
+  bool get isFailure => const {
+    DisconnectCode.error,
+    DisconnectCode.busy,
+    DisconnectCode.restricted,
+    DisconnectCode.other,
+  }.contains(code);
+
+  /// Text to show the user: [label] when Android gave one, else a default
+  /// for [code] such as "Busy" or "Call failed".
+  String get displayText {
+    if (label.isNotEmpty) return label;
+    return switch (code) {
+      DisconnectCode.error => 'Call failed',
+      DisconnectCode.local => 'Call ended',
+      DisconnectCode.remote => 'Call ended',
+      DisconnectCode.canceled => 'Call canceled',
+      DisconnectCode.missed => 'Missed call',
+      DisconnectCode.rejected => 'Call declined',
+      DisconnectCode.busy => 'Busy',
+      DisconnectCode.restricted => 'Call not allowed',
+      DisconnectCode.answeredElsewhere => 'Answered on another device',
+      DisconnectCode.callPulled => 'Moved to another device',
+      _ => 'Call ended',
+    };
+  }
+
+  @override
+  String toString() => 'DisconnectCause(${code.name}, "$label", $reason)';
 }
 
 /// Thrown when an Android call fails, for example because a permission is

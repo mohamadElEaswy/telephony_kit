@@ -13,6 +13,14 @@ public interface CallEventListener {
   /** The state of a call changed. {@code state} is one of {@code android.telecom.Call.STATE_*}. */
   void onCallStateChanged(String callId, int state);
 
+  /**
+   * A call ended. {@code code} is one of {@code android.telecom.DisconnectCause}
+   * codes, {@code label} a short text for the user (may be empty) and {@code
+   * reason} a technical reason for logs. Sent just before {@link
+   * #onCallRemoved}.
+   */
+  void onCallDisconnected(String callId, int code, String label, String reason);
+
   /** A call was removed and is no longer tracked. */
   void onCallRemoved(String callId);
 

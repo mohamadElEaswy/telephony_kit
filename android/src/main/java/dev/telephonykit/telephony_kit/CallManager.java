@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.os.PowerManager;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
+import android.telecom.DisconnectCause;
 import android.telecom.InCallService;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.VideoProfile;
@@ -43,6 +44,14 @@ public final class CallManager {
   private static boolean lastMuted = false;
   private static int lastRoute = CallAudioState.ROUTE_EARPIECE;
   private static boolean proximityEnabled = true;
+  /** Why recent calls ended, kept after removal so Dart can still read it. */
+  private static final Map<String, DisconnectCause> disconnectCauses =
+      new LinkedHashMap<String, DisconnectCause>() {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<String, DisconnectCause> eldest) {
+          return size() > 20;
+        }
+      };
   private static PowerManager.WakeLock proximityLock;
 
   // ---------------------------------------------------------------------------
@@ -257,6 +266,51 @@ public final class CallManager {
     if (current == null) return false;
     current.setAudioRoute(on ? CallAudioState.ROUTE_SPEAKER : CallAudioState.ROUTE_WIRED_OR_EARPIECE);
     return true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Disconnect cause
+  // ---------------------------------------------------------------------------
+
+  private static DisconnectCause causeOf(String callId) {
+    Call call = find(callId);
+    if (call != null && call.getDetails() != null) {
+      DisconnectCause cause = call.getDetails().getDisconnectCause();
+      if (cause != null && cause.getCode() != DisconnectCause.UNKNOWN) return cause;
+    }
+    synchronized (lock) {
+      return disconnectCauses.get(callId);
+    }
+  }
+
+  /**
+   * Why the call ended, one of {@code android.telecom.DisconnectCause} codes
+   * (for example BUSY is 7), or -1 if it has not ended. Still available for a
+   * while after the call was removed.
+   */
+  public static int getDisconnectCode(String callId) {
+    DisconnectCause cause = causeOf(callId);
+    return cause == null ? -1 : cause.getCode();
+  }
+
+  /** A short text to show the user, such as "Busy", or "". */
+  public static String getDisconnectLabel(String callId) {
+    DisconnectCause cause = causeOf(callId);
+    return cause == null || cause.getLabel() == null ? "" : cause.getLabel().toString();
+  }
+
+  /** A longer explanation to show the user, or "". */
+  public static String getDisconnectDescription(String callId) {
+    DisconnectCause cause = causeOf(callId);
+    return cause == null || cause.getDescription() == null
+        ? ""
+        : cause.getDescription().toString();
+  }
+
+  /** The technical reason for logs, or "". */
+  public static String getDisconnectReason(String callId) {
+    DisconnectCause cause = causeOf(callId);
+    return cause == null || cause.getReason() == null ? "" : cause.getReason();
   }
 
   // ---------------------------------------------------------------------------
@@ -575,8 +629,23 @@ public final class CallManager {
     if (callback != null) call.unregisterCallback(callback);
     updateNotification();
     if (removedId != null) {
+      DisconnectCause cause = call.getDetails() == null ? null : call.getDetails().getDisconnectCause();
+      if (cause != null) {
+        synchronized (lock) {
+          disconnectCauses.put(removedId, cause);
+        }
+      }
       CallEventListener l = currentListener();
-      if (l != null) l.onCallRemoved(removedId);
+      if (l != null) {
+        if (cause != null) {
+          l.onCallDisconnected(
+              removedId,
+              cause.getCode(),
+              cause.getLabel() == null ? "" : cause.getLabel().toString(),
+              cause.getReason() == null ? "" : cause.getReason());
+        }
+        l.onCallRemoved(removedId);
+      }
     }
   }
 

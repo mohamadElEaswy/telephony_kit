@@ -4820,6 +4820,16 @@ extension type CallEventListener._(jni$_.JObject _$this)
         );
         return jni$_.nullptr;
       }
+      if ($d ==
+          r'onCallDisconnected(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V') {
+        _$impls[$p]!.onCallDisconnected(
+          ($a![0] as jni$_.JString?),
+          ($a![1] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+          ($a![2] as jni$_.JString?),
+          ($a![3] as jni$_.JString?),
+        );
+        return jni$_.nullptr;
+      }
       if ($d == r'onCallRemoved(Ljava/lang/String;)V') {
         _$impls[$p]!.onCallRemoved(($a![0] as jni$_.JString?));
         return jni$_.nullptr;
@@ -4861,6 +4871,8 @@ extension type CallEventListener._(jni$_.JObject _$this)
         if ($impl.onCallAdded$async) r'onCallAdded(Ljava/lang/String;)V',
         if ($impl.onCallStateChanged$async)
           r'onCallStateChanged(Ljava/lang/String;I)V',
+        if ($impl.onCallDisconnected$async)
+          r'onCallDisconnected(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V',
         if ($impl.onCallRemoved$async) r'onCallRemoved(Ljava/lang/String;)V',
         if ($impl.onAudioStateChanged$async) r'onAudioStateChanged(ZI)V',
       ],
@@ -4949,6 +4961,65 @@ extension CallEventListener$$Methods on CallEventListener {
     ).check();
   }
 
+  static final _id_onCallDisconnected = CallEventListener._class
+      .instanceMethodId(
+        r'onCallDisconnected',
+        r'(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V',
+      );
+
+  static final _onCallDisconnected =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onCallDisconnected(java.lang.String callId, int code, java.lang.String label, java.lang.String reason)`
+  ///
+  /// A call ended. {@code code} is one of {@code android.telecom.DisconnectCause}
+  ///codes, {@code label} a short text for the user (may be empty) and {@code
+  ///reason} a technical reason for logs. Sent just before \#onCallRemoved.
+  void onCallDisconnected(
+    jni$_.JString? callId,
+    core$_.int code,
+    jni$_.JString? label,
+    jni$_.JString? reason,
+  ) {
+    final _$$selfRef = reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    final _$label = label?.reference ?? jni$_.jNullReference;
+    final _$reason = reason?.reference ?? jni$_.jNullReference;
+    _onCallDisconnected(
+      _$$selfRef.pointer,
+      _id_onCallDisconnected.pointer,
+      _$callId.pointer,
+      code,
+      _$label.pointer,
+      _$reason.pointer,
+    ).check();
+  }
+
   static final _id_onCallRemoved = CallEventListener._class.instanceMethodId(
     r'onCallRemoved',
     r'(Ljava/lang/String;)V',
@@ -5029,6 +5100,14 @@ abstract base mixin class $CallEventListener {
     required void Function(jni$_.JString? callId, core$_.int state)
     onCallStateChanged,
     core$_.bool onCallStateChanged$async,
+    required void Function(
+      jni$_.JString? callId,
+      core$_.int code,
+      jni$_.JString? label,
+      jni$_.JString? reason,
+    )
+    onCallDisconnected,
+    core$_.bool onCallDisconnected$async,
     required void Function(jni$_.JString? callId) onCallRemoved,
     core$_.bool onCallRemoved$async,
     required void Function(core$_.bool muted, core$_.int route)
@@ -5040,6 +5119,13 @@ abstract base mixin class $CallEventListener {
   core$_.bool get onCallAdded$async => false;
   void onCallStateChanged(jni$_.JString? callId, core$_.int state);
   core$_.bool get onCallStateChanged$async => false;
+  void onCallDisconnected(
+    jni$_.JString? callId,
+    core$_.int code,
+    jni$_.JString? label,
+    jni$_.JString? reason,
+  );
+  core$_.bool get onCallDisconnected$async => false;
   void onCallRemoved(jni$_.JString? callId);
   core$_.bool get onCallRemoved$async => false;
   void onAudioStateChanged(core$_.bool muted, core$_.int route);
@@ -5053,6 +5139,14 @@ final class _$CallEventListener with $CallEventListener {
     required void Function(jni$_.JString? callId, core$_.int state)
     onCallStateChanged,
     this.onCallStateChanged$async = false,
+    required void Function(
+      jni$_.JString? callId,
+      core$_.int code,
+      jni$_.JString? label,
+      jni$_.JString? reason,
+    )
+    onCallDisconnected,
+    this.onCallDisconnected$async = false,
     required void Function(jni$_.JString? callId) onCallRemoved,
     this.onCallRemoved$async = false,
     required void Function(core$_.bool muted, core$_.int route)
@@ -5060,6 +5154,7 @@ final class _$CallEventListener with $CallEventListener {
     this.onAudioStateChanged$async = false,
   }) : _onCallAdded = onCallAdded,
        _onCallStateChanged = onCallStateChanged,
+       _onCallDisconnected = onCallDisconnected,
        _onCallRemoved = onCallRemoved,
        _onAudioStateChanged = onAudioStateChanged;
 
@@ -5068,6 +5163,14 @@ final class _$CallEventListener with $CallEventListener {
   final void Function(jni$_.JString? callId, core$_.int state)
   _onCallStateChanged;
   final core$_.bool onCallStateChanged$async;
+  final void Function(
+    jni$_.JString? callId,
+    core$_.int code,
+    jni$_.JString? label,
+    jni$_.JString? reason,
+  )
+  _onCallDisconnected;
+  final core$_.bool onCallDisconnected$async;
   final void Function(jni$_.JString? callId) _onCallRemoved;
   final core$_.bool onCallRemoved$async;
   final void Function(core$_.bool muted, core$_.int route) _onAudioStateChanged;
@@ -5079,6 +5182,15 @@ final class _$CallEventListener with $CallEventListener {
 
   void onCallStateChanged(jni$_.JString? callId, core$_.int state) {
     return _onCallStateChanged(callId, state);
+  }
+
+  void onCallDisconnected(
+    jni$_.JString? callId,
+    core$_.int code,
+    jni$_.JString? label,
+    jni$_.JString? reason,
+  ) {
+    return _onCallDisconnected(callId, code, label, reason);
   }
 
   void onCallRemoved(jni$_.JString? callId) {
@@ -5944,6 +6056,155 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
       _id_setSpeakerOn.pointer,
       on ? 1 : 0,
     ).boolean;
+  }
+
+  static final _id_getDisconnectCode = _class.staticMethodId(
+    r'getDisconnectCode',
+    r'(Ljava/lang/String;)I',
+  );
+
+  static final _getDisconnectCode =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getDisconnectCode(java.lang.String callId)`
+  ///
+  /// Why the call ended, one of {@code android.telecom.DisconnectCause} codes
+  ///(for example BUSY is 7), or -1 if it has not ended. Still available for a
+  ///while after the call was removed.
+  static core$_.int getDisconnectCode(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getDisconnectCode(
+      _$$classRef.pointer,
+      _id_getDisconnectCode.pointer,
+      _$callId.pointer,
+    ).integer;
+  }
+
+  static final _id_getDisconnectLabel = _class.staticMethodId(
+    r'getDisconnectLabel',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getDisconnectLabel =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getDisconnectLabel(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// A short text to show the user, such as "Busy", or "".
+  static jni$_.JString? getDisconnectLabel(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getDisconnectLabel(
+      _$$classRef.pointer,
+      _id_getDisconnectLabel.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getDisconnectDescription = _class.staticMethodId(
+    r'getDisconnectDescription',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getDisconnectDescription =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getDisconnectDescription(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// A longer explanation to show the user, or "".
+  static jni$_.JString? getDisconnectDescription(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getDisconnectDescription(
+      _$$classRef.pointer,
+      _id_getDisconnectDescription.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getDisconnectReason = _class.staticMethodId(
+    r'getDisconnectReason',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getDisconnectReason =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getDisconnectReason(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The technical reason for logs, or "".
+  static jni$_.JString? getDisconnectReason(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getDisconnectReason(
+      _$$classRef.pointer,
+      _id_getDisconnectReason.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
   }
 
   static final _id_getSelectablePhoneAccountIds = _class.staticMethodId(

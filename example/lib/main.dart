@@ -56,7 +56,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _requestPermissions();
     _refresh();
     _takeDialNumber();
-    _subscription = telephony.callEvents.listen((_) => _refresh());
+    _subscription = telephony.callEvents.listen((event) {
+      if (event is CallDisconnected && event.cause.isFailure && mounted) {
+        // For example "Busy" or "Call failed".
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(event.cause.displayText)));
+      }
+      _refresh();
+    });
   }
 
   /// Shows the number of a dial intent (a tapped tel: link) on the keypad.

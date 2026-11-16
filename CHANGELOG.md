@@ -1,5 +1,11 @@
 ## Unreleased
 
+* Disconnect cause: `PhoneCall.disconnectCause` (`DisconnectCause` with
+  `code`, `label`, `description`, `reason`, `displayText`,
+  `isFailure`), still readable for the last 20 calls after removal, and a new
+  `CallDisconnected` event sent just before `CallRemoved`. Breaking: an
+  exhaustive `switch` over `CallEvent` needs a `CallDisconnected` case.
+  The example shows failures such as "Busy" or "Radio off".
 * Proximity sensor: the screen turns off near the ear while a call is
   active or dialing on the earpiece or a wired headset (not while ringing,
   on speaker or Bluetooth). `proximitySensorEnabled` (default true),

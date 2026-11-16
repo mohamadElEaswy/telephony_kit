@@ -1008,6 +1008,17 @@ class TelephonyKit {
             onCallStateChanged$async: true,
             onCallRemoved: (id) => controller.add(CallRemoved(_str(id))),
             onCallRemoved$async: true,
+            onCallDisconnected: (id, code, label, reason) => controller.add(
+              CallDisconnected(
+                _str(id),
+                DisconnectCause(
+                  code: DisconnectCode.fromValue(code),
+                  label: _str(label),
+                  reason: _str(reason),
+                ),
+              ),
+            ),
+            onCallDisconnected$async: true,
             onAudioStateChanged: (muted, route) => controller.add(
               AudioStateChanged(
                 muted: muted,
@@ -1155,6 +1166,21 @@ class PhoneCall {
   DateTime? get connectedAt {
     final millis = android.CallManager.getConnectTimeMillis(_id);
     return millis <= 0 ? null : DateTime.fromMillisecondsSinceEpoch(millis);
+  }
+
+  /// Why the call ended, or null while it is still going. Stays available
+  /// for a while after the call is removed, for the last 20 calls.
+  DisconnectCause? get disconnectCause {
+    final code = android.CallManager.getDisconnectCode(_id);
+    if (code < 0) return null;
+    return DisconnectCause(
+      code: DisconnectCode.fromValue(code),
+      label: TelephonyKit._str(android.CallManager.getDisconnectLabel(_id)),
+      description: TelephonyKit._str(
+        android.CallManager.getDisconnectDescription(_id),
+      ),
+      reason: TelephonyKit._str(android.CallManager.getDisconnectReason(_id)),
+    );
   }
 
   /// Answers a ringing call.
