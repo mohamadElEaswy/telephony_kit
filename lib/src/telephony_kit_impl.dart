@@ -344,7 +344,15 @@ class TelephonyKit {
 
     final rows = _queryRows(
       'content://call_log/calls',
-      projection: const ['number', 'name', 'type', 'date', 'duration'],
+      projection: const [
+        '_id',
+        'number',
+        'name',
+        'type',
+        'date',
+        'duration',
+        'new',
+      ],
       selection: where.isEmpty ? null : where.join(' AND '),
       selectionArgs: args,
       sortOrder: 'date DESC',
@@ -353,6 +361,8 @@ class TelephonyKit {
     return [
       for (final row in rows)
         CallLogEntry(
+          id: row['_id'] ?? '',
+          isNew: row['new'] == '1' && row['type'] == '3',
           number: row['number'] ?? '',
           name: row['name'] ?? '',
           type: CallLogType.fromValue(int.tryParse(row['type'] ?? '') ?? -1),
