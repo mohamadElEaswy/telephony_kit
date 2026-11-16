@@ -1,5 +1,10 @@
 ## Unreleased
 
+* Reject with a message: `PhoneCall.reject(message: ...)` texts the caller
+  (Telecom sends it, no SMS permission needed); `reject()` still works.
+  `PhoneCall.cannedTextResponses` (the user's replies from the phone
+  settings) and `TelephonyKit.quickReplies` (defaults, changeable). Example:
+  Reply button on the incoming screen.
 * Emergency numbers: `isEmergencyNumber(number)`. Call screening never
   blocks or silences emergency numbers (reason `emergency`). The example
   keypad labels them.

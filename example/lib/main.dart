@@ -785,6 +785,12 @@ class _InCallScreenState extends State<InCallScreen> {
                   setState(() {});
                 },
               ),
+            if (ringing)
+              TextButton.icon(
+                icon: const Icon(Icons.message_outlined),
+                label: const Text('Reply'),
+                onPressed: () => _replyAndReject(call),
+              ),
             const SizedBox(height: 48),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -815,6 +821,59 @@ class _InCallScreenState extends State<InCallScreen> {
         ),
       ),
     );
+  }
+
+  /// Rejects the call and texts the caller a quick reply.
+  Future<void> _replyAndReject(PhoneCall call) async {
+    final canned = call.cannedTextResponses;
+    final replies = canned.isNotEmpty ? canned : telephony.quickReplies;
+    final message = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: ListView(
+          shrinkWrap: true,
+          children: [
+            for (final reply in replies)
+              ListTile(
+                title: Text(reply),
+                onTap: () => Navigator.pop(context, reply),
+              ),
+            ListTile(
+              leading: const Icon(Icons.edit),
+              title: const Text('Write your own…'),
+              onTap: () async {
+                final text = await _writeReply();
+                if (context.mounted) Navigator.pop(context, text);
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    if (message == null || message.isEmpty) return;
+    call.reject(message: message);
+    widget.onChanged();
+  }
+
+  Future<String?> _writeReply() {
+    final controller = TextEditingController();
+    return showDialog<String>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reply'),
+        content: TextField(controller: controller, autofocus: true),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, controller.text),
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    ).whenComplete(controller.dispose);
   }
 
   String? _cachedName;

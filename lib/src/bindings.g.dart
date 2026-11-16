@@ -5874,6 +5874,91 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
     ).boolean;
   }
 
+  static final _id_rejectWithMessage = _class.staticMethodId(
+    r'rejectWithMessage',
+    r'(Ljava/lang/String;Ljava/lang/String;)Z',
+  );
+
+  static final _rejectWithMessage =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean rejectWithMessage(java.lang.String callId, java.lang.String message)`
+  ///
+  /// Rejects a ringing call and sends {@code message} to the caller as a text
+  ///message. Telecom sends it; the app needs no SMS permission.
+  static core$_.bool rejectWithMessage(
+    jni$_.JString? callId,
+    jni$_.JString? message,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    final _$message = message?.reference ?? jni$_.jNullReference;
+    return _rejectWithMessage(
+      _$$classRef.pointer,
+      _id_rejectWithMessage.pointer,
+      _$callId.pointer,
+      _$message.pointer,
+    ).boolean;
+  }
+
+  static final _id_getCannedTextResponses = _class.staticMethodId(
+    r'getCannedTextResponses',
+    r'(Ljava/lang/String;)[Ljava/lang/String;',
+  );
+
+  static final _getCannedTextResponses =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] getCannedTextResponses(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The quick reply texts Telecom offers for a ringing call (the user's
+  ///"respond via message" settings), or an empty array if not loaded yet.
+  static jni$_.JArray<jni$_.JString?>? getCannedTextResponses(
+    jni$_.JString? callId,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getCannedTextResponses(
+      _$$classRef.pointer,
+      _id_getCannedTextResponses.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+
   static final _id_disconnect = _class.staticMethodId(
     r'disconnect',
     r'(Ljava/lang/String;)Z',

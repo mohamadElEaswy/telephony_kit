@@ -1088,6 +1088,17 @@ class TelephonyKit {
   /// off when something is near the sensor.
   bool get isProximityLockHeld => android.CallManager.isProximityLockHeld;
 
+  /// Replies to offer when rejecting a call with a message (see
+  /// `PhoneCall.reject`). Prefer `PhoneCall.cannedTextResponses`, the
+  /// user's own replies from the phone settings, when they are not empty.
+  /// Change this list to use your own texts.
+  List<String> quickReplies = const [
+    "Can't talk now. Call me later?",
+    "I'll call you right back.",
+    "I'll call you later.",
+    "Can't talk now. What's up?",
+  ];
+
   /// Holds the active call and resumes the held one (call waiting).
   bool swapCalls() => android.CallManager.swapCalls();
 
@@ -1211,7 +1222,22 @@ class PhoneCall {
   bool answer() => android.CallManager.answer(_id);
 
   /// Rejects a ringing call.
-  bool reject() => android.CallManager.reject(_id);
+  ///
+  /// With a [message], the caller also gets it as a text message, for
+  /// example one of [cannedTextResponses] or `TelephonyKit.quickReplies`.
+  /// Telecom sends it, so no SMS permission is needed.
+  bool reject({String? message}) => message == null || message.isEmpty
+      ? android.CallManager.reject(_id)
+      : android.CallManager.rejectWithMessage(_id, message.toJString());
+
+  /// The quick reply texts the user set in the phone settings ("respond via
+  /// message"), for a ringing call. May be empty until Telecom loads them;
+  /// fall back to `TelephonyKit.quickReplies`.
+  List<String> get cannedTextResponses {
+    final list = android.CallManager.getCannedTextResponses(_id);
+    if (list == null) return const [];
+    return [for (var i = 0; i < list.length; i++) TelephonyKit._str(list[i])];
+  }
 
   /// Hangs up.
   bool hangUp() => android.CallManager.disconnect(_id);

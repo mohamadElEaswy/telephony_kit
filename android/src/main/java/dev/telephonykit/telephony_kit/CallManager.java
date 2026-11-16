@@ -207,6 +207,28 @@ public final class CallManager {
     return true;
   }
 
+  /**
+   * Rejects a ringing call and sends {@code message} to the caller as a text
+   * message. Telecom sends it; the app needs no SMS permission.
+   */
+  public static boolean rejectWithMessage(String callId, String message) {
+    Call call = find(callId);
+    if (call == null) return false;
+    call.reject(message != null && !message.isEmpty(), message);
+    return true;
+  }
+
+  /**
+   * The quick reply texts Telecom offers for a ringing call (the user's
+   * "respond via message" settings), or an empty array if not loaded yet.
+   */
+  public static String[] getCannedTextResponses(String callId) {
+    Call call = find(callId);
+    if (call == null) return new String[0];
+    List<String> responses = call.getCannedTextResponses();
+    return responses == null ? new String[0] : responses.toArray(new String[0]);
+  }
+
   /** Hangs up an active, dialing or held call. */
   public static boolean disconnect(String callId) {
     Call call = find(callId);
