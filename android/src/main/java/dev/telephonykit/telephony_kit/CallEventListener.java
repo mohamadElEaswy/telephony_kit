@@ -21,6 +21,13 @@ public interface CallEventListener {
    */
   void onCallDisconnected(String callId, int code, String label, String reason);
 
+  /**
+   * The dialed number had a wait character (';'). Ask the user, then call
+   * {@link CallManager#continuePostDial}. {@code remaining} is the digits
+   * still to send.
+   */
+  void onPostDialWait(String callId, String remaining);
+
   /** A call was removed and is no longer tracked. */
   void onCallRemoved(String callId);
 

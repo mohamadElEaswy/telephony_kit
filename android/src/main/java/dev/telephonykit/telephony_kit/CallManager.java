@@ -44,6 +44,8 @@ public final class CallManager {
   private static boolean lastMuted = false;
   private static int lastRoute = CallAudioState.ROUTE_EARPIECE;
   private static boolean proximityEnabled = true;
+  /** Digits waiting for the user after a ';' in the dialed number. */
+  private static final Map<String, String> postDialWaits = new LinkedHashMap<>();
   /** Why recent calls ended, kept after removal so Dart can still read it. */
   private static final Map<String, DisconnectCause> disconnectCauses =
       new LinkedHashMap<String, DisconnectCause>() {
@@ -265,6 +267,35 @@ public final class CallManager {
     }
     if (current == null) return false;
     current.setAudioRoute(on ? CallAudioState.ROUTE_SPEAKER : CallAudioState.ROUTE_WIRED_OR_EARPIECE);
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Post-dial digits
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Digits waiting to be sent after a wait character (';') in the dialed
+   * number, or "" when the call is not waiting.
+   */
+  public static String getPostDialRemaining(String callId) {
+    synchronized (lock) {
+      String remaining = postDialWaits.get(callId);
+      return remaining == null ? "" : remaining;
+    }
+  }
+
+  /**
+   * Answers a post-dial wait: {@code proceed} true sends the remaining
+   * digits, false drops them. Returns false if the call is unknown.
+   */
+  public static boolean continuePostDial(String callId, boolean proceed) {
+    Call call = find(callId);
+    if (call == null) return false;
+    synchronized (lock) {
+      postDialWaits.remove(callId);
+    }
+    call.postDialContinue(proceed);
     return true;
   }
 
@@ -572,6 +603,16 @@ public final class CallManager {
             if (l != null) l.onCallStateChanged(id, state);
           }
 
+          @Override
+          public void onPostDialWait(Call c, String remainingPostDialSequence) {
+            String remaining = remainingPostDialSequence == null ? "" : remainingPostDialSequence;
+            synchronized (lock) {
+              postDialWaits.put(id, remaining);
+            }
+            CallEventListener l = currentListener();
+            if (l != null) l.onPostDialWait(id, remaining);
+          }
+
           // Conference changes do not change the state, but the UI must
           // update (merge and swap buttons, which call to show), so report
           // them as a state event with the current state.
@@ -621,6 +662,7 @@ public final class CallManager {
           removedId = entry.getKey();
           it.remove();
           incoming.remove(removedId);
+          postDialWaits.remove(removedId);
           break;
         }
       }

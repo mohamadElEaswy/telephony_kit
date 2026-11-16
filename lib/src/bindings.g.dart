@@ -4830,6 +4830,13 @@ extension type CallEventListener._(jni$_.JObject _$this)
         );
         return jni$_.nullptr;
       }
+      if ($d == r'onPostDialWait(Ljava/lang/String;Ljava/lang/String;)V') {
+        _$impls[$p]!.onPostDialWait(
+          ($a![0] as jni$_.JString?),
+          ($a![1] as jni$_.JString?),
+        );
+        return jni$_.nullptr;
+      }
       if ($d == r'onCallRemoved(Ljava/lang/String;)V') {
         _$impls[$p]!.onCallRemoved(($a![0] as jni$_.JString?));
         return jni$_.nullptr;
@@ -4873,6 +4880,8 @@ extension type CallEventListener._(jni$_.JObject _$this)
           r'onCallStateChanged(Ljava/lang/String;I)V',
         if ($impl.onCallDisconnected$async)
           r'onCallDisconnected(Ljava/lang/String;ILjava/lang/String;Ljava/lang/String;)V',
+        if ($impl.onPostDialWait$async)
+          r'onPostDialWait(Ljava/lang/String;Ljava/lang/String;)V',
         if ($impl.onCallRemoved$async) r'onCallRemoved(Ljava/lang/String;)V',
         if ($impl.onAudioStateChanged$async) r'onAudioStateChanged(ZI)V',
       ],
@@ -5020,6 +5029,49 @@ extension CallEventListener$$Methods on CallEventListener {
     ).check();
   }
 
+  static final _id_onPostDialWait = CallEventListener._class.instanceMethodId(
+    r'onPostDialWait',
+    r'(Ljava/lang/String;Ljava/lang/String;)V',
+  );
+
+  static final _onPostDialWait =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onPostDialWait(java.lang.String callId, java.lang.String remaining)`
+  ///
+  /// The dialed number had a wait character (';'). Ask the user, then call
+  ///CallManager\#continuePostDial. {@code remaining} is the digits
+  ///still to send.
+  void onPostDialWait(jni$_.JString? callId, jni$_.JString? remaining) {
+    final _$$selfRef = reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    final _$remaining = remaining?.reference ?? jni$_.jNullReference;
+    _onPostDialWait(
+      _$$selfRef.pointer,
+      _id_onPostDialWait.pointer,
+      _$callId.pointer,
+      _$remaining.pointer,
+    ).check();
+  }
+
   static final _id_onCallRemoved = CallEventListener._class.instanceMethodId(
     r'onCallRemoved',
     r'(Ljava/lang/String;)V',
@@ -5108,6 +5160,9 @@ abstract base mixin class $CallEventListener {
     )
     onCallDisconnected,
     core$_.bool onCallDisconnected$async,
+    required void Function(jni$_.JString? callId, jni$_.JString? remaining)
+    onPostDialWait,
+    core$_.bool onPostDialWait$async,
     required void Function(jni$_.JString? callId) onCallRemoved,
     core$_.bool onCallRemoved$async,
     required void Function(core$_.bool muted, core$_.int route)
@@ -5126,6 +5181,8 @@ abstract base mixin class $CallEventListener {
     jni$_.JString? reason,
   );
   core$_.bool get onCallDisconnected$async => false;
+  void onPostDialWait(jni$_.JString? callId, jni$_.JString? remaining);
+  core$_.bool get onPostDialWait$async => false;
   void onCallRemoved(jni$_.JString? callId);
   core$_.bool get onCallRemoved$async => false;
   void onAudioStateChanged(core$_.bool muted, core$_.int route);
@@ -5147,6 +5204,9 @@ final class _$CallEventListener with $CallEventListener {
     )
     onCallDisconnected,
     this.onCallDisconnected$async = false,
+    required void Function(jni$_.JString? callId, jni$_.JString? remaining)
+    onPostDialWait,
+    this.onPostDialWait$async = false,
     required void Function(jni$_.JString? callId) onCallRemoved,
     this.onCallRemoved$async = false,
     required void Function(core$_.bool muted, core$_.int route)
@@ -5155,6 +5215,7 @@ final class _$CallEventListener with $CallEventListener {
   }) : _onCallAdded = onCallAdded,
        _onCallStateChanged = onCallStateChanged,
        _onCallDisconnected = onCallDisconnected,
+       _onPostDialWait = onPostDialWait,
        _onCallRemoved = onCallRemoved,
        _onAudioStateChanged = onAudioStateChanged;
 
@@ -5171,6 +5232,9 @@ final class _$CallEventListener with $CallEventListener {
   )
   _onCallDisconnected;
   final core$_.bool onCallDisconnected$async;
+  final void Function(jni$_.JString? callId, jni$_.JString? remaining)
+  _onPostDialWait;
+  final core$_.bool onPostDialWait$async;
   final void Function(jni$_.JString? callId) _onCallRemoved;
   final core$_.bool onCallRemoved$async;
   final void Function(core$_.bool muted, core$_.int route) _onAudioStateChanged;
@@ -5191,6 +5255,10 @@ final class _$CallEventListener with $CallEventListener {
     jni$_.JString? reason,
   ) {
     return _onCallDisconnected(callId, code, label, reason);
+  }
+
+  void onPostDialWait(jni$_.JString? callId, jni$_.JString? remaining) {
+    return _onPostDialWait(callId, remaining);
   }
 
   void onCallRemoved(jni$_.JString? callId) {
@@ -6055,6 +6123,86 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
       _$$classRef.pointer,
       _id_setSpeakerOn.pointer,
       on ? 1 : 0,
+    ).boolean;
+  }
+
+  static final _id_getPostDialRemaining = _class.staticMethodId(
+    r'getPostDialRemaining',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getPostDialRemaining =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getPostDialRemaining(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Digits waiting to be sent after a wait character (';') in the dialed
+  ///number, or "" when the call is not waiting.
+  static jni$_.JString? getPostDialRemaining(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getPostDialRemaining(
+      _$$classRef.pointer,
+      _id_getPostDialRemaining.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_continuePostDial = _class.staticMethodId(
+    r'continuePostDial',
+    r'(Ljava/lang/String;Z)Z',
+  );
+
+  static final _continuePostDial =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public boolean continuePostDial(java.lang.String callId, boolean proceed)`
+  ///
+  /// Answers a post-dial wait: {@code proceed} true sends the remaining
+  ///digits, false drops them. Returns false if the call is unknown.
+  static core$_.bool continuePostDial(
+    jni$_.JString? callId,
+    core$_.bool proceed,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _continuePostDial(
+      _$$classRef.pointer,
+      _id_continuePostDial.pointer,
+      _$callId.pointer,
+      proceed ? 1 : 0,
     ).boolean;
   }
 

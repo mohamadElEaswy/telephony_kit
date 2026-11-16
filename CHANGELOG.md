@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Post-dial digits: a wait (`;`) in the dialed number sends a
+  `PostDialWait` event; answer with `PhoneCall.continuePostDial(proceed)`.
+  `PhoneCall.postDialRemaining`. Pauses (`,`) need nothing. Example: a
+  "Send remaining digits?" dialog; long press `*` for `,` and `#` for `;`.
 * Disconnect cause: `PhoneCall.disconnectCause` (`DisconnectCause` with
   `code`, `label`, `description`, `reason`, `displayText`,
   `isFailure`), still readable for the last 20 calls after removal, and a new

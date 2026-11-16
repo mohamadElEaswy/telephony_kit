@@ -57,6 +57,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _refresh();
     _takeDialNumber();
     _subscription = telephony.callEvents.listen((event) {
+      if (event is PostDialWait && mounted) _askPostDial(event);
       if (event is CallDisconnected && event.cause.isFailure && mounted) {
         // For example "Busy" or "Call failed".
         ScaffoldMessenger.of(
@@ -65,6 +66,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       _refresh();
     });
+  }
+
+  /// Asks whether to send the digits after a wait (;) in the dialed number.
+  Future<void> _askPostDial(PostDialWait event) async {
+    final send = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Send remaining digits?'),
+        content: Text(event.remaining),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('No'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Send'),
+          ),
+        ],
+      ),
+    );
+    telephony.call(event.callId).continuePostDial(send ?? false);
   }
 
   /// Shows the number of a dial intent (a tapped tel: link) on the keypad.
@@ -317,6 +340,12 @@ class _KeypadPageState extends State<KeypadPage> {
             for (final key in keys)
               TextButton(
                 onPressed: () => setState(() => _number += key),
+                // Long press: * adds a pause (,) and # a wait (;).
+                onLongPress: switch (key) {
+                  '*' => () => setState(() => _number += ','),
+                  '#' => () => setState(() => _number += ';'),
+                  _ => null,
+                },
                 child: Text(key, style: const TextStyle(fontSize: 28)),
               ),
           ],

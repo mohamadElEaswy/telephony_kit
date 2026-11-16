@@ -1019,6 +1019,9 @@ class TelephonyKit {
               ),
             ),
             onCallDisconnected$async: true,
+            onPostDialWait: (id, remaining) =>
+                controller.add(PostDialWait(_str(id), _str(remaining))),
+            onPostDialWait$async: true,
             onAudioStateChanged: (muted, route) => controller.add(
               AudioStateChanged(
                 muted: muted,
@@ -1182,6 +1185,16 @@ class PhoneCall {
       reason: TelephonyKit._str(android.CallManager.getDisconnectReason(_id)),
     );
   }
+
+  /// The digits waiting to be sent after a wait character (`;`), or an
+  /// empty string when the call is not waiting. See [PostDialWait].
+  String get postDialRemaining =>
+      TelephonyKit._str(android.CallManager.getPostDialRemaining(_id));
+
+  /// Answers a [PostDialWait]: [proceed] true sends the remaining digits,
+  /// false drops them. Returns false if the call is no longer tracked.
+  bool continuePostDial(bool proceed) =>
+      android.CallManager.continuePostDial(_id, proceed);
 
   /// Answers a ringing call.
   bool answer() => android.CallManager.answer(_id);

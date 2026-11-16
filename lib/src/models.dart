@@ -317,6 +317,22 @@ final class CallDisconnected extends CallEvent {
   final DisconnectCause cause;
 }
 
+/// The dialed number had a wait character (`;`), for example
+/// `0123456789;1234` for an extension. Ask the user whether to send
+/// [remaining], then call `PhoneCall.continuePostDial`.
+///
+/// A pause (`,`) needs no answer: Android waits a moment and sends the
+/// digits after it by itself.
+final class PostDialWait extends CallEvent {
+  const PostDialWait(this.callId, this.remaining);
+
+  /// The call's id.
+  final String callId;
+
+  /// The digits still to send, which may contain more `,` or `;`.
+  final String remaining;
+}
+
 /// Mute or the audio route changed.
 final class AudioStateChanged extends CallEvent {
   const AudioStateChanged({required this.muted, required this.route});
