@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <!-- Permissions and the in-call service are declared by the app, not the
-         library. See the README. -->
+    <application>
+        <!-- Handles answer, decline and hang up buttons on call notifications.
+             Not exported, so only this app's own notifications can use it. -->
+        <receiver
+            android:name="dev.telephonykit.telephony_kit.CallActionReceiver"
+            android:exported="false" />
+    </application>
+    <!-- Other permissions and the in-call and call screening services are
+         declared by the app, not the library. See the README. -->
 </manifest>

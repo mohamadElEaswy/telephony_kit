@@ -10,12 +10,17 @@ every call except the event stream is a direct, synchronous JNI call.
 | Feature | Needs |
 | --- | --- |
 | Open the system dialer with a number | nothing |
-| Place a call, choose the SIM | `CALL_PHONE` |
-| Network, SIM and phone details | `READ_PHONE_STATE` for SIM list and phone accounts |
-| Call log, call log search | `READ_CALL_LOG` |
+| Place a call, choose the SIM, call voicemail | `CALL_PHONE` |
+| Network, SIM and phone details, live signal and 2G to 5G events | `READ_PHONE_STATE` for some details |
+| Call log and call log search | `READ_CALL_LOG` |
+| Delete call log entries, mark missed calls seen | `WRITE_CALL_LOG` |
 | Contact search, caller lookup by number | `READ_CONTACTS` |
-| Default dialer check and request | nothing |
-| Incoming and outgoing call events, answer, reject, hang up, hold, DTMF, mute, speaker | the app must be the default dialer and declare the in-call service |
+| USSD codes such as `*100#` | `CALL_PHONE`, Android 8.0+ |
+| Send SMS / search SMS | `SEND_SMS` / `READ_SMS` |
+| Default dialer and call screening roles | nothing |
+| Call events, answer, reject, hang up, hold, DTMF, mute, audio routes and Bluetooth, swap, merge and conference, call notifications | the app is the default dialer and declares the in-call service |
+| Call screening with block rules | default dialer or call screening role, and the screening service declared |
+| System block list | the app is the default dialer |
 
 Android only. iOS does not let third-party apps replace the phone app or read
 call data, so it is not supported. On other platforms the APIs throw.
@@ -24,7 +29,7 @@ call data, so it is not supported. On other platforms the APIs throw.
 
 ```yaml
 dependencies:
-  telephony_kit: ^0.2.0
+  telephony_kit: ^0.3.0
 ```
 
 Minimum Android version is API 24 (Android 7.0).
@@ -133,9 +138,10 @@ inside `<application>`:
     <meta-data
         android:name="android.telecom.IN_CALL_SERVICE_UI"
         android:value="true" />
+    <!-- false lets the system play the ringtone. -->
     <meta-data
         android:name="android.telecom.IN_CALL_SERVICE_RINGING"
-        android:value="true" />
+        android:value="false" />
     <intent-filter>
         <action android:name="android.telecom.InCallService" />
     </intent-filter>
@@ -179,15 +185,154 @@ telephony.setMuted(true);
 telephony.setSpeakerOn(true);
 ```
 
-When a call starts ringing, the service opens your app's launcher activity.
-Turn this off with `telephony.launchAppOnIncomingCall = false` if you show your
-own notification instead.
+### Call notifications
+
+While the app is the default dialer, telephony_kit shows:
+
+- an **incoming call** notification with Answer and Decline buttons. It opens
+  your app full screen on the lock screen, and on Android 12+ it uses the
+  system call style.
+- an **ongoing call** notification with a timer and a Hang up button.
+
+Add these permissions so they can show:
+
+```xml
+<uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+<uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+```
+
+On Android 13+ also request `POST_NOTIFICATIONS` at runtime. Turn them off
+with `telephony.showCallNotifications = false` if you build your own. When a
+call starts ringing the service also tries to open your launcher activity;
+turn that off with `telephony.launchAppOnIncomingCall = false`.
+
+### Several calls and conferences
+
+```dart
+telephony.swapCalls();                 // call waiting: hold one, resume the other
+final call = telephony.calls.first;
+if (call.canMerge) call.merge();       // make a conference
+for (final party in call.children) {   // parties in a conference
+  print(party.number);
+}
+call.children.first.splitFromConference();
+```
+
+To add a call, place another call with `placeCall` while one is active.
+
+### Audio routes and Bluetooth
+
+```dart
+print(telephony.supportedAudioRoutes);  // {earpiece, speaker, bluetooth}
+telephony.setAudioRoute(AudioRoute.speaker);
+for (final device in telephony.bluetoothDevices) {
+  print('${device.name} active: ${device.isActive}');
+}
+telephony.selectBluetoothDevice(telephony.bluetoothDevices.first.address);
+```
+
+Bluetooth device names need `BLUETOOTH_CONNECT` on Android 12+.
+
+## Call screening and blocking
+
+telephony_kit has two block lists.
+
+**The app's rules**, applied by `TelephonyKitCallScreeningService`. They are
+saved on the device and work even when the app is closed:
+
+```dart
+final rules = telephony.screening;
+rules.blockNumber('+201001234567');       // matches 01001234567 too
+rules.blockPrefix('0900');                 // premium numbers
+rules.unknownCallerAction = ScreeningAction.silence; // needs READ_CONTACTS
+rules.hiddenNumberAction = ScreeningAction.reject;
+rules.blockedAction = ScreeningAction.reject;       // the default
+
+telephony.screenedCalls.listen((c) => print('${c.number}: ${c.reason}'));
+```
+
+Declare the service in your manifest:
+
+```xml
+<service
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitCallScreeningService"
+    android:permission="android.permission.BIND_SCREENING_SERVICE"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.telecom.CallScreeningService" />
+    </intent-filter>
+</service>
+```
+
+Android uses it when the app is the default dialer. Other apps can ask for the
+call screening role with `requestCallScreeningRole()` (Android 10+).
+Silencing needs Android 10+.
+
+**The system block list** (`BlockedNumberContract`) is shared with the phone
+and the SMS app, but only the default dialer may change it:
+
+```dart
+if (telephony.canBlockNumbers) {
+  telephony.blockNumber('+201001234567');
+  print(telephony.getBlockedNumbers());
+  telephony.unblockNumber('+201001234567');
+}
+```
+
+## Network, signal, voicemail and USSD
+
+```dart
+telephony.networkEvents.listen((event) {
+  switch (event) {
+    case SignalStrengthChanged(:final level):   // 0 to 4
+      print('signal $level');
+    case NetworkTypeChanged():
+      print(event.generation.label);           // 2G, 3G, 4G, 5G
+    case ServiceStatusChanged(:final status):
+      print(status);
+    case DeviceCallStateChanged(:final state):  // needs READ_PHONE_STATE
+      print(state);
+  }
+});
+
+print(telephony.signalLevel);
+print(telephony.voicemailNumber);
+telephony.callVoicemail();
+
+final reply = await telephony.sendUssd('*100#');           // balance
+final reply2 = await telephony.sendUssd('*100#', subscriptionId: 2);
+```
+
+USSD codes that open a multi-step menu only return the first screen.
+
+## Call log changes
+
+```dart
+final missed = telephony.searchCallLog(types: {CallLogType.missed});
+telephony.deleteCallLogEntries(missed.map((e) => e.id));
+telephony.deleteCallLogForNumber('01001234567');
+telephony.markMissedCallsRead();   // clears the missed call badge
+```
+
+These need `WRITE_CALL_LOG`.
+
+## SMS
+
+```dart
+final parts = await telephony.sendSms('+201001234567', 'Hello');
+final found = telephony.searchSms(query: 'code', type: SmsType.inbox);
+```
+
+`sendSms` completes when every part was sent (not delivered). Google Play
+only allows `SEND_SMS` and `READ_SMS` for the default SMS app and a few
+listed exceptions, so leave them out unless your app qualifies.
 
 ### Google Play policy
 
-Google Play only allows the call log and some phone permissions for apps whose
-core purpose is to be the default phone app, and it asks you to declare that
-in the Play Console. Read the
+Google Play only allows the call log, SMS and some phone permissions for apps
+whose core purpose is to be the default phone (or SMS) app, and it asks you to
+declare that in the Play Console. Only declare the permissions for the features
+you use. Read the
 [SMS and Call Log permissions policy](https://support.google.com/googleplay/android-developer/answer/10208820)
 before you publish.
 
@@ -213,14 +358,21 @@ jnigen bindings (lib/src/bindings.g.dart)
    ├──► Android framework: TelecomManager, TelephonyManager, RoleManager,
    │    SubscriptionManager, ContentResolver, CallLog ...
    └──► Package Java (android/src/main/java):
-        CallManager  ◄── TelephonyKitInCallService (bound by the system)
-        CallEventListener  (implemented in Dart)
+        CallManager ◄── TelephonyKitInCallService (bound by the system)
+        CallScreening ◄── TelephonyKitCallScreeningService (bound by the system)
+        CallNotifications, CallActionReceiver (notification buttons)
+        NetworkMonitor, UssdHelper, SmsHelper
+        CallEventListener, ScreeningListener, NetworkEventListener,
+        ResultListener (implemented in Dart)
 ```
 
-Android only delivers calls to an `InCallService` subclass declared in the
-app's manifest, which cannot be generated from Dart. That small Java class and
-its `CallManager` are the only native code. jnigen generates Dart bindings for
-them too, and Dart implements `CallEventListener` directly.
+Android only talks to services, receivers and abstract callback classes that
+are real Java subclasses, which cannot be generated from Dart. Those are the
+only Java code: the in-call and screening services, the notification button
+receiver, and small helpers for callbacks Android only offers as abstract
+classes (USSD, telephony callbacks, SMS results). jnigen generates Dart
+bindings for the helpers, and Dart implements the listener interfaces
+directly. Everything else calls the Android framework from Dart.
 
 ### Regenerating the bindings
 

@@ -4,6 +4,11 @@ import 'package:material_ui/material_ui.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:telephony_kit/telephony_kit.dart';
 
+import 'blocking_page.dart';
+import 'in_call_controls.dart';
+import 'messages_page.dart';
+import 'network_section.dart';
+
 void main() {
   runApp(const DialerApp());
 }
@@ -63,7 +68,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 
   Future<void> _requestPermissions() async {
-    await [Permission.phone, Permission.contacts].request();
+    await [
+      Permission.phone,
+      Permission.contacts,
+      Permission.notification,
+      Permission.sms,
+      Permission.bluetoothConnect,
+    ].request();
     _refresh();
   }
 
@@ -78,12 +89,41 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     if (_calls.isNotEmpty) {
-      return InCallScreen(call: _calls.last, onChanged: _refresh);
+      // Show the ringing call first, then the active one, then the newest.
+      final call = _calls.firstWhere(
+        (c) => c.state == CallState.ringing,
+        orElse: () => _calls.firstWhere(
+          (c) => c.state == CallState.active,
+          orElse: () => _calls.last,
+        ),
+      );
+      return InCallScreen(
+        key: ValueKey(call.id),
+        call: call,
+        allCalls: _calls,
+        onChanged: _refresh,
+      );
     }
     final pages = [const KeypadPage(), const RecentsPage(), const DevicePage()];
     return Scaffold(
       appBar: AppBar(
         title: const Text('Phone'),
+        actions: [
+          IconButton(
+            tooltip: 'Messages',
+            icon: const Icon(Icons.sms_outlined),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const MessagesPage()),
+            ),
+          ),
+          IconButton(
+            tooltip: 'Blocking',
+            icon: const Icon(Icons.block),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const BlockingPage()),
+            ),
+          ),
+        ],
         bottom: _isDefaultDialer
             ? null
             : PreferredSize(
@@ -305,6 +345,11 @@ class _RecentsPageState extends State<RecentsPage> {
                 selected: _missedOnly,
                 onSelected: (v) => setState(() => _missedOnly = v),
               ),
+              const Spacer(),
+              TextButton(
+                onPressed: () => _run(() => telephony.markMissedCallsRead()),
+                child: const Text('Mark missed as seen'),
+              ),
             ],
           ),
         ),
@@ -313,9 +358,67 @@ class _RecentsPageState extends State<RecentsPage> {
     );
   }
 
+  void _run(void Function() action) {
+    try {
+      action();
+    } on TelephonyException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+    setState(() {});
+  }
+
+  Future<void> _menu(CallLogEntry entry) async {
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.delete_outline),
+              title: const Text('Delete this entry'),
+              onTap: () => Navigator.pop(context, 'delete'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.delete_sweep_outlined),
+              title: const Text('Delete all calls with this number'),
+              onTap: () => Navigator.pop(context, 'delete_all'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: const Text('Block number'),
+              onTap: () => Navigator.pop(context, 'block'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (!mounted) return;
+    switch (choice) {
+      case 'delete':
+        _run(() => telephony.deleteCallLogEntries([entry.id]));
+      case 'delete_all':
+        _run(() => telephony.deleteCallLogForNumber(entry.number));
+      case 'block':
+        _run(() {
+          if (telephony.canBlockNumbers) {
+            telephony.blockNumber(entry.number);
+          } else {
+            telephony.screening.blockNumber(entry.number);
+          }
+        });
+    }
+  }
+
   Widget _tile(CallLogEntry entry) => ListTile(
+    onLongPress: () => _menu(entry),
     leading: Icon(_iconFor(entry.type), color: _colorFor(entry.type)),
-    title: Text(entry.name.isEmpty ? entry.number : entry.name),
+    title: Text(
+      entry.name.isEmpty ? entry.number : entry.name,
+      style: entry.isNew ? const TextStyle(fontWeight: FontWeight.bold) : null,
+    ),
     subtitle: Text('${entry.date.toLocal()}'.split('.').first),
     trailing: IconButton(
       icon: const Icon(Icons.call),
@@ -454,6 +557,8 @@ class DevicePage extends StatelessWidget {
         _row('SIM slots', '${info.slotCount}'),
         _row('Default dialer', telephony.defaultDialerPackage ?? '-'),
         const Divider(),
+        const NetworkSection(),
+        const Divider(),
         for (final sim in sims)
           ListTile(
             leading: const Icon(Icons.sim_card),
@@ -479,9 +584,15 @@ class DevicePage extends StatelessWidget {
 // -----------------------------------------------------------------------------
 
 class InCallScreen extends StatefulWidget {
-  const InCallScreen({super.key, required this.call, required this.onChanged});
+  const InCallScreen({
+    super.key,
+    required this.call,
+    required this.allCalls,
+    required this.onChanged,
+  });
 
   final PhoneCall call;
+  final List<PhoneCall> allCalls;
   final VoidCallback onChanged;
 
   @override
@@ -523,8 +634,6 @@ class _InCallScreenState extends State<InCallScreen> {
     final name = call.displayName.isNotEmpty
         ? call.displayName
         : (_contactName(call.number) ?? call.number);
-    final muted = telephony.isMuted;
-    final speaker = telephony.audioRoute == AudioRoute.speaker;
 
     return Scaffold(
       body: SafeArea(
@@ -542,19 +651,13 @@ class _InCallScreenState extends State<InCallScreen> {
             ),
             const Spacer(),
             if (!ringing)
-              Wrap(
-                spacing: 24,
-                children: [
-                  _toggle(Icons.mic_off, 'Mute', muted, () {
-                    telephony.setMuted(!muted);
-                  }),
-                  _toggle(Icons.volume_up, 'Speaker', speaker, () {
-                    telephony.setSpeakerOn(!speaker);
-                  }),
-                  _toggle(Icons.pause, 'Hold', state == CallState.holding, () {
-                    state == CallState.holding ? call.unhold() : call.hold();
-                  }),
-                ],
+              InCallControls(
+                call: call,
+                allCalls: widget.allCalls,
+                onChanged: () {
+                  widget.onChanged();
+                  setState(() {});
+                },
               ),
             const SizedBox(height: 48),
             Row(
@@ -608,24 +711,6 @@ class _InCallScreenState extends State<InCallScreen> {
     } on TelephonyException {
       return null;
     }
-  }
-
-  Widget _toggle(IconData icon, String label, bool on, VoidCallback onTap) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        IconButton.filledTonal(
-          isSelected: on,
-          iconSize: 32,
-          onPressed: () {
-            onTap();
-            setState(() {});
-          },
-          icon: Icon(icon),
-        ),
-        Text(label),
-      ],
-    );
   }
 }
 

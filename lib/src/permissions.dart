@@ -14,7 +14,8 @@ abstract final class TelephonyPermission {
   /// Needed by `TelephonyKit.getCallLog`.
   static const readCallLog = 'android.permission.READ_CALL_LOG';
 
-  /// Needed to change the call log.
+  /// Needed by `TelephonyKit.deleteCallLogEntries` and
+  /// `TelephonyKit.markMissedCallsRead`.
   static const writeCallLog = 'android.permission.WRITE_CALL_LOG';
 
   /// Needed by `TelephonyKit.endCall` on Android 9 and newer.
@@ -22,6 +23,18 @@ abstract final class TelephonyPermission {
 
   /// Needed by `TelephonyKit.searchContacts` and `TelephonyKit.lookupNumber`.
   static const readContacts = 'android.permission.READ_CONTACTS';
+
+  /// Needed by `TelephonyKit.sendSms`.
+  static const sendSms = 'android.permission.SEND_SMS';
+
+  /// Needed by `TelephonyKit.searchSms`.
+  static const readSms = 'android.permission.READ_SMS';
+
+  /// Needed for call notifications on Android 13+.
+  static const postNotifications = 'android.permission.POST_NOTIFICATIONS';
+
+  /// Needed for Bluetooth device names on Android 12+.
+  static const bluetoothConnect = 'android.permission.BLUETOOTH_CONNECT';
 
   /// Needed to read the device's own phone numbers.
   static const readPhoneNumbers = 'android.permission.READ_PHONE_NUMBERS';

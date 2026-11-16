@@ -211,12 +211,20 @@ class NetworkInfo {
 /// One entry from the device call log.
 class CallLogEntry {
   const CallLogEntry({
+    this.id = '',
+    this.isNew = false,
     required this.number,
     required this.name,
     required this.type,
     required this.date,
     required this.duration,
   });
+
+  /// The row id, used by `TelephonyKit.deleteCallLogEntries`.
+  final String id;
+
+  /// True for a missed call the user has not seen yet.
+  final bool isNew;
 
   /// The phone number.
   final String number;
@@ -333,4 +341,285 @@ class Contact {
 
   @override
   String toString() => 'Contact($displayName, $phones)';
+}
+
+/// What call screening does with a matching call.
+enum ScreeningAction {
+  /// Let the call ring normally.
+  allow(0),
+
+  /// Let the call through without ringing. Needs Android 10+.
+  silence(1),
+
+  /// Reject the call and leave no notification.
+  reject(2);
+
+  const ScreeningAction(this.value);
+
+  /// The raw value used by the Java layer.
+  final int value;
+
+  /// Converts a raw value.
+  static ScreeningAction fromValue(int value) => ScreeningAction.values
+      .firstWhere((a) => a.value == value, orElse: () => ScreeningAction.allow);
+}
+
+/// An incoming call that the screening service checked.
+class ScreenedCall {
+  const ScreenedCall({
+    required this.number,
+    required this.action,
+    required this.reason,
+  });
+
+  /// The caller's number, or an empty string if hidden.
+  final String number;
+
+  /// What was done with the call.
+  final ScreeningAction action;
+
+  /// Why: `blocked_number`, `blocked_prefix`, `unknown_caller`,
+  /// `hidden_number`, `allowed` or `disabled`.
+  final String reason;
+
+  @override
+  String toString() => 'ScreenedCall($number, $action, $reason)';
+}
+
+/// A number on the system block list (`BlockedNumberContract`).
+class BlockedNumber {
+  const BlockedNumber({
+    required this.id,
+    required this.number,
+    required this.e164Number,
+  });
+
+  /// The row id.
+  final String id;
+
+  /// The number as it was blocked.
+  final String number;
+
+  /// The number in E.164 format, or an empty string.
+  final String e164Number;
+
+  @override
+  String toString() => 'BlockedNumber($number)';
+}
+
+/// A Bluetooth device that can carry call audio.
+class BluetoothAudioDevice {
+  const BluetoothAudioDevice({
+    required this.address,
+    required this.name,
+    required this.isActive,
+  });
+
+  /// The device's hardware address.
+  final String address;
+
+  /// The device's name. Empty without BLUETOOTH_CONNECT on Android 12+.
+  final String name;
+
+  /// Whether call audio is going to this device now.
+  final bool isActive;
+
+  @override
+  String toString() => 'BluetoothAudioDevice(${name.isEmpty ? address : name})';
+}
+
+/// Whether the device is registered on a network,
+/// mirroring `ServiceState.STATE_*`.
+enum ServiceStatus {
+  inService(0),
+  outOfService(1),
+  emergencyOnly(2),
+  radioOff(3),
+  unknown(-1);
+
+  const ServiceStatus(this.value);
+
+  /// The raw Android value.
+  final int value;
+
+  /// Converts a raw value.
+  static ServiceStatus fromValue(int value) => ServiceStatus.values.firstWhere(
+    (s) => s.value == value,
+    orElse: () => ServiceStatus.unknown,
+  );
+}
+
+/// The device's call state, mirroring `TelephonyManager.CALL_STATE_*`.
+enum DeviceCallState {
+  idle(0),
+  ringing(1),
+  offHook(2),
+  unknown(-1);
+
+  const DeviceCallState(this.value);
+
+  /// The raw Android value.
+  final int value;
+
+  /// Converts a raw value.
+  static DeviceCallState fromValue(int value) =>
+      DeviceCallState.values.firstWhere(
+        (s) => s.value == value,
+        orElse: () => DeviceCallState.unknown,
+      );
+}
+
+/// A simplified mobile network generation.
+enum NetworkGeneration {
+  unknown,
+  g2,
+  g3,
+  g4,
+
+  /// 5G standalone, or 5G shown over an LTE anchor (NSA).
+  g5;
+
+  /// The label phones usually show.
+  String get label => switch (this) {
+    NetworkGeneration.g2 => '2G',
+    NetworkGeneration.g3 => '3G',
+    NetworkGeneration.g4 => '4G',
+    NetworkGeneration.g5 => '5G',
+    NetworkGeneration.unknown => '',
+  };
+
+  /// Maps `TelephonyManager.NETWORK_TYPE_*` and
+  /// `TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_*` to a generation.
+  static NetworkGeneration from(int networkType, [int overrideType = 0]) {
+    // OVERRIDE_NETWORK_TYPE_NR_NSA = 3, NR_ADVANCED = 5 (NR_NSA_MMWAVE = 4).
+    if (overrideType == 3 || overrideType == 4 || overrideType == 5) {
+      return NetworkGeneration.g5;
+    }
+    return switch (networkType) {
+      1 || 2 || 4 || 7 || 11 || 16 => NetworkGeneration.g2,
+      3 ||
+      5 ||
+      6 ||
+      8 ||
+      9 ||
+      10 ||
+      12 ||
+      14 ||
+      15 ||
+      17 => NetworkGeneration.g3,
+      13 || 18 || 19 => NetworkGeneration.g4,
+      20 => NetworkGeneration.g5,
+      _ => NetworkGeneration.unknown,
+    };
+  }
+}
+
+/// A change in signal, service or network reported by
+/// `TelephonyKit.networkEvents`.
+sealed class NetworkEvent {
+  const NetworkEvent();
+}
+
+/// The signal level changed.
+final class SignalStrengthChanged extends NetworkEvent {
+  const SignalStrengthChanged(this.level);
+
+  /// From 0 (none) to 4 (great).
+  final int level;
+}
+
+/// The device registered on or lost the network.
+final class ServiceStatusChanged extends NetworkEvent {
+  const ServiceStatusChanged(this.status);
+
+  /// The new status.
+  final ServiceStatus status;
+}
+
+/// The network type changed, for example from LTE to 5G.
+final class NetworkTypeChanged extends NetworkEvent {
+  const NetworkTypeChanged({
+    required this.networkType,
+    required this.overrideType,
+  });
+
+  /// `TelephonyManager.NETWORK_TYPE_*`.
+  final int networkType;
+
+  /// `TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_*`, or 0.
+  final int overrideType;
+
+  /// The generation to show, such as 4G or 5G.
+  NetworkGeneration get generation =>
+      NetworkGeneration.from(networkType, overrideType);
+}
+
+/// The device call state changed (any app). Needs READ_PHONE_STATE.
+final class DeviceCallStateChanged extends NetworkEvent {
+  const DeviceCallStateChanged(this.state, this.number);
+
+  /// The new state.
+  final DeviceCallState state;
+
+  /// The number, usually empty on modern Android.
+  final String number;
+}
+
+/// Whether an SMS was received or sent, mirroring `Telephony.Sms.TYPE`.
+enum SmsType {
+  inbox(1),
+  sent(2),
+  draft(3),
+  outbox(4),
+  failed(5),
+  queued(6),
+  unknown(-1);
+
+  const SmsType(this.value);
+
+  /// The raw Android value.
+  final int value;
+
+  /// Converts a raw value.
+  static SmsType fromValue(int value) => SmsType.values.firstWhere(
+    (t) => t.value == value,
+    orElse: () => SmsType.unknown,
+  );
+}
+
+/// One SMS from the device's message store.
+class SmsMessage {
+  const SmsMessage({
+    required this.id,
+    required this.threadId,
+    required this.address,
+    required this.body,
+    required this.date,
+    required this.type,
+    required this.isRead,
+  });
+
+  /// The row id.
+  final String id;
+
+  /// The conversation id.
+  final String threadId;
+
+  /// The other party's number or sender name.
+  final String address;
+
+  /// The message text.
+  final String body;
+
+  /// When it was received or sent.
+  final DateTime date;
+
+  /// Inbox, sent and so on.
+  final SmsType type;
+
+  /// Whether the user has read it.
+  final bool isRead;
+
+  @override
+  String toString() => 'SmsMessage($type, $address, $date)';
 }

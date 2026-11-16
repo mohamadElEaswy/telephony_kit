@@ -4,7 +4,13 @@
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_CALL_LOG" />
+    <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
     <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-permission android:name="android.permission.READ_SMS" />
 
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
@@ -53,11 +59,22 @@
             <meta-data
                 android:name="android.telecom.IN_CALL_SERVICE_UI"
                 android:value="true" />
+            <!-- false: the system plays the ringtone. -->
             <meta-data
                 android:name="android.telecom.IN_CALL_SERVICE_RINGING"
-                android:value="true" />
+                android:value="false" />
             <intent-filter>
                 <action android:name="android.telecom.InCallService" />
+            </intent-filter>
+        </service>
+
+        <!-- Applies telephony_kit's block rules to incoming calls. -->
+        <service
+            android:name="dev.telephonykit.telephony_kit.TelephonyKitCallScreeningService"
+            android:permission="android.permission.BIND_SCREENING_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.telecom.CallScreeningService" />
             </intent-filter>
         </service>
 

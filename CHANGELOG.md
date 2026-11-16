@@ -1,3 +1,29 @@
+## 0.3.0
+
+* Incoming call notification with answer and decline buttons that shows full
+  screen on the lock screen, and an ongoing call notification with hang up.
+  `showCallNotifications` turns them off.
+* Call screening: `TelephonyKitCallScreeningService` applies block rules
+  (numbers, prefixes, callers not in contacts, hidden numbers) even when the
+  app is closed. Configure through `TelephonyKit.screening`; watch
+  `screenedCalls`. `requestCallScreeningRole` for non-dialer apps.
+* System block list: `getBlockedNumbers`, `blockNumber`, `unblockNumber`,
+  `isNumberBlocked`, `canBlockNumbers`.
+* Multi-call and conference: `swapCalls`, and on `PhoneCall` `merge`,
+  `conferenceWith`, `swap`, `splitFromConference`, `children`, `parent`.
+* Audio routes: `supportedAudioRoutes`, `setAudioRoute`, `bluetoothDevices`,
+  `selectBluetoothDevice`.
+* `networkEvents` stream (signal level, service state, 2G to 5G, device call
+  state), plus `signalLevel` and `networkGeneration`.
+* Call log changes: `deleteCallLogEntries`, `deleteCallLogForNumber`,
+  `markMissedCallsRead`. `CallLogEntry` has `id` and `isNew`.
+* `voicemailNumber`, `callVoicemail`, and `sendUssd` for codes like `*100#`.
+* SMS: `sendSms` and `searchSms`.
+* Example: blocking page, messages page, live network, USSD, audio route and
+  keypad sheets, swap and merge, and long press actions on recent calls.
+* The example manifest now lets the system play the ringtone
+  (`IN_CALL_SERVICE_RINGING` false).
+
 ## 0.2.0
 
 * `searchCallLog`: filter the call log by name or number, call type and date

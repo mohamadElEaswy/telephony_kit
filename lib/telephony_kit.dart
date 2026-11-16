@@ -4,4 +4,5 @@ library;
 
 export 'src/models.dart';
 export 'src/permissions.dart';
-export 'src/telephony_kit_impl.dart' show PhoneCall, TelephonyKit;
+export 'src/telephony_kit_impl.dart'
+    show CallScreeningSettings, PhoneCall, TelephonyKit;

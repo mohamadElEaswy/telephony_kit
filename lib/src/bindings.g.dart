@@ -2103,6 +2103,17 @@ extension type RoleManager._(jni$_.JObject _$this) implements jni$_.JObject {
 
   /// The type which includes information such as the signature of this class.
   static const jni$_.JType<RoleManager> type = $RoleManager$Type$();
+  static final _id_ROLE_CALL_SCREENING = _class.staticFieldId(
+    r'ROLE_CALL_SCREENING',
+    r'Ljava/lang/String;',
+  );
+
+  /// from: `static public final java.lang.String ROLE_CALL_SCREENING`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JString? get ROLE_CALL_SCREENING =>
+      _id_ROLE_CALL_SCREENING.getNullable(_class, jni$_.JString.type)
+          as jni$_.JString?;
+
   static final _id_ROLE_DIALER = _class.staticFieldId(
     r'ROLE_DIALER',
     r'Ljava/lang/String;',
@@ -2854,6 +2865,35 @@ extension TelephonyManager$$Methods on TelephonyManager {
     ).object<jni$_.JString?>();
   }
 
+  static final _id_get$voiceMailNumber = TelephonyManager._class
+      .instanceMethodId(r'getVoiceMailNumber', r'()Ljava/lang/String;');
+
+  static final _get$voiceMailNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public java.lang.String getVoiceMailNumber()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? get voiceMailNumber {
+    final _$$selfRef = reference;
+    return _get$voiceMailNumber(
+      _$$selfRef.pointer,
+      _id_get$voiceMailNumber.pointer,
+    ).object<jni$_.JString?>();
+  }
+
   static final _id_get$isVoiceCapable = TelephonyManager._class
       .instanceMethodId(r'isVoiceCapable', r'()Z');
 
@@ -3347,6 +3387,283 @@ extension ContentResolver$$Methods on ContentResolver {
       _$bundle.pointer,
       _$cancellationSignal.pointer,
     ).object<Cursor?>();
+  }
+
+  static final _id_insert = ContentResolver._class.instanceMethodId(
+    r'insert',
+    r'(Landroid/net/Uri;Landroid/content/ContentValues;)Landroid/net/Uri;',
+  );
+
+  static final _insert =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public final android.net.Uri insert(android.net.Uri uri, android.content.ContentValues contentValues)`
+  /// The returned object must be released after use, by calling the [release] method.
+  Uri? insert(Uri? uri, ContentValues? contentValues) {
+    final _$$selfRef = reference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    final _$contentValues = contentValues?.reference ?? jni$_.jNullReference;
+    return _insert(
+      _$$selfRef.pointer,
+      _id_insert.pointer,
+      _$uri.pointer,
+      _$contentValues.pointer,
+    ).object<Uri?>();
+  }
+
+  static final _id_insert$1 = ContentResolver._class.instanceMethodId(
+    r'insert',
+    r'(Landroid/net/Uri;Landroid/content/ContentValues;Landroid/os/Bundle;)Landroid/net/Uri;',
+  );
+
+  static final _insert$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public final android.net.Uri insert(android.net.Uri uri, android.content.ContentValues contentValues, android.os.Bundle bundle)`
+  /// The returned object must be released after use, by calling the [release] method.
+  Uri? insert$1(Uri? uri, ContentValues? contentValues, Bundle? bundle) {
+    final _$$selfRef = reference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    final _$contentValues = contentValues?.reference ?? jni$_.jNullReference;
+    final _$bundle = bundle?.reference ?? jni$_.jNullReference;
+    return _insert$1(
+      _$$selfRef.pointer,
+      _id_insert$1.pointer,
+      _$uri.pointer,
+      _$contentValues.pointer,
+      _$bundle.pointer,
+    ).object<Uri?>();
+  }
+
+  static final _id_delete = ContentResolver._class.instanceMethodId(
+    r'delete',
+    r'(Landroid/net/Uri;Ljava/lang/String;[Ljava/lang/String;)I',
+  );
+
+  static final _delete =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public final int delete(android.net.Uri uri, java.lang.String string, java.lang.String[] strings)`
+  core$_.int delete(
+    Uri? uri,
+    jni$_.JString? string,
+    jni$_.JArray<jni$_.JString?>? strings,
+  ) {
+    final _$$selfRef = reference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$strings = strings?.reference ?? jni$_.jNullReference;
+    return _delete(
+      _$$selfRef.pointer,
+      _id_delete.pointer,
+      _$uri.pointer,
+      _$string.pointer,
+      _$strings.pointer,
+    ).integer;
+  }
+
+  static final _id_delete$1 = ContentResolver._class.instanceMethodId(
+    r'delete',
+    r'(Landroid/net/Uri;Landroid/os/Bundle;)I',
+  );
+
+  static final _delete$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public final int delete(android.net.Uri uri, android.os.Bundle bundle)`
+  core$_.int delete$1(Uri? uri, Bundle? bundle) {
+    final _$$selfRef = reference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    final _$bundle = bundle?.reference ?? jni$_.jNullReference;
+    return _delete$1(
+      _$$selfRef.pointer,
+      _id_delete$1.pointer,
+      _$uri.pointer,
+      _$bundle.pointer,
+    ).integer;
+  }
+
+  static final _id_update = ContentResolver._class.instanceMethodId(
+    r'update',
+    r'(Landroid/net/Uri;Landroid/content/ContentValues;Ljava/lang/String;[Ljava/lang/String;)I',
+  );
+
+  static final _update =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public final int update(android.net.Uri uri, android.content.ContentValues contentValues, java.lang.String string, java.lang.String[] strings)`
+  core$_.int update(
+    Uri? uri,
+    ContentValues? contentValues,
+    jni$_.JString? string,
+    jni$_.JArray<jni$_.JString?>? strings,
+  ) {
+    final _$$selfRef = reference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    final _$contentValues = contentValues?.reference ?? jni$_.jNullReference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$strings = strings?.reference ?? jni$_.jNullReference;
+    return _update(
+      _$$selfRef.pointer,
+      _id_update.pointer,
+      _$uri.pointer,
+      _$contentValues.pointer,
+      _$string.pointer,
+      _$strings.pointer,
+    ).integer;
+  }
+
+  static final _id_update$1 = ContentResolver._class.instanceMethodId(
+    r'update',
+    r'(Landroid/net/Uri;Landroid/content/ContentValues;Landroid/os/Bundle;)I',
+  );
+
+  static final _update$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public final int update(android.net.Uri uri, android.content.ContentValues contentValues, android.os.Bundle bundle)`
+  core$_.int update$1(Uri? uri, ContentValues? contentValues, Bundle? bundle) {
+    final _$$selfRef = reference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    final _$contentValues = contentValues?.reference ?? jni$_.jNullReference;
+    final _$bundle = bundle?.reference ?? jni$_.jNullReference;
+    return _update$1(
+      _$$selfRef.pointer,
+      _id_update$1.pointer,
+      _$uri.pointer,
+      _$contentValues.pointer,
+      _$bundle.pointer,
+    ).integer;
   }
 }
 
@@ -3857,6 +4174,599 @@ final class $CallLog$Calls$Type$ extends jni$_.JType<CallLog$Calls> {
   String get signature => r'Landroid/provider/CallLog$Calls;';
 }
 
+/// from: `android.content.ContentValues`
+extension type ContentValues._(jni$_.JObject _$this)
+    implements jni$_.JObject, Parcelable {
+  static final _class = jni$_.JClass.forName(r'android/content/ContentValues');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<ContentValues> type = $ContentValues$Type$();
+  static final _id_new$ = _class.constructorId(r'()V');
+
+  static final _new$ =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public void <init>()`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory ContentValues() {
+    final _$$classRef = _class.reference;
+    return _new$(_$$classRef.pointer, _id_new$.pointer).object<ContentValues>();
+  }
+
+  static final _id_new$1 = _class.constructorId(r'(I)V');
+
+  static final _new$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public void <init>(int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory ContentValues.new$1(core$_.int i) {
+    final _$$classRef = _class.reference;
+    return _new$1(
+      _$$classRef.pointer,
+      _id_new$1.pointer,
+      i,
+    ).object<ContentValues>();
+  }
+
+  static final _id_new$2 = _class.constructorId(
+    r'(Landroid/content/ContentValues;)V',
+  );
+
+  static final _new$2 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void <init>(android.content.ContentValues contentValues)`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory ContentValues.new$2(ContentValues? contentValues) {
+    final _$$classRef = _class.reference;
+    final _$contentValues = contentValues?.reference ?? jni$_.jNullReference;
+    return _new$2(
+      _$$classRef.pointer,
+      _id_new$2.pointer,
+      _$contentValues.pointer,
+    ).object<ContentValues>();
+  }
+}
+
+extension ContentValues$$Methods on ContentValues {
+  static final _id_put = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/String;)V',
+  );
+
+  static final _put =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.String string1)`
+  void put(jni$_.JString? string, jni$_.JString? string1) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$string1 = string1?.reference ?? jni$_.jNullReference;
+    _put(
+      _$$selfRef.pointer,
+      _id_put.pointer,
+      _$string.pointer,
+      _$string1.pointer,
+    ).check();
+  }
+
+  static final _id_put$1 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/Byte;)V',
+  );
+
+  static final _put$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.Byte byte)`
+  void put$1(jni$_.JString? string, jni$_.JByte? byte) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$byte = byte?.reference ?? jni$_.jNullReference;
+    _put$1(
+      _$$selfRef.pointer,
+      _id_put$1.pointer,
+      _$string.pointer,
+      _$byte.pointer,
+    ).check();
+  }
+
+  static final _id_put$2 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/Short;)V',
+  );
+
+  static final _put$2 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.Short short)`
+  void put$2(jni$_.JString? string, jni$_.JShort? short) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$short = short?.reference ?? jni$_.jNullReference;
+    _put$2(
+      _$$selfRef.pointer,
+      _id_put$2.pointer,
+      _$string.pointer,
+      _$short.pointer,
+    ).check();
+  }
+
+  static final _id_put$3 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/Integer;)V',
+  );
+
+  static final _put$3 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.Integer integer)`
+  void put$3(jni$_.JString? string, jni$_.JInteger? integer) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$integer = integer?.reference ?? jni$_.jNullReference;
+    _put$3(
+      _$$selfRef.pointer,
+      _id_put$3.pointer,
+      _$string.pointer,
+      _$integer.pointer,
+    ).check();
+  }
+
+  static final _id_put$4 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/Long;)V',
+  );
+
+  static final _put$4 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.Long long)`
+  void put$4(jni$_.JString? string, jni$_.JLong? long) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$long = long?.reference ?? jni$_.jNullReference;
+    _put$4(
+      _$$selfRef.pointer,
+      _id_put$4.pointer,
+      _$string.pointer,
+      _$long.pointer,
+    ).check();
+  }
+
+  static final _id_put$5 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/Float;)V',
+  );
+
+  static final _put$5 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.Float float)`
+  void put$5(jni$_.JString? string, jni$_.JFloat? float) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$float = float?.reference ?? jni$_.jNullReference;
+    _put$5(
+      _$$selfRef.pointer,
+      _id_put$5.pointer,
+      _$string.pointer,
+      _$float.pointer,
+    ).check();
+  }
+
+  static final _id_put$6 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/Double;)V',
+  );
+
+  static final _put$6 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.Double double)`
+  void put$6(jni$_.JString? string, jni$_.JDouble? double) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$double = double?.reference ?? jni$_.jNullReference;
+    _put$6(
+      _$$selfRef.pointer,
+      _id_put$6.pointer,
+      _$string.pointer,
+      _$double.pointer,
+    ).check();
+  }
+
+  static final _id_put$7 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;Ljava/lang/Boolean;)V',
+  );
+
+  static final _put$7 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, java.lang.Boolean boolean)`
+  void put$7(jni$_.JString? string, jni$_.JBoolean? boolean) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$boolean = boolean?.reference ?? jni$_.jNullReference;
+    _put$7(
+      _$$selfRef.pointer,
+      _id_put$7.pointer,
+      _$string.pointer,
+      _$boolean.pointer,
+    ).check();
+  }
+
+  static final _id_put$8 = ContentValues._class.instanceMethodId(
+    r'put',
+    r'(Ljava/lang/String;[B)V',
+  );
+
+  static final _put$8 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void put(java.lang.String string, byte[] bs)`
+  void put$8(jni$_.JString? string, jni$_.JByteArray? bs) {
+    final _$$selfRef = reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$bs = bs?.reference ?? jni$_.jNullReference;
+    _put$8(
+      _$$selfRef.pointer,
+      _id_put$8.pointer,
+      _$string.pointer,
+      _$bs.pointer,
+    ).check();
+  }
+}
+
+final class $ContentValues$Type$ extends jni$_.JType<ContentValues> {
+  @jni$_.internal
+  const $ContentValues$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/content/ContentValues;';
+}
+
+/// from: `android.provider.BlockedNumberContract`
+extension type BlockedNumberContract._(jni$_.JObject _$this)
+    implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'android/provider/BlockedNumberContract',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<BlockedNumberContract> type =
+      $BlockedNumberContract$Type$();
+  static final _id_isBlocked = _class.staticMethodId(
+    r'isBlocked',
+    r'(Landroid/content/Context;Ljava/lang/String;)Z',
+  );
+
+  static final _isBlocked =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isBlocked(android.content.Context context, java.lang.String string)`
+  static core$_.bool isBlocked(Context? context, jni$_.JString? string) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    return _isBlocked(
+      _$$classRef.pointer,
+      _id_isBlocked.pointer,
+      _$context.pointer,
+      _$string.pointer,
+    ).boolean;
+  }
+
+  static final _id_unblock = _class.staticMethodId(
+    r'unblock',
+    r'(Landroid/content/Context;Ljava/lang/String;)I',
+  );
+
+  static final _unblock =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int unblock(android.content.Context context, java.lang.String string)`
+  static core$_.int unblock(Context? context, jni$_.JString? string) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    return _unblock(
+      _$$classRef.pointer,
+      _id_unblock.pointer,
+      _$context.pointer,
+      _$string.pointer,
+    ).integer;
+  }
+
+  static final _id_canCurrentUserBlockNumbers = _class.staticMethodId(
+    r'canCurrentUserBlockNumbers',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _canCurrentUserBlockNumbers =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean canCurrentUserBlockNumbers(android.content.Context context)`
+  static core$_.bool canCurrentUserBlockNumbers(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _canCurrentUserBlockNumbers(
+      _$$classRef.pointer,
+      _id_canCurrentUserBlockNumbers.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+}
+
+final class $BlockedNumberContract$Type$
+    extends jni$_.JType<BlockedNumberContract> {
+  @jni$_.internal
+  const $BlockedNumberContract$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/provider/BlockedNumberContract;';
+}
+
 /// from: `dev.telephonykit.telephony_kit.CallEventListener`
 ///
 /// Receives call events from CallManager.
@@ -4267,6 +5177,43 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
     _set$launchAppOnIncomingCall(
       _$$classRef.pointer,
       _id_set$launchAppOnIncomingCall.pointer,
+      enabled ? 1 : 0,
+    ).check();
+  }
+
+  static final _id_set$showCallNotifications = _class.staticMethodId(
+    r'setShowCallNotifications',
+    r'(Z)V',
+  );
+
+  static final _set$showCallNotifications =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setShowCallNotifications(boolean enabled)`
+  ///
+  /// Whether incoming and ongoing call notifications are shown (default true).
+  /// The incoming notification has answer and decline buttons and opens the
+  /// app full screen on the lock screen.
+  static set showCallNotifications(core$_.bool enabled) {
+    final _$$classRef = _class.reference;
+    _set$showCallNotifications(
+      _$$classRef.pointer,
+      _id_set$showCallNotifications.pointer,
       enabled ? 1 : 0,
     ).check();
   }
@@ -4899,6 +5846,574 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
       on ? 1 : 0,
     ).boolean;
   }
+
+  static final _id_isConference = _class.staticMethodId(
+    r'isConference',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _isConference =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isConference(java.lang.String callId)`
+  ///
+  /// True if the call is a conference (it has child calls).
+  static core$_.bool isConference(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _isConference(
+      _$$classRef.pointer,
+      _id_isConference.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_canMerge = _class.staticMethodId(
+    r'canMerge',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _canMerge =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean canMerge(java.lang.String callId)`
+  ///
+  /// True if the call can be merged with another call into a conference.
+  static core$_.bool canMerge(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _canMerge(
+      _$$classRef.pointer,
+      _id_canMerge.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_canSwap = _class.staticMethodId(
+    r'canSwap',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _canSwap =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean canSwap(java.lang.String callId)`
+  ///
+  /// True if the call (a conference) can swap between its two parties.
+  static core$_.bool canSwap(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _canSwap(
+      _$$classRef.pointer,
+      _id_canSwap.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_conference = _class.staticMethodId(
+    r'conference',
+    r'(Ljava/lang/String;Ljava/lang/String;)Z',
+  );
+
+  static final _conference =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean conference(java.lang.String callId, java.lang.String otherCallId)`
+  ///
+  /// Joins two calls into a conference.
+  static core$_.bool conference(
+    jni$_.JString? callId,
+    jni$_.JString? otherCallId,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    final _$otherCallId = otherCallId?.reference ?? jni$_.jNullReference;
+    return _conference(
+      _$$classRef.pointer,
+      _id_conference.pointer,
+      _$callId.pointer,
+      _$otherCallId.pointer,
+    ).boolean;
+  }
+
+  static final _id_mergeConference = _class.staticMethodId(
+    r'mergeConference',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _mergeConference =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean mergeConference(java.lang.String callId)`
+  ///
+  /// Merges the calls that this call can be merged with into a conference.
+  static core$_.bool mergeConference(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _mergeConference(
+      _$$classRef.pointer,
+      _id_mergeConference.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_swapConference = _class.staticMethodId(
+    r'swapConference',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _swapConference =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean swapConference(java.lang.String callId)`
+  ///
+  /// Swaps the active party of a two-party conference.
+  static core$_.bool swapConference(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _swapConference(
+      _$$classRef.pointer,
+      _id_swapConference.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_splitFromConference = _class.staticMethodId(
+    r'splitFromConference',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _splitFromConference =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean splitFromConference(java.lang.String callId)`
+  ///
+  /// Splits a call out of its conference so it can be talked to privately.
+  static core$_.bool splitFromConference(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _splitFromConference(
+      _$$classRef.pointer,
+      _id_splitFromConference.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_getChildIds = _class.staticMethodId(
+    r'getChildIds',
+    r'(Ljava/lang/String;)[Ljava/lang/String;',
+  );
+
+  static final _getChildIds =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] getChildIds(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Ids of the calls that make up a conference.
+  static jni$_.JArray<jni$_.JString?>? getChildIds(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getChildIds(
+      _$$classRef.pointer,
+      _id_getChildIds.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+
+  static final _id_getParentId = _class.staticMethodId(
+    r'getParentId',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getParentId =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getParentId(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The id of the conference this call belongs to, or an empty string.
+  static jni$_.JString? getParentId(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getParentId(
+      _$$classRef.pointer,
+      _id_getParentId.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_swapCalls = _class.staticMethodId(r'swapCalls', r'()Z');
+
+  static final _swapCalls =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public boolean swapCalls()`
+  ///
+  /// Swaps between an active and a held call: holds the active one and
+  /// resumes the other. Use for call waiting.
+  static core$_.bool swapCalls() {
+    final _$$classRef = _class.reference;
+    return _swapCalls(_$$classRef.pointer, _id_swapCalls.pointer).boolean;
+  }
+
+  static final _id_get$supportedAudioRouteMask = _class.staticMethodId(
+    r'getSupportedAudioRouteMask',
+    r'()I',
+  );
+
+  static final _get$supportedAudioRouteMask =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public int getSupportedAudioRouteMask()`
+  ///
+  /// Bit mask of supported routes ({@code CallAudioState.ROUTE_*}), or 0.
+  static core$_.int get supportedAudioRouteMask {
+    final _$$classRef = _class.reference;
+    return _get$supportedAudioRouteMask(
+      _$$classRef.pointer,
+      _id_get$supportedAudioRouteMask.pointer,
+    ).integer;
+  }
+
+  static final _id_setAudioRoute = _class.staticMethodId(
+    r'setAudioRoute',
+    r'(I)Z',
+  );
+
+  static final _setAudioRoute =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public boolean setAudioRoute(int route)`
+  ///
+  /// Routes call audio. {@code route} is one of {@code CallAudioState.ROUTE_*}.
+  static core$_.bool setAudioRoute(core$_.int route) {
+    final _$$classRef = _class.reference;
+    return _setAudioRoute(
+      _$$classRef.pointer,
+      _id_setAudioRoute.pointer,
+      route,
+    ).boolean;
+  }
+
+  static final _id_get$bluetoothDeviceAddresses = _class.staticMethodId(
+    r'getBluetoothDeviceAddresses',
+    r'()[Ljava/lang/String;',
+  );
+
+  static final _get$bluetoothDeviceAddresses =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] getBluetoothDeviceAddresses()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Addresses of Bluetooth devices that can carry call audio.
+  static jni$_.JArray<jni$_.JString?>? get bluetoothDeviceAddresses {
+    final _$$classRef = _class.reference;
+    return _get$bluetoothDeviceAddresses(
+      _$$classRef.pointer,
+      _id_get$bluetoothDeviceAddresses.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+
+  static final _id_getBluetoothDeviceName = _class.staticMethodId(
+    r'getBluetoothDeviceName',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getBluetoothDeviceName =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getBluetoothDeviceName(java.lang.String address)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The name of a Bluetooth device, or an empty string. Needs
+  /// BLUETOOTH_CONNECT on Android 12+.
+  static jni$_.JString? getBluetoothDeviceName(jni$_.JString? address) {
+    final _$$classRef = _class.reference;
+    final _$address = address?.reference ?? jni$_.jNullReference;
+    return _getBluetoothDeviceName(
+      _$$classRef.pointer,
+      _id_getBluetoothDeviceName.pointer,
+      _$address.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_get$activeBluetoothDeviceAddress = _class.staticMethodId(
+    r'getActiveBluetoothDeviceAddress',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _get$activeBluetoothDeviceAddress =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public java.lang.String getActiveBluetoothDeviceAddress()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Address of the Bluetooth device in use, or an empty string.
+  static jni$_.JString? get activeBluetoothDeviceAddress {
+    final _$$classRef = _class.reference;
+    return _get$activeBluetoothDeviceAddress(
+      _$$classRef.pointer,
+      _id_get$activeBluetoothDeviceAddress.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_selectBluetoothDevice = _class.staticMethodId(
+    r'selectBluetoothDevice',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _selectBluetoothDevice =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean selectBluetoothDevice(java.lang.String address)`
+  ///
+  /// Sends call audio to the Bluetooth device with this address.
+  static core$_.bool selectBluetoothDevice(jni$_.JString? address) {
+    final _$$classRef = _class.reference;
+    final _$address = address?.reference ?? jni$_.jNullReference;
+    return _selectBluetoothDevice(
+      _$$classRef.pointer,
+      _id_selectBluetoothDevice.pointer,
+      _$address.pointer,
+    ).boolean;
+  }
 }
 
 final class $CallManager$Type$ extends jni$_.JType<CallManager> {
@@ -4908,6 +6423,1657 @@ final class $CallManager$Type$ extends jni$_.JType<CallManager> {
   @jni$_.internal
   @core$_.override
   String get signature => r'Ldev/telephonykit/telephony_kit/CallManager;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.CallScreening`
+///
+/// Block rules applied by TelephonyKitCallScreeningService.
+///
+/// Rules are saved in SharedPreferences so they work even when the Flutter
+/// app is not running.
+extension type CallScreening._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/CallScreening',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<CallScreening> type = $CallScreening$Type$();
+
+  /// from: `static public final int ACTION_ALLOW`
+  static const ACTION_ALLOW = 0;
+
+  /// from: `static public final int ACTION_SILENCE`
+  static const ACTION_SILENCE = 1;
+
+  /// from: `static public final int ACTION_REJECT`
+  static const ACTION_REJECT = 2;
+  static final _id_set$listener = _class.staticMethodId(
+    r'setListener',
+    r'(Ldev/telephonykit/telephony_kit/ScreeningListener;)V',
+  );
+
+  static final _set$listener =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `synchronized static public void setListener(dev.telephonykit.telephony_kit.ScreeningListener newListener)`
+  ///
+  /// Receives a callback for each screened call while the app is running.
+  static set listener(ScreeningListener? newListener) {
+    final _$$classRef = _class.reference;
+    final _$newListener = newListener?.reference ?? jni$_.jNullReference;
+    _set$listener(
+      _$$classRef.pointer,
+      _id_set$listener.pointer,
+      _$newListener.pointer,
+    ).check();
+  }
+
+  static final _id_setEnabled = _class.staticMethodId(
+    r'setEnabled',
+    r'(Landroid/content/Context;Z)V',
+  );
+
+  static final _setEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setEnabled(android.content.Context context, boolean enabled)`
+  ///
+  /// Turns screening on or off. Off lets every call through.
+  static void setEnabled(Context? context, core$_.bool enabled) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _setEnabled(
+      _$$classRef.pointer,
+      _id_setEnabled.pointer,
+      _$context.pointer,
+      enabled ? 1 : 0,
+    ).check();
+  }
+
+  static final _id_isEnabled = _class.staticMethodId(
+    r'isEnabled',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isEnabled(android.content.Context context)`
+  static core$_.bool isEnabled(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isEnabled(
+      _$$classRef.pointer,
+      _id_isEnabled.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+
+  static final _id_setBlockedNumberAction = _class.staticMethodId(
+    r'setBlockedNumberAction',
+    r'(Landroid/content/Context;I)V',
+  );
+
+  static final _setBlockedNumberAction =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setBlockedNumberAction(android.content.Context context, int action)`
+  ///
+  /// What to do with numbers on the block list. Defaults to reject.
+  static void setBlockedNumberAction(Context? context, core$_.int action) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _setBlockedNumberAction(
+      _$$classRef.pointer,
+      _id_setBlockedNumberAction.pointer,
+      _$context.pointer,
+      action,
+    ).check();
+  }
+
+  static final _id_getBlockedNumberAction = _class.staticMethodId(
+    r'getBlockedNumberAction',
+    r'(Landroid/content/Context;)I',
+  );
+
+  static final _getBlockedNumberAction =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getBlockedNumberAction(android.content.Context context)`
+  static core$_.int getBlockedNumberAction(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getBlockedNumberAction(
+      _$$classRef.pointer,
+      _id_getBlockedNumberAction.pointer,
+      _$context.pointer,
+    ).integer;
+  }
+
+  static final _id_setUnknownCallerAction = _class.staticMethodId(
+    r'setUnknownCallerAction',
+    r'(Landroid/content/Context;I)V',
+  );
+
+  static final _setUnknownCallerAction =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setUnknownCallerAction(android.content.Context context, int action)`
+  ///
+  /// What to do with callers not in contacts. Defaults to allow.
+  static void setUnknownCallerAction(Context? context, core$_.int action) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _setUnknownCallerAction(
+      _$$classRef.pointer,
+      _id_setUnknownCallerAction.pointer,
+      _$context.pointer,
+      action,
+    ).check();
+  }
+
+  static final _id_getUnknownCallerAction = _class.staticMethodId(
+    r'getUnknownCallerAction',
+    r'(Landroid/content/Context;)I',
+  );
+
+  static final _getUnknownCallerAction =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getUnknownCallerAction(android.content.Context context)`
+  static core$_.int getUnknownCallerAction(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getUnknownCallerAction(
+      _$$classRef.pointer,
+      _id_getUnknownCallerAction.pointer,
+      _$context.pointer,
+    ).integer;
+  }
+
+  static final _id_setHiddenNumberAction = _class.staticMethodId(
+    r'setHiddenNumberAction',
+    r'(Landroid/content/Context;I)V',
+  );
+
+  static final _setHiddenNumberAction =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setHiddenNumberAction(android.content.Context context, int action)`
+  ///
+  /// What to do with private or hidden numbers. Defaults to allow.
+  static void setHiddenNumberAction(Context? context, core$_.int action) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _setHiddenNumberAction(
+      _$$classRef.pointer,
+      _id_setHiddenNumberAction.pointer,
+      _$context.pointer,
+      action,
+    ).check();
+  }
+
+  static final _id_getHiddenNumberAction = _class.staticMethodId(
+    r'getHiddenNumberAction',
+    r'(Landroid/content/Context;)I',
+  );
+
+  static final _getHiddenNumberAction =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getHiddenNumberAction(android.content.Context context)`
+  static core$_.int getHiddenNumberAction(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getHiddenNumberAction(
+      _$$classRef.pointer,
+      _id_getHiddenNumberAction.pointer,
+      _$context.pointer,
+    ).integer;
+  }
+
+  static final _id_addBlockedNumber = _class.staticMethodId(
+    r'addBlockedNumber',
+    r'(Landroid/content/Context;Ljava/lang/String;)V',
+  );
+
+  static final _addBlockedNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void addBlockedNumber(android.content.Context context, java.lang.String number)`
+  static void addBlockedNumber(Context? context, jni$_.JString? number) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$number = number?.reference ?? jni$_.jNullReference;
+    _addBlockedNumber(
+      _$$classRef.pointer,
+      _id_addBlockedNumber.pointer,
+      _$context.pointer,
+      _$number.pointer,
+    ).check();
+  }
+
+  static final _id_removeBlockedNumber = _class.staticMethodId(
+    r'removeBlockedNumber',
+    r'(Landroid/content/Context;Ljava/lang/String;)V',
+  );
+
+  static final _removeBlockedNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void removeBlockedNumber(android.content.Context context, java.lang.String number)`
+  static void removeBlockedNumber(Context? context, jni$_.JString? number) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$number = number?.reference ?? jni$_.jNullReference;
+    _removeBlockedNumber(
+      _$$classRef.pointer,
+      _id_removeBlockedNumber.pointer,
+      _$context.pointer,
+      _$number.pointer,
+    ).check();
+  }
+
+  static final _id_getBlockedNumbers = _class.staticMethodId(
+    r'getBlockedNumbers',
+    r'(Landroid/content/Context;)[Ljava/lang/String;',
+  );
+
+  static final _getBlockedNumbers =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] getBlockedNumbers(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JArray<jni$_.JString?>? getBlockedNumbers(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getBlockedNumbers(
+      _$$classRef.pointer,
+      _id_getBlockedNumbers.pointer,
+      _$context.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+
+  static final _id_addBlockedPrefix = _class.staticMethodId(
+    r'addBlockedPrefix',
+    r'(Landroid/content/Context;Ljava/lang/String;)V',
+  );
+
+  static final _addBlockedPrefix =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void addBlockedPrefix(android.content.Context context, java.lang.String prefix)`
+  ///
+  /// Blocks every number that starts with {@code prefix}, such as "+20900".
+  static void addBlockedPrefix(Context? context, jni$_.JString? prefix) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$prefix = prefix?.reference ?? jni$_.jNullReference;
+    _addBlockedPrefix(
+      _$$classRef.pointer,
+      _id_addBlockedPrefix.pointer,
+      _$context.pointer,
+      _$prefix.pointer,
+    ).check();
+  }
+
+  static final _id_removeBlockedPrefix = _class.staticMethodId(
+    r'removeBlockedPrefix',
+    r'(Landroid/content/Context;Ljava/lang/String;)V',
+  );
+
+  static final _removeBlockedPrefix =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void removeBlockedPrefix(android.content.Context context, java.lang.String prefix)`
+  static void removeBlockedPrefix(Context? context, jni$_.JString? prefix) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$prefix = prefix?.reference ?? jni$_.jNullReference;
+    _removeBlockedPrefix(
+      _$$classRef.pointer,
+      _id_removeBlockedPrefix.pointer,
+      _$context.pointer,
+      _$prefix.pointer,
+    ).check();
+  }
+
+  static final _id_getBlockedPrefixes = _class.staticMethodId(
+    r'getBlockedPrefixes',
+    r'(Landroid/content/Context;)[Ljava/lang/String;',
+  );
+
+  static final _getBlockedPrefixes =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] getBlockedPrefixes(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JArray<jni$_.JString?>? getBlockedPrefixes(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getBlockedPrefixes(
+      _$$classRef.pointer,
+      _id_getBlockedPrefixes.pointer,
+      _$context.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+}
+
+final class $CallScreening$Type$ extends jni$_.JType<CallScreening> {
+  @jni$_.internal
+  const $CallScreening$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/CallScreening;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.NetworkEventListener`
+///
+/// Receives radio and network changes from NetworkMonitor.
+extension type NetworkEventListener._(jni$_.JObject _$this)
+    implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/NetworkEventListener',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<NetworkEventListener> type =
+      $NetworkEventListener$Type$();
+
+  /// Maps a specific port to the implemented interface.
+  static final core$_.Map<core$_.int, $NetworkEventListener> _$impls = {};
+  static jni$_.JObjectPtr _$invoke(
+    core$_.int port,
+    jni$_.JObjectPtr descriptor,
+    jni$_.JObjectPtr args,
+  ) {
+    return _$invokeMethod(
+      port,
+      jni$_.MethodInvocation.fromAddresses(0, descriptor.address, args.address),
+    );
+  }
+
+  static final jni$_.Pointer<
+    jni$_.NativeFunction<
+      jni$_.JObjectPtr Function(jni$_.Int64, jni$_.JObjectPtr, jni$_.JObjectPtr)
+    >
+  >
+  _$invokePointer = jni$_.Pointer.fromFunction(_$invoke);
+
+  static jni$_.Pointer<jni$_.Void> _$invokeMethod(
+    core$_.int $p,
+    jni$_.MethodInvocation $i,
+  ) {
+    try {
+      final $d = $i.methodDescriptor.toDartString(releaseOriginal: true);
+      final $a = $i.args;
+      if ($d == r'onSignalStrengthChanged(I)V') {
+        _$impls[$p]!.onSignalStrengthChanged(
+          ($a![0] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+        );
+        return jni$_.nullptr;
+      }
+      if ($d == r'onServiceStateChanged(I)V') {
+        _$impls[$p]!.onServiceStateChanged(
+          ($a![0] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+        );
+        return jni$_.nullptr;
+      }
+      if ($d == r'onNetworkTypeChanged(II)V') {
+        _$impls[$p]!.onNetworkTypeChanged(
+          ($a![0] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+          ($a![1] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+        );
+        return jni$_.nullptr;
+      }
+      if ($d == r'onCallStateChanged(ILjava/lang/String;)V') {
+        _$impls[$p]!.onCallStateChanged(
+          ($a![0] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+          ($a![1] as jni$_.JString?),
+        );
+        return jni$_.nullptr;
+      }
+    } catch (e) {
+      return jni$_.ProtectedJniExtensions.newDartException(e);
+    }
+    return jni$_.nullptr;
+  }
+
+  static void implementIn(
+    jni$_.JImplementer implementer,
+    $NetworkEventListener $impl,
+  ) {
+    late final jni$_.RawReceivePort $p;
+    $p = jni$_.RawReceivePort(($m) {
+      if ($m == null) {
+        _$impls.remove($p.sendPort.nativePort);
+        $p.close();
+        return;
+      }
+      final $i = jni$_.MethodInvocation.fromMessage($m);
+      final $r = _$invokeMethod($p.sendPort.nativePort, $i);
+      $i.args?.release();
+      jni$_.ProtectedJniExtensions.returnResult($i.result, $r);
+    });
+    implementer.add(
+      r'dev.telephonykit.telephony_kit.NetworkEventListener',
+      $p,
+      _$invokePointer,
+      [
+        if ($impl.onSignalStrengthChanged$async) r'onSignalStrengthChanged(I)V',
+        if ($impl.onServiceStateChanged$async) r'onServiceStateChanged(I)V',
+        if ($impl.onNetworkTypeChanged$async) r'onNetworkTypeChanged(II)V',
+        if ($impl.onCallStateChanged$async)
+          r'onCallStateChanged(ILjava/lang/String;)V',
+      ],
+    );
+    final $a = $p.sendPort.nativePort;
+    _$impls[$a] = $impl;
+  }
+
+  factory NetworkEventListener.implement($NetworkEventListener $impl) {
+    final $i = jni$_.JImplementer();
+    implementIn($i, $impl);
+    return $i.implement<NetworkEventListener>();
+  }
+}
+
+extension NetworkEventListener$$Methods on NetworkEventListener {
+  static final _id_onSignalStrengthChanged = NetworkEventListener._class
+      .instanceMethodId(r'onSignalStrengthChanged', r'(I)V');
+
+  static final _onSignalStrengthChanged =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public abstract void onSignalStrengthChanged(int level)`
+  ///
+  /// Signal level from 0 (none) to 4 (great).
+  void onSignalStrengthChanged(core$_.int level) {
+    final _$$selfRef = reference;
+    _onSignalStrengthChanged(
+      _$$selfRef.pointer,
+      _id_onSignalStrengthChanged.pointer,
+      level,
+    ).check();
+  }
+
+  static final _id_onServiceStateChanged = NetworkEventListener._class
+      .instanceMethodId(r'onServiceStateChanged', r'(I)V');
+
+  static final _onServiceStateChanged =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public abstract void onServiceStateChanged(int state)`
+  ///
+  /// {@code android.telephony.ServiceState.STATE_*}: 0 in service, 1 out of service, 2 emergency only, 3 radio off.
+  void onServiceStateChanged(core$_.int state) {
+    final _$$selfRef = reference;
+    _onServiceStateChanged(
+      _$$selfRef.pointer,
+      _id_onServiceStateChanged.pointer,
+      state,
+    ).check();
+  }
+
+  static final _id_onNetworkTypeChanged = NetworkEventListener._class
+      .instanceMethodId(r'onNetworkTypeChanged', r'(II)V');
+
+  static final _onNetworkTypeChanged =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public abstract void onNetworkTypeChanged(int networkType, int overrideType)`
+  ///
+  /// {@code networkType} is a {@code TelephonyManager.NETWORK_TYPE_*} value.
+  /// {@code overrideType} is a {@code TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_*}
+  /// value (for example 5G NSA shown on LTE), or 0.
+  void onNetworkTypeChanged(core$_.int networkType, core$_.int overrideType) {
+    final _$$selfRef = reference;
+    _onNetworkTypeChanged(
+      _$$selfRef.pointer,
+      _id_onNetworkTypeChanged.pointer,
+      networkType,
+      overrideType,
+    ).check();
+  }
+
+  static final _id_onCallStateChanged = NetworkEventListener._class
+      .instanceMethodId(r'onCallStateChanged', r'(ILjava/lang/String;)V');
+
+  static final _onCallStateChanged =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32, jni$_.Pointer<jni$_.Void>)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onCallStateChanged(int state, java.lang.String number)`
+  ///
+  /// Device call state: 0 idle, 1 ringing, 2 off hook. Only delivered when
+  /// READ_PHONE_STATE is granted. {@code number} is usually empty on modern
+  /// Android.
+  void onCallStateChanged(core$_.int state, jni$_.JString? number) {
+    final _$$selfRef = reference;
+    final _$number = number?.reference ?? jni$_.jNullReference;
+    _onCallStateChanged(
+      _$$selfRef.pointer,
+      _id_onCallStateChanged.pointer,
+      state,
+      _$number.pointer,
+    ).check();
+  }
+}
+
+abstract base mixin class $NetworkEventListener {
+  factory $NetworkEventListener({
+    required void Function(core$_.int level) onSignalStrengthChanged,
+    core$_.bool onSignalStrengthChanged$async,
+    required void Function(core$_.int state) onServiceStateChanged,
+    core$_.bool onServiceStateChanged$async,
+    required void Function(core$_.int networkType, core$_.int overrideType)
+    onNetworkTypeChanged,
+    core$_.bool onNetworkTypeChanged$async,
+    required void Function(core$_.int state, jni$_.JString? number)
+    onCallStateChanged,
+    core$_.bool onCallStateChanged$async,
+  }) = _$NetworkEventListener;
+
+  void onSignalStrengthChanged(core$_.int level);
+  core$_.bool get onSignalStrengthChanged$async => false;
+  void onServiceStateChanged(core$_.int state);
+  core$_.bool get onServiceStateChanged$async => false;
+  void onNetworkTypeChanged(core$_.int networkType, core$_.int overrideType);
+  core$_.bool get onNetworkTypeChanged$async => false;
+  void onCallStateChanged(core$_.int state, jni$_.JString? number);
+  core$_.bool get onCallStateChanged$async => false;
+}
+
+final class _$NetworkEventListener with $NetworkEventListener {
+  _$NetworkEventListener({
+    required void Function(core$_.int level) onSignalStrengthChanged,
+    this.onSignalStrengthChanged$async = false,
+    required void Function(core$_.int state) onServiceStateChanged,
+    this.onServiceStateChanged$async = false,
+    required void Function(core$_.int networkType, core$_.int overrideType)
+    onNetworkTypeChanged,
+    this.onNetworkTypeChanged$async = false,
+    required void Function(core$_.int state, jni$_.JString? number)
+    onCallStateChanged,
+    this.onCallStateChanged$async = false,
+  }) : _onSignalStrengthChanged = onSignalStrengthChanged,
+       _onServiceStateChanged = onServiceStateChanged,
+       _onNetworkTypeChanged = onNetworkTypeChanged,
+       _onCallStateChanged = onCallStateChanged;
+
+  final void Function(core$_.int level) _onSignalStrengthChanged;
+  final core$_.bool onSignalStrengthChanged$async;
+  final void Function(core$_.int state) _onServiceStateChanged;
+  final core$_.bool onServiceStateChanged$async;
+  final void Function(core$_.int networkType, core$_.int overrideType)
+  _onNetworkTypeChanged;
+  final core$_.bool onNetworkTypeChanged$async;
+  final void Function(core$_.int state, jni$_.JString? number)
+  _onCallStateChanged;
+  final core$_.bool onCallStateChanged$async;
+
+  void onSignalStrengthChanged(core$_.int level) {
+    return _onSignalStrengthChanged(level);
+  }
+
+  void onServiceStateChanged(core$_.int state) {
+    return _onServiceStateChanged(state);
+  }
+
+  void onNetworkTypeChanged(core$_.int networkType, core$_.int overrideType) {
+    return _onNetworkTypeChanged(networkType, overrideType);
+  }
+
+  void onCallStateChanged(core$_.int state, jni$_.JString? number) {
+    return _onCallStateChanged(state, number);
+  }
+}
+
+final class $NetworkEventListener$Type$
+    extends jni$_.JType<NetworkEventListener> {
+  @jni$_.internal
+  const $NetworkEventListener$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature =>
+      r'Ldev/telephonykit/telephony_kit/NetworkEventListener;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.NetworkMonitor`
+///
+/// Streams signal, service, network type and call state changes.
+extension type NetworkMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/NetworkMonitor',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<NetworkMonitor> type = $NetworkMonitor$Type$();
+  static final _id_start = _class.staticMethodId(
+    r'start',
+    r'(Landroid/content/Context;Ldev/telephonykit/telephony_kit/NetworkEventListener;)V',
+  );
+
+  static final _start =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void start(android.content.Context context, dev.telephonykit.telephony_kit.NetworkEventListener listener)`
+  ///
+  /// Starts sending events to {@code listener}. Replaces any earlier listener.
+  static void start(Context? context, NetworkEventListener? listener) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$listener = listener?.reference ?? jni$_.jNullReference;
+    _start(
+      _$$classRef.pointer,
+      _id_start.pointer,
+      _$context.pointer,
+      _$listener.pointer,
+    ).check();
+  }
+
+  static final _id_stop = _class.staticMethodId(r'stop', r'()V');
+
+  static final _stop =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public void stop()`
+  ///
+  /// Stops sending events.
+  static void stop() {
+    final _$$classRef = _class.reference;
+    _stop(_$$classRef.pointer, _id_stop.pointer).check();
+  }
+
+  static final _id_getSignalLevel = _class.staticMethodId(
+    r'getSignalLevel',
+    r'(Landroid/content/Context;)I',
+  );
+
+  static final _getSignalLevel =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getSignalLevel(android.content.Context context)`
+  ///
+  /// The current signal level from 0 to 4, or -1 if unknown.
+  static core$_.int getSignalLevel(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getSignalLevel(
+      _$$classRef.pointer,
+      _id_getSignalLevel.pointer,
+      _$context.pointer,
+    ).integer;
+  }
+
+  static final _id_getDataNetworkType = _class.staticMethodId(
+    r'getDataNetworkType',
+    r'(Landroid/content/Context;)I',
+  );
+
+  static final _getDataNetworkType =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getDataNetworkType(android.content.Context context)`
+  ///
+  /// The current data network type ({@code TelephonyManager.NETWORK_TYPE_*}),
+  /// or 0 if unknown. Needs READ_PHONE_STATE.
+  static core$_.int getDataNetworkType(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getDataNetworkType(
+      _$$classRef.pointer,
+      _id_getDataNetworkType.pointer,
+      _$context.pointer,
+    ).integer;
+  }
+}
+
+final class $NetworkMonitor$Type$ extends jni$_.JType<NetworkMonitor> {
+  @jni$_.internal
+  const $NetworkMonitor$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/NetworkMonitor;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.ResultListener`
+///
+/// A one-shot result from an asynchronous Android request (USSD, SMS).
+extension type ResultListener._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/ResultListener',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<ResultListener> type = $ResultListener$Type$();
+
+  /// Maps a specific port to the implemented interface.
+  static final core$_.Map<core$_.int, $ResultListener> _$impls = {};
+  static jni$_.JObjectPtr _$invoke(
+    core$_.int port,
+    jni$_.JObjectPtr descriptor,
+    jni$_.JObjectPtr args,
+  ) {
+    return _$invokeMethod(
+      port,
+      jni$_.MethodInvocation.fromAddresses(0, descriptor.address, args.address),
+    );
+  }
+
+  static final jni$_.Pointer<
+    jni$_.NativeFunction<
+      jni$_.JObjectPtr Function(jni$_.Int64, jni$_.JObjectPtr, jni$_.JObjectPtr)
+    >
+  >
+  _$invokePointer = jni$_.Pointer.fromFunction(_$invoke);
+
+  static jni$_.Pointer<jni$_.Void> _$invokeMethod(
+    core$_.int $p,
+    jni$_.MethodInvocation $i,
+  ) {
+    try {
+      final $d = $i.methodDescriptor.toDartString(releaseOriginal: true);
+      final $a = $i.args;
+      if ($d == r'onSuccess(Ljava/lang/String;)V') {
+        _$impls[$p]!.onSuccess(($a![0] as jni$_.JString?));
+        return jni$_.nullptr;
+      }
+      if ($d == r'onFailure(ILjava/lang/String;)V') {
+        _$impls[$p]!.onFailure(
+          ($a![0] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+          ($a![1] as jni$_.JString?),
+        );
+        return jni$_.nullptr;
+      }
+    } catch (e) {
+      return jni$_.ProtectedJniExtensions.newDartException(e);
+    }
+    return jni$_.nullptr;
+  }
+
+  static void implementIn(
+    jni$_.JImplementer implementer,
+    $ResultListener $impl,
+  ) {
+    late final jni$_.RawReceivePort $p;
+    $p = jni$_.RawReceivePort(($m) {
+      if ($m == null) {
+        _$impls.remove($p.sendPort.nativePort);
+        $p.close();
+        return;
+      }
+      final $i = jni$_.MethodInvocation.fromMessage($m);
+      final $r = _$invokeMethod($p.sendPort.nativePort, $i);
+      $i.args?.release();
+      jni$_.ProtectedJniExtensions.returnResult($i.result, $r);
+    });
+    implementer.add(
+      r'dev.telephonykit.telephony_kit.ResultListener',
+      $p,
+      _$invokePointer,
+      [
+        if ($impl.onSuccess$async) r'onSuccess(Ljava/lang/String;)V',
+        if ($impl.onFailure$async) r'onFailure(ILjava/lang/String;)V',
+      ],
+    );
+    final $a = $p.sendPort.nativePort;
+    _$impls[$a] = $impl;
+  }
+
+  factory ResultListener.implement($ResultListener $impl) {
+    final $i = jni$_.JImplementer();
+    implementIn($i, $impl);
+    return $i.implement<ResultListener>();
+  }
+}
+
+extension ResultListener$$Methods on ResultListener {
+  static final _id_onSuccess = ResultListener._class.instanceMethodId(
+    r'onSuccess',
+    r'(Ljava/lang/String;)V',
+  );
+
+  static final _onSuccess =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onSuccess(java.lang.String value)`
+  ///
+  /// The request succeeded. {@code value} is the response text, if any.
+  void onSuccess(jni$_.JString? value) {
+    final _$$selfRef = reference;
+    final _$value = value?.reference ?? jni$_.jNullReference;
+    _onSuccess(
+      _$$selfRef.pointer,
+      _id_onSuccess.pointer,
+      _$value.pointer,
+    ).check();
+  }
+
+  static final _id_onFailure = ResultListener._class.instanceMethodId(
+    r'onFailure',
+    r'(ILjava/lang/String;)V',
+  );
+
+  static final _onFailure =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32, jni$_.Pointer<jni$_.Void>)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onFailure(int code, java.lang.String message)`
+  ///
+  /// The request failed with an Android error code.
+  void onFailure(core$_.int code, jni$_.JString? message) {
+    final _$$selfRef = reference;
+    final _$message = message?.reference ?? jni$_.jNullReference;
+    _onFailure(
+      _$$selfRef.pointer,
+      _id_onFailure.pointer,
+      code,
+      _$message.pointer,
+    ).check();
+  }
+}
+
+abstract base mixin class $ResultListener {
+  factory $ResultListener({
+    required void Function(jni$_.JString? value) onSuccess,
+    core$_.bool onSuccess$async,
+    required void Function(core$_.int code, jni$_.JString? message) onFailure,
+    core$_.bool onFailure$async,
+  }) = _$ResultListener;
+
+  void onSuccess(jni$_.JString? value);
+  core$_.bool get onSuccess$async => false;
+  void onFailure(core$_.int code, jni$_.JString? message);
+  core$_.bool get onFailure$async => false;
+}
+
+final class _$ResultListener with $ResultListener {
+  _$ResultListener({
+    required void Function(jni$_.JString? value) onSuccess,
+    this.onSuccess$async = false,
+    required void Function(core$_.int code, jni$_.JString? message) onFailure,
+    this.onFailure$async = false,
+  }) : _onSuccess = onSuccess,
+       _onFailure = onFailure;
+
+  final void Function(jni$_.JString? value) _onSuccess;
+  final core$_.bool onSuccess$async;
+  final void Function(core$_.int code, jni$_.JString? message) _onFailure;
+  final core$_.bool onFailure$async;
+
+  void onSuccess(jni$_.JString? value) {
+    return _onSuccess(value);
+  }
+
+  void onFailure(core$_.int code, jni$_.JString? message) {
+    return _onFailure(code, message);
+  }
+}
+
+final class $ResultListener$Type$ extends jni$_.JType<ResultListener> {
+  @jni$_.internal
+  const $ResultListener$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/ResultListener;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.ScreeningListener`
+///
+/// Told about each incoming call that TelephonyKitCallScreeningService screened.
+extension type ScreeningListener._(jni$_.JObject _$this)
+    implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/ScreeningListener',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<ScreeningListener> type = $ScreeningListener$Type$();
+
+  /// Maps a specific port to the implemented interface.
+  static final core$_.Map<core$_.int, $ScreeningListener> _$impls = {};
+  static jni$_.JObjectPtr _$invoke(
+    core$_.int port,
+    jni$_.JObjectPtr descriptor,
+    jni$_.JObjectPtr args,
+  ) {
+    return _$invokeMethod(
+      port,
+      jni$_.MethodInvocation.fromAddresses(0, descriptor.address, args.address),
+    );
+  }
+
+  static final jni$_.Pointer<
+    jni$_.NativeFunction<
+      jni$_.JObjectPtr Function(jni$_.Int64, jni$_.JObjectPtr, jni$_.JObjectPtr)
+    >
+  >
+  _$invokePointer = jni$_.Pointer.fromFunction(_$invoke);
+
+  static jni$_.Pointer<jni$_.Void> _$invokeMethod(
+    core$_.int $p,
+    jni$_.MethodInvocation $i,
+  ) {
+    try {
+      final $d = $i.methodDescriptor.toDartString(releaseOriginal: true);
+      final $a = $i.args;
+      if ($d == r'onCallScreened(Ljava/lang/String;ILjava/lang/String;)V') {
+        _$impls[$p]!.onCallScreened(
+          ($a![0] as jni$_.JString?),
+          ($a![1] as jni$_.JInteger).toDartInt(releaseOriginal: true),
+          ($a![2] as jni$_.JString?),
+        );
+        return jni$_.nullptr;
+      }
+    } catch (e) {
+      return jni$_.ProtectedJniExtensions.newDartException(e);
+    }
+    return jni$_.nullptr;
+  }
+
+  static void implementIn(
+    jni$_.JImplementer implementer,
+    $ScreeningListener $impl,
+  ) {
+    late final jni$_.RawReceivePort $p;
+    $p = jni$_.RawReceivePort(($m) {
+      if ($m == null) {
+        _$impls.remove($p.sendPort.nativePort);
+        $p.close();
+        return;
+      }
+      final $i = jni$_.MethodInvocation.fromMessage($m);
+      final $r = _$invokeMethod($p.sendPort.nativePort, $i);
+      $i.args?.release();
+      jni$_.ProtectedJniExtensions.returnResult($i.result, $r);
+    });
+    implementer.add(
+      r'dev.telephonykit.telephony_kit.ScreeningListener',
+      $p,
+      _$invokePointer,
+      [
+        if ($impl.onCallScreened$async)
+          r'onCallScreened(Ljava/lang/String;ILjava/lang/String;)V',
+      ],
+    );
+    final $a = $p.sendPort.nativePort;
+    _$impls[$a] = $impl;
+  }
+
+  factory ScreeningListener.implement($ScreeningListener $impl) {
+    final $i = jni$_.JImplementer();
+    implementIn($i, $impl);
+    return $i.implement<ScreeningListener>();
+  }
+}
+
+extension ScreeningListener$$Methods on ScreeningListener {
+  static final _id_onCallScreened = ScreeningListener._class.instanceMethodId(
+    r'onCallScreened',
+    r'(Ljava/lang/String;ILjava/lang/String;)V',
+  );
+
+  static final _onCallScreened =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onCallScreened(java.lang.String number, int action, java.lang.String reason)`
+  ///
+  /// {@code action} is CallScreening\#ACTION_ALLOW,
+  /// CallScreening\#ACTION_SILENCE or CallScreening\#ACTION_REJECT.
+  /// {@code reason} is a short machine readable reason such as "blocked_number".
+  void onCallScreened(
+    jni$_.JString? number,
+    core$_.int action,
+    jni$_.JString? reason,
+  ) {
+    final _$$selfRef = reference;
+    final _$number = number?.reference ?? jni$_.jNullReference;
+    final _$reason = reason?.reference ?? jni$_.jNullReference;
+    _onCallScreened(
+      _$$selfRef.pointer,
+      _id_onCallScreened.pointer,
+      _$number.pointer,
+      action,
+      _$reason.pointer,
+    ).check();
+  }
+}
+
+abstract base mixin class $ScreeningListener {
+  factory $ScreeningListener({
+    required void Function(
+      jni$_.JString? number,
+      core$_.int action,
+      jni$_.JString? reason,
+    )
+    onCallScreened,
+    core$_.bool onCallScreened$async,
+  }) = _$ScreeningListener;
+
+  void onCallScreened(
+    jni$_.JString? number,
+    core$_.int action,
+    jni$_.JString? reason,
+  );
+  core$_.bool get onCallScreened$async => false;
+}
+
+final class _$ScreeningListener with $ScreeningListener {
+  _$ScreeningListener({
+    required void Function(
+      jni$_.JString? number,
+      core$_.int action,
+      jni$_.JString? reason,
+    )
+    onCallScreened,
+    this.onCallScreened$async = false,
+  }) : _onCallScreened = onCallScreened;
+
+  final void Function(
+    jni$_.JString? number,
+    core$_.int action,
+    jni$_.JString? reason,
+  )
+  _onCallScreened;
+  final core$_.bool onCallScreened$async;
+
+  void onCallScreened(
+    jni$_.JString? number,
+    core$_.int action,
+    jni$_.JString? reason,
+  ) {
+    return _onCallScreened(number, action, reason);
+  }
+}
+
+final class $ScreeningListener$Type$ extends jni$_.JType<ScreeningListener> {
+  @jni$_.internal
+  const $ScreeningListener$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/ScreeningListener;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.SmsHelper`
+///
+/// Sends SMS messages and reports whether every part was sent.
+extension type SmsHelper._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/SmsHelper',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<SmsHelper> type = $SmsHelper$Type$();
+  static final _id_send = _class.staticMethodId(
+    r'send',
+    r'(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;ILdev/telephonykit/telephony_kit/ResultListener;)V',
+  );
+
+  static final _send =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void send(android.content.Context context, java.lang.String destination, java.lang.String text, int subscriptionId, dev.telephonykit.telephony_kit.ResultListener listener)`
+  ///
+  /// Sends {@code text} to {@code destination}. Long messages are split into
+  /// parts. Pass a subscription id to pick the SIM, or -1 for the default.
+  /// Needs SEND_SMS. The listener gets the number of parts on success.
+  static void send(
+    Context? context,
+    jni$_.JString? destination,
+    jni$_.JString? text,
+    core$_.int subscriptionId,
+    ResultListener? listener,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$destination = destination?.reference ?? jni$_.jNullReference;
+    final _$text = text?.reference ?? jni$_.jNullReference;
+    final _$listener = listener?.reference ?? jni$_.jNullReference;
+    _send(
+      _$$classRef.pointer,
+      _id_send.pointer,
+      _$context.pointer,
+      _$destination.pointer,
+      _$text.pointer,
+      subscriptionId,
+      _$listener.pointer,
+    ).check();
+  }
+}
+
+final class $SmsHelper$Type$ extends jni$_.JType<SmsHelper> {
+  @jni$_.internal
+  const $SmsHelper$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/SmsHelper;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.UssdHelper`
+///
+/// Sends USSD codes such as {@code *100\#} and returns the network's reply.
+extension type UssdHelper._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/UssdHelper',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<UssdHelper> type = $UssdHelper$Type$();
+  static final _id_send = _class.staticMethodId(
+    r'send',
+    r'(Landroid/content/Context;Ljava/lang/String;ILdev/telephonykit/telephony_kit/ResultListener;)V',
+  );
+
+  static final _send =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void send(android.content.Context context, java.lang.String code, int subscriptionId, dev.telephonykit.telephony_kit.ResultListener listener)`
+  ///
+  /// Sends {@code code}. Pass a subscription id to use a specific SIM, or -1
+  /// for the default. Needs CALL_PHONE and Android 8.0+.
+  static void send(
+    Context? context,
+    jni$_.JString? code,
+    core$_.int subscriptionId,
+    ResultListener? listener,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$code = code?.reference ?? jni$_.jNullReference;
+    final _$listener = listener?.reference ?? jni$_.jNullReference;
+    _send(
+      _$$classRef.pointer,
+      _id_send.pointer,
+      _$context.pointer,
+      _$code.pointer,
+      subscriptionId,
+      _$listener.pointer,
+    ).check();
+  }
+}
+
+final class $UssdHelper$Type$ extends jni$_.JType<UssdHelper> {
+  @jni$_.internal
+  const $UssdHelper$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/UssdHelper;';
 }
 
 /// from: `android.view.ContextThemeWrapper`

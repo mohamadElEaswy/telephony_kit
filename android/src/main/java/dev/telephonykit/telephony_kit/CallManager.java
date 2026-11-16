@@ -1,5 +1,6 @@
 package dev.telephonykit.telephony_kit;
 
+import android.bluetooth.BluetoothDevice;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,6 +12,7 @@ import android.telecom.CallAudioState;
 import android.telecom.InCallService;
 import android.telecom.VideoProfile;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -32,6 +34,9 @@ public final class CallManager {
   private static InCallService service;
   private static CallEventListener listener;
   private static boolean launchAppOnIncomingCall = true;
+  private static boolean showNotifications = true;
+  private static Context appContext;
+  private static CallAudioState lastAudioState;
   private static int nextId = 1;
   private static boolean lastMuted = false;
   private static int lastRoute = CallAudioState.ROUTE_EARPIECE;
@@ -50,6 +55,17 @@ public final class CallManager {
   /** Whether the app's launch activity is opened when a call starts ringing. */
   public static void setLaunchAppOnIncomingCall(boolean enabled) {
     launchAppOnIncomingCall = enabled;
+  }
+
+  /**
+   * Whether incoming and ongoing call notifications are shown (default true).
+   * The incoming notification has answer and decline buttons and opens the
+   * app full screen on the lock screen.
+   */
+  public static void setShowCallNotifications(boolean enabled) {
+    showNotifications = enabled;
+    Context ctx = appContext;
+    if (!enabled && ctx != null) CallNotifications.cancel(ctx);
   }
 
   /** True while the system is bound to {@link TelephonyKitInCallService}. */
@@ -220,12 +236,198 @@ public final class CallManager {
   }
 
   // ---------------------------------------------------------------------------
+  // Conference and multi-call
+  // ---------------------------------------------------------------------------
+
+  /** True if the call is a conference (it has child calls). */
+  public static boolean isConference(String callId) {
+    Call call = find(callId);
+    return call != null
+        && call.getDetails() != null
+        && call.getDetails().hasProperty(Call.Details.PROPERTY_CONFERENCE);
+  }
+
+  /** True if the call can be merged with another call into a conference. */
+  public static boolean canMerge(String callId) {
+    Call call = find(callId);
+    if (call == null || call.getDetails() == null) return false;
+    return call.getDetails().can(Call.Details.CAPABILITY_MERGE_CONFERENCE)
+        || !call.getConferenceableCalls().isEmpty();
+  }
+
+  /** True if the call (a conference) can swap between its two parties. */
+  public static boolean canSwap(String callId) {
+    Call call = find(callId);
+    return call != null
+        && call.getDetails() != null
+        && call.getDetails().can(Call.Details.CAPABILITY_SWAP_CONFERENCE);
+  }
+
+  /** Joins two calls into a conference. */
+  public static boolean conference(String callId, String otherCallId) {
+    Call call = find(callId);
+    Call other = find(otherCallId);
+    if (call == null || other == null) return false;
+    call.conference(other);
+    return true;
+  }
+
+  /** Merges the calls that this call can be merged with into a conference. */
+  public static boolean mergeConference(String callId) {
+    Call call = find(callId);
+    if (call == null) return false;
+    if (call.getDetails().can(Call.Details.CAPABILITY_MERGE_CONFERENCE)) {
+      call.mergeConference();
+      return true;
+    }
+    List<Call> conferenceable = call.getConferenceableCalls();
+    if (conferenceable.isEmpty()) return false;
+    call.conference(conferenceable.get(0));
+    return true;
+  }
+
+  /** Swaps the active party of a two-party conference. */
+  public static boolean swapConference(String callId) {
+    Call call = find(callId);
+    if (call == null) return false;
+    call.swapConference();
+    return true;
+  }
+
+  /** Splits a call out of its conference so it can be talked to privately. */
+  public static boolean splitFromConference(String callId) {
+    Call call = find(callId);
+    if (call == null) return false;
+    call.splitFromConference();
+    return true;
+  }
+
+  /** Ids of the calls that make up a conference. */
+  public static String[] getChildIds(String callId) {
+    Call call = find(callId);
+    if (call == null) return new String[0];
+    List<String> ids = new ArrayList<>();
+    for (Call child : call.getChildren()) {
+      String id = idOf(child);
+      if (id != null) ids.add(id);
+    }
+    return ids.toArray(new String[0]);
+  }
+
+  /** The id of the conference this call belongs to, or an empty string. */
+  public static String getParentId(String callId) {
+    Call call = find(callId);
+    if (call == null || call.getParent() == null) return "";
+    String id = idOf(call.getParent());
+    return id == null ? "" : id;
+  }
+
+  /**
+   * Swaps between an active and a held call: holds the active one and
+   * resumes the other. Use for call waiting.
+   */
+  @SuppressWarnings("deprecation")
+  public static boolean swapCalls() {
+    Call active = null;
+    Call held = null;
+    synchronized (lock) {
+      for (Call c : calls.values()) {
+        if (c.getParent() != null) continue;
+        int state = c.getState();
+        if (state == Call.STATE_ACTIVE && active == null) active = c;
+        if (state == Call.STATE_HOLDING && held == null) held = c;
+      }
+    }
+    if (held == null) return false;
+    if (active != null) active.hold();
+    held.unhold();
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Audio routes
+  // ---------------------------------------------------------------------------
+
+  /** Bit mask of supported routes ({@code CallAudioState.ROUTE_*}), or 0. */
+  public static int getSupportedAudioRouteMask() {
+    CallAudioState state = lastAudioState;
+    return state == null ? 0 : state.getSupportedRouteMask();
+  }
+
+  /** Routes call audio. {@code route} is one of {@code CallAudioState.ROUTE_*}. */
+  @SuppressWarnings("deprecation")
+  public static boolean setAudioRoute(int route) {
+    InCallService current;
+    synchronized (lock) {
+      current = service;
+    }
+    if (current == null) return false;
+    current.setAudioRoute(route);
+    return true;
+  }
+
+  /** Addresses of Bluetooth devices that can carry call audio. */
+  public static String[] getBluetoothDeviceAddresses() {
+    CallAudioState state = lastAudioState;
+    if (state == null || Build.VERSION.SDK_INT < 28) return new String[0];
+    Collection<BluetoothDevice> devices = state.getSupportedBluetoothDevices();
+    List<String> out = new ArrayList<>();
+    for (BluetoothDevice d : devices) out.add(d.getAddress());
+    return out.toArray(new String[0]);
+  }
+
+  /**
+   * The name of a Bluetooth device, or an empty string. Needs
+   * BLUETOOTH_CONNECT on Android 12+.
+   */
+  public static String getBluetoothDeviceName(String address) {
+    BluetoothDevice device = findBluetooth(address);
+    if (device == null) return "";
+    try {
+      String name = device.getName();
+      return name == null ? "" : name;
+    } catch (SecurityException e) {
+      return "";
+    }
+  }
+
+  /** Address of the Bluetooth device in use, or an empty string. */
+  public static String getActiveBluetoothDeviceAddress() {
+    CallAudioState state = lastAudioState;
+    if (state == null || Build.VERSION.SDK_INT < 28) return "";
+    BluetoothDevice device = state.getActiveBluetoothDevice();
+    return device == null ? "" : device.getAddress();
+  }
+
+  /** Sends call audio to the Bluetooth device with this address. */
+  public static boolean selectBluetoothDevice(String address) {
+    InCallService current;
+    synchronized (lock) {
+      current = service;
+    }
+    BluetoothDevice device = findBluetooth(address);
+    if (current == null || device == null || Build.VERSION.SDK_INT < 28) return false;
+    current.requestBluetoothAudio(device);
+    return true;
+  }
+
+  private static BluetoothDevice findBluetooth(String address) {
+    CallAudioState state = lastAudioState;
+    if (state == null || address == null || Build.VERSION.SDK_INT < 28) return null;
+    for (BluetoothDevice d : state.getSupportedBluetoothDevices()) {
+      if (address.equals(d.getAddress())) return d;
+    }
+    return null;
+  }
+
+  // ---------------------------------------------------------------------------
   // Called by TelephonyKitInCallService
   // ---------------------------------------------------------------------------
 
   static void attachService(InCallService inCallService) {
     synchronized (lock) {
       service = inCallService;
+      appContext = inCallService.getApplicationContext();
     }
   }
 
@@ -249,6 +451,7 @@ public final class CallManager {
         new Call.Callback() {
           @Override
           public void onStateChanged(Call c, int state) {
+            updateNotification();
             CallEventListener l = currentListener();
             if (l != null) l.onCallStateChanged(id, state);
           }
@@ -261,6 +464,7 @@ public final class CallManager {
     CallEventListener l = currentListener();
     if (l != null) l.onCallAdded(id);
 
+    updateNotification();
     if (launchAppOnIncomingCall && call.getState() == Call.STATE_RINGING) {
       launchApp(context);
     }
@@ -283,6 +487,7 @@ public final class CallManager {
       callback = callbacks.remove(call);
     }
     if (callback != null) call.unregisterCallback(callback);
+    updateNotification();
     if (removedId != null) {
       CallEventListener l = currentListener();
       if (l != null) l.onCallRemoved(removedId);
@@ -291,6 +496,7 @@ public final class CallManager {
 
   static void onAudioStateChanged(CallAudioState state) {
     if (state == null) return;
+    lastAudioState = state;
     lastMuted = state.isMuted();
     lastRoute = state.getRoute();
     CallEventListener l = currentListener();
@@ -313,7 +519,60 @@ public final class CallManager {
     }
   }
 
-  private static void launchApp(Context context) {
+  private static String idOf(Call call) {
+    synchronized (lock) {
+      for (Map.Entry<String, Call> e : calls.entrySet()) {
+        if (e.getValue() == call) return e.getKey();
+      }
+    }
+    return null;
+  }
+
+  /** Shows the notification for the most relevant call, or clears it. */
+  @SuppressWarnings("deprecation")
+  private static void updateNotification() {
+    Context ctx = appContext;
+    if (ctx == null) return;
+    if (!showNotifications) {
+      CallNotifications.cancel(ctx);
+      return;
+    }
+    String ringingId = null;
+    String liveId = null;
+    synchronized (lock) {
+      for (Map.Entry<String, Call> e : calls.entrySet()) {
+        Call c = e.getValue();
+        if (c.getParent() != null) continue;
+        int state = c.getState();
+        if (state == Call.STATE_RINGING) ringingId = e.getKey();
+        else if (state != Call.STATE_DISCONNECTED && state != Call.STATE_DISCONNECTING) {
+          liveId = e.getKey();
+        }
+      }
+    }
+    if (ringingId != null) {
+      CallNotifications.showIncoming(ctx, ringingId, callerLabel(ringingId));
+    } else if (liveId != null) {
+      int state = getState(liveId);
+      String status =
+          state == Call.STATE_HOLDING
+              ? "On hold"
+              : state == Call.STATE_ACTIVE ? "Ongoing call" : "Calling…";
+      CallNotifications.showOngoing(
+          ctx, liveId, callerLabel(liveId), status, getConnectTimeMillis(liveId));
+    } else {
+      CallNotifications.cancel(ctx);
+    }
+  }
+
+  private static String callerLabel(String callId) {
+    String name = getDisplayName(callId);
+    if (!name.isEmpty()) return name;
+    String number = getNumber(callId);
+    return number.isEmpty() ? "Unknown caller" : number;
+  }
+
+  static void launchApp(Context context) {
     Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
     if (intent == null) return;
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);

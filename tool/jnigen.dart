@@ -38,6 +38,7 @@ const _androidAllowList = <String, Set<String>>{
     'isRoleHeld',
     'createRequestRoleIntent',
     'ROLE_DIALER',
+    'ROLE_CALL_SCREENING',
   },
   'android.telecom.TelecomManager': {
     'placeCall',
@@ -61,6 +62,7 @@ const _androidAllowList = <String, Set<String>>{
     'isVoiceCapable',
     'getPhoneCount',
     'getActiveModemCount',
+    'getVoiceMailNumber',
   },
   'android.telephony.SubscriptionManager': {'getActiveSubscriptionInfoList'},
   'android.telephony.SubscriptionInfo': {
@@ -71,7 +73,13 @@ const _androidAllowList = <String, Set<String>>{
     'getCountryIso',
     'isEmbedded',
   },
-  'android.content.ContentResolver': {'query'},
+  'android.content.ContentResolver': {'query', 'insert', 'delete', 'update'},
+  'android.content.ContentValues': {'<init>', 'put'},
+  'android.provider.BlockedNumberContract': {
+    'canCurrentUserBlockNumbers',
+    'isBlocked',
+    'unblock',
+  },
   'android.database.Cursor': {
     'moveToNext',
     'getColumnIndex',
@@ -103,6 +111,13 @@ const _androidAllowList = <String, Set<String>>{
 
 const _ownPackage = 'dev.telephonykit.telephony_kit.';
 
+/// Classes in the package that only Android calls, so they get no bindings.
+const _systemOnly = {
+  '${_ownPackage}TelephonyKitInCallService',
+  '${_ownPackage}TelephonyKitCallScreeningService',
+  '${_ownPackage}CallActionReceiver',
+};
+
 final class _AllowListVisitor extends Visitor {
   _AllowListVisitor() : super.base();
 
@@ -110,8 +125,8 @@ final class _AllowListVisitor extends Visitor {
 
   @override
   void visitClass(ClassDecl c) {
-    if (c.binaryName == '${_ownPackage}TelephonyKitInCallService') {
-      // Only the system talks to the service; Dart uses CallManager.
+    if (_systemOnly.contains(c.binaryName)) {
+      // Only the system talks to these; Dart uses CallManager and friends.
       c.isIncluded = false;
       _allowed = const {};
       return;
@@ -182,6 +197,8 @@ void main() async {
         'android.content.ContentResolver',
         'android.database.Cursor',
         'android.provider.CallLog',
+        'android.content.ContentValues',
+        'android.provider.BlockedNumberContract',
       ],
       sourcePath: [packageRoot.resolve('android/src/main/java/')],
       androidSdk: AndroidSdk(versions: [36, 35], sdkRoot: _sdkRoot()),

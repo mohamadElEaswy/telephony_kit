@@ -109,31 +109,54 @@ class TelephonyKit {
   /// resumes. Returns false if there is no foreground activity or the role is
   /// not available on this device.
   bool requestDefaultDialer() => _guard('Requesting dialer role', () {
+    if (_sdkInt >= 29) return _requestRole(android.RoleManager.ROLE_DIALER);
     final activity = _activity();
     if (activity == null) return false;
-    final android.Intent? intent;
-    if (_sdkInt >= 29) {
-      final roles = _service(
-        android.Context.ROLE_SERVICE,
-        android.RoleManager.type,
-      );
-      if (!roles.isRoleAvailable(android.RoleManager.ROLE_DIALER)) {
-        return false;
-      }
-      intent = roles.createRequestRoleIntent(android.RoleManager.ROLE_DIALER);
-    } else {
-      intent = android.Intent.new$2(
-        android.TelecomManager.ACTION_CHANGE_DEFAULT_DIALER,
-      );
-      intent.putExtra$8(
-        android.TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
-        _context.packageName,
-      );
-    }
-    if (intent == null) return false;
+    final intent = android.Intent.new$2(
+      android.TelecomManager.ACTION_CHANGE_DEFAULT_DIALER,
+    );
+    intent.putExtra$8(
+      android.TelecomManager.EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME,
+      _context.packageName,
+    );
     activity.startActivityForResult(intent, defaultDialerRequestCode);
     return true;
   });
+
+  /// Whether this app holds the call screening role (Android 10+).
+  ///
+  /// The default dialer can screen calls without it.
+  bool get isCallScreeningRoleHeld => _guard('Checking screening role', () {
+    if (_sdkInt < 29) return false;
+    final roles = _service(
+      android.Context.ROLE_SERVICE,
+      android.RoleManager.type,
+    );
+    return roles.isRoleHeld(android.RoleManager.ROLE_CALL_SCREENING);
+  });
+
+  /// Asks the user to make this app the call screening app (Android 10+).
+  ///
+  /// Only needed when the app is not the default dialer.
+  bool requestCallScreeningRole() => _guard(
+    'Requesting screening role',
+    () =>
+        _sdkInt >= 29 && _requestRole(android.RoleManager.ROLE_CALL_SCREENING),
+  );
+
+  bool _requestRole(JString? role) {
+    final activity = _activity();
+    if (activity == null) return false;
+    final roles = _service(
+      android.Context.ROLE_SERVICE,
+      android.RoleManager.type,
+    );
+    if (!roles.isRoleAvailable(role)) return false;
+    final intent = roles.createRequestRoleIntent(role);
+    if (intent == null) return false;
+    activity.startActivityForResult(intent, defaultDialerRequestCode);
+    return true;
+  }
 
   // ---------------------------------------------------------------------------
   // Placing calls
@@ -400,6 +423,399 @@ class TelephonyKit {
     );
   });
 
+  // ---------------------------------------------------------------------------
+  // Call log changes
+  // ---------------------------------------------------------------------------
+
+  /// Deletes call log entries by [CallLogEntry.id]. Returns how many were
+  /// deleted. Needs `TelephonyPermission.writeCallLog`.
+  int deleteCallLogEntries(Iterable<String> ids) =>
+      _guard('Deleting call log entries', () {
+        final list = ids.where((id) => id.isNotEmpty).toList();
+        if (list.isEmpty) return 0;
+        return _delete(
+          'content://call_log/calls',
+          '_id IN (${List.filled(list.length, '?').join(',')})',
+          list,
+        );
+      });
+
+  /// Deletes every call log entry for [number] (any format). Returns how many
+  /// were deleted. Needs `TelephonyPermission.writeCallLog`.
+  int deleteCallLogForNumber(String number) =>
+      _guard('Deleting call log entries', () {
+        final patterns = numberSearchPatterns(number);
+        if (patterns.isEmpty) return 0;
+        return _delete(
+          'content://call_log/calls',
+          patterns.map((_) => 'number LIKE ?').join(' OR '),
+          [for (final p in patterns) '%$p'],
+        );
+      });
+
+  /// Marks all new missed calls as seen, which clears the missed call
+  /// badge. Returns how many changed. Needs `TelephonyPermission.writeCallLog`.
+  int markMissedCallsRead() => _guard('Marking missed calls read', () {
+    final resolver = _context.contentResolver;
+    if (resolver == null) return 0;
+    final values = android.ContentValues()
+      ..put$3('new'.toJString(), 0.toJInteger())
+      ..put$3('is_read'.toJString(), 1.toJInteger());
+    return resolver.update(
+      android.Uri.parse('content://call_log/calls'.toJString()),
+      values,
+      'type = 3 AND new = 1'.toJString(),
+      null,
+    );
+  });
+
+  int _delete(String uri, String where, List<String> args) {
+    final resolver = _context.contentResolver;
+    if (resolver == null) return 0;
+    return resolver.delete(
+      android.Uri.parse(uri.toJString()),
+      where.toJString(),
+      JArray.of(JString.type, [for (final a in args) a.toJString()]),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // System block list
+  // ---------------------------------------------------------------------------
+
+  static const _blockedUri = 'content://com.android.blockednumber/blocked';
+
+  /// Whether this app may use the system block list. True for the default
+  /// dialer and default SMS app.
+  bool get canBlockNumbers => _guard(
+    'Checking block list access',
+    () => android.BlockedNumberContract.canCurrentUserBlockNumbers(_context),
+  );
+
+  /// Numbers on the system block list, which every app and the phone itself
+  /// respect. Only the default dialer or SMS app may read it.
+  List<BlockedNumber> getBlockedNumbers() => _guard('Reading block list', () {
+    final rows = _queryRows(
+      _blockedUri,
+      projection: const ['_id', 'original_number', 'e164_number'],
+      limit: 10000,
+    );
+    return [
+      for (final row in rows)
+        BlockedNumber(
+          id: row['_id'] ?? '',
+          number: row['original_number'] ?? '',
+          e164Number: row['e164_number'] ?? '',
+        ),
+    ];
+  });
+
+  /// Adds [number] to the system block list. Default dialer only.
+  bool blockNumber(String number) => _guard('Blocking number', () {
+    final resolver = _context.contentResolver;
+    if (resolver == null || number.trim().isEmpty) return false;
+    final values = android.ContentValues()
+      ..put('original_number'.toJString(), number.trim().toJString());
+    return resolver.insert(
+          android.Uri.parse(_blockedUri.toJString()),
+          values,
+        ) !=
+        null;
+  });
+
+  /// Removes [number] from the system block list. Returns how many entries
+  /// were removed. Default dialer only.
+  int unblockNumber(String number) => _guard(
+    'Unblocking number',
+    () => android.BlockedNumberContract.unblock(_context, number.toJString()),
+  );
+
+  /// Whether [number] is on the system block list. Default dialer only.
+  bool isNumberBlocked(String number) => _guard(
+    'Checking block list',
+    () => android.BlockedNumberContract.isBlocked(_context, number.toJString()),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Call screening
+  // ---------------------------------------------------------------------------
+
+  /// Rules for the call screening service. They are saved on the device and
+  /// apply even when the app is closed.
+  late final CallScreeningSettings screening = CallScreeningSettings._(this);
+
+  StreamController<ScreenedCall>? _screened;
+  android.ScreeningListener? _screeningListener;
+
+  /// Calls checked by the screening service while the app is running.
+  Stream<ScreenedCall> get screenedCalls {
+    final existing = _screened;
+    if (existing != null) return existing.stream;
+    late final StreamController<ScreenedCall> controller;
+    controller = StreamController<ScreenedCall>.broadcast(
+      onListen: () {
+        final listener = android.ScreeningListener.implement(
+          android.$ScreeningListener(
+            onCallScreened: (number, action, reason) => controller.add(
+              ScreenedCall(
+                number: _str(number),
+                action: ScreeningAction.fromValue(action),
+                reason: _str(reason),
+              ),
+            ),
+            onCallScreened$async: true,
+          ),
+        );
+        _screeningListener = listener;
+        android.CallScreening.listener = listener;
+      },
+      onCancel: () {
+        android.CallScreening.listener = null;
+        _screeningListener?.release();
+        _screeningListener = null;
+      },
+    );
+    _screened = controller;
+    return controller.stream;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Network and signal
+  // ---------------------------------------------------------------------------
+
+  StreamController<NetworkEvent>? _network;
+  android.NetworkEventListener? _networkListener;
+
+  /// Live signal strength, service state, network type (for example 4G to
+  /// 5G) and device call state changes.
+  ///
+  /// Call state events need `TelephonyPermission.readPhoneState`; listen
+  /// again after granting it.
+  Stream<NetworkEvent> get networkEvents {
+    final existing = _network;
+    if (existing != null) return existing.stream;
+    late final StreamController<NetworkEvent> controller;
+    controller = StreamController<NetworkEvent>.broadcast(
+      onListen: () {
+        final listener = android.NetworkEventListener.implement(
+          android.$NetworkEventListener(
+            onSignalStrengthChanged: (level) =>
+                controller.add(SignalStrengthChanged(level)),
+            onSignalStrengthChanged$async: true,
+            onServiceStateChanged: (state) => controller.add(
+              ServiceStatusChanged(ServiceStatus.fromValue(state)),
+            ),
+            onServiceStateChanged$async: true,
+            onNetworkTypeChanged: (type, override) => controller.add(
+              NetworkTypeChanged(networkType: type, overrideType: override),
+            ),
+            onNetworkTypeChanged$async: true,
+            onCallStateChanged: (state, number) => controller.add(
+              DeviceCallStateChanged(
+                DeviceCallState.fromValue(state),
+                _str(number),
+              ),
+            ),
+            onCallStateChanged$async: true,
+          ),
+        );
+        _networkListener = listener;
+        android.NetworkMonitor.start(_context, listener);
+      },
+      onCancel: () {
+        android.NetworkMonitor.stop();
+        // Release a little later: Android may still deliver a queued event.
+        final old = _networkListener;
+        _networkListener = null;
+        Future<void>.delayed(const Duration(seconds: 2), () => old?.release());
+      },
+    );
+    _network = controller;
+    return controller.stream;
+  }
+
+  /// The current signal level from 0 to 4, or -1 if unknown (Android 9+).
+  int get signalLevel => _guard(
+    'Reading signal level',
+    () => android.NetworkMonitor.getSignalLevel(_context),
+  );
+
+  /// The current data network generation. Needs
+  /// `TelephonyPermission.readPhoneState`.
+  NetworkGeneration get networkGeneration => _guard(
+    'Reading network type',
+    () => NetworkGeneration.from(
+      android.NetworkMonitor.getDataNetworkType(_context),
+    ),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Voicemail and USSD
+  // ---------------------------------------------------------------------------
+
+  /// The voicemail number of the default SIM, or an empty string. Needs
+  /// `TelephonyPermission.readPhoneState`.
+  String get voicemailNumber => _guard(
+    'Reading voicemail number',
+    () => _str(_telephony.voiceMailNumber),
+  );
+
+  /// Calls voicemail. Needs `TelephonyPermission.callPhone`.
+  void callVoicemail() => _guard('Calling voicemail', () {
+    final uri = android.Uri.fromParts(
+      'voicemail'.toJString(),
+      ''.toJString(),
+      null,
+    );
+    _telecom.placeCall(uri, null);
+  });
+
+  final _pending = <JObject>{};
+
+  /// Sends a USSD code such as `*100#` and returns the network's reply.
+  ///
+  /// Pass [subscriptionId] (from [getSimCards]) to choose the SIM. Needs
+  /// `TelephonyPermission.callPhone` and Android 8.0+. Codes that open an
+  /// interactive menu only return the first screen.
+  Future<String> sendUssd(String code, {int? subscriptionId}) {
+    final completer = Completer<String>();
+    late final android.ResultListener listener;
+    listener = android.ResultListener.implement(
+      android.$ResultListener(
+        onSuccess: (value) {
+          _pending.remove(listener);
+          completer.complete(_str(value));
+        },
+        onSuccess$async: true,
+        onFailure: (code, message) {
+          _pending.remove(listener);
+          completer.completeError(
+            TelephonyException('USSD failed ($code): ${_str(message)}'),
+          );
+        },
+        onFailure$async: true,
+      ),
+    );
+    _pending.add(listener);
+    _guard(
+      'Sending USSD',
+      () => android.UssdHelper.send(
+        _context,
+        code.toJString(),
+        subscriptionId ?? -1,
+        listener,
+      ),
+    );
+    return completer.future;
+  }
+
+  // ---------------------------------------------------------------------------
+  // SMS
+  // ---------------------------------------------------------------------------
+
+  /// Sends an SMS. Long messages are split into parts. Completes with the
+  /// number of parts once all were sent (not delivered).
+  ///
+  /// Pass [subscriptionId] (from [getSimCards]) to choose the SIM. Needs
+  /// `TelephonyPermission.sendSms`. Google Play restricts this permission.
+  Future<int> sendSms(String to, String text, {int? subscriptionId}) {
+    final completer = Completer<int>();
+    late final android.ResultListener listener;
+    listener = android.ResultListener.implement(
+      android.$ResultListener(
+        onSuccess: (value) {
+          _pending.remove(listener);
+          completer.complete(int.tryParse(_str(value)) ?? 1);
+        },
+        onSuccess$async: true,
+        onFailure: (code, message) {
+          _pending.remove(listener);
+          completer.completeError(
+            TelephonyException('SMS failed ($code): ${_str(message)}'),
+          );
+        },
+        onFailure$async: true,
+      ),
+    );
+    _pending.add(listener);
+    _guard(
+      'Sending SMS',
+      () => android.SmsHelper.send(
+        _context,
+        to.toJString(),
+        text.toJString(),
+        subscriptionId ?? -1,
+        listener,
+      ),
+    );
+    return completer.future;
+  }
+
+  /// Searches stored SMS messages, newest first.
+  ///
+  /// [query] matches the sender or the text. Needs
+  /// `TelephonyPermission.readSms`, which Google Play only allows for the
+  /// default SMS app and a few exceptions.
+  List<SmsMessage> searchSms({
+    String? query,
+    SmsType? type,
+    String? threadId,
+    int limit = 100,
+  }) => _guard('Searching SMS', () {
+    final where = <String>[];
+    final args = <String>[];
+    final text = query?.trim() ?? '';
+    if (text.isNotEmpty) {
+      final options = <String>['address LIKE ?', 'body LIKE ?'];
+      args
+        ..add('%$text%')
+        ..add('%$text%');
+      for (final digits in numberSearchPatterns(text)) {
+        options.add('address LIKE ?');
+        args.add('%$digits%');
+      }
+      where.add('(${options.join(' OR ')})');
+    }
+    if (type != null && type != SmsType.unknown) {
+      where.add('type = ?');
+      args.add('${type.value}');
+    }
+    if (threadId != null) {
+      where.add('thread_id = ?');
+      args.add(threadId);
+    }
+    final rows = _queryRows(
+      'content://sms',
+      projection: const [
+        '_id',
+        'thread_id',
+        'address',
+        'body',
+        'date',
+        'type',
+        'read',
+      ],
+      selection: where.isEmpty ? null : where.join(' AND '),
+      selectionArgs: args,
+      sortOrder: 'date DESC',
+      limit: limit,
+    );
+    return [
+      for (final row in rows)
+        SmsMessage(
+          id: row['_id'] ?? '',
+          threadId: row['thread_id'] ?? '',
+          address: row['address'] ?? '',
+          body: row['body'] ?? '',
+          date: DateTime.fromMillisecondsSinceEpoch(
+            int.tryParse(row['date'] ?? '') ?? 0,
+          ),
+          type: SmsType.fromValue(int.tryParse(row['type'] ?? '') ?? -1),
+          isRead: row['read'] == '1',
+        ),
+    ];
+  });
+
   /// Runs a content provider query and returns each row as column -> text.
   List<Map<String, String?>> _queryRows(
     String uri, {
@@ -502,6 +918,54 @@ class TelephonyKit {
   set launchAppOnIncomingCall(bool value) =>
       android.CallManager.launchAppOnIncomingCall = value;
 
+  /// Whether incoming and ongoing call notifications are shown. Defaults to
+  /// true. The incoming notification has answer and decline buttons and
+  /// shows the app full screen on the lock screen. Needs
+  /// `TelephonyPermission.postNotifications` on Android 13+.
+  set showCallNotifications(bool value) =>
+      android.CallManager.showCallNotifications = value;
+
+  /// Holds the active call and resumes the held one (call waiting).
+  bool swapCalls() => android.CallManager.swapCalls();
+
+  /// The audio routes available for the current call.
+  Set<AudioRoute> get supportedAudioRoutes {
+    final mask = android.CallManager.supportedAudioRouteMask;
+    return {
+      for (final route in AudioRoute.values)
+        if (route.value > 0 && mask & route.value != 0) route,
+    };
+  }
+
+  /// Sends call audio to [route]. Returns false if no call is active.
+  bool setAudioRoute(AudioRoute route) =>
+      route != AudioRoute.unknown &&
+      android.CallManager.setAudioRoute(route.value);
+
+  /// Bluetooth devices that can carry call audio (Android 9+).
+  List<BluetoothAudioDevice> get bluetoothDevices {
+    final addresses = android.CallManager.bluetoothDeviceAddresses;
+    if (addresses == null) return const [];
+    final active = _str(android.CallManager.activeBluetoothDeviceAddress);
+    return [
+      for (var i = 0; i < addresses.length; i++)
+        () {
+          final address = _str(addresses[i]);
+          return BluetoothAudioDevice(
+            address: address,
+            name: _str(
+              android.CallManager.getBluetoothDeviceName(address.toJString()),
+            ),
+            isActive: address == active,
+          );
+        }(),
+    ];
+  }
+
+  /// Sends call audio to a Bluetooth device from [bluetoothDevices].
+  bool selectBluetoothDevice(String address) =>
+      android.CallManager.selectBluetoothDevice(address.toJString());
+
   /// The calls tracked by the in-call service, oldest first.
   List<PhoneCall> get calls {
     final ids = android.CallManager.callIds;
@@ -577,6 +1041,113 @@ class PhoneCall {
   /// Stops the current DTMF tone.
   bool stopDtmf() => android.CallManager.stopDtmfTone(_id);
 
+  /// Whether this call is a conference.
+  bool get isConference => android.CallManager.isConference(_id);
+
+  /// Whether this call can be merged with another call.
+  bool get canMerge => android.CallManager.canMerge(_id);
+
+  /// Whether this conference can swap between its parties.
+  bool get canSwap => android.CallManager.canSwap(_id);
+
+  /// The calls in this conference.
+  List<PhoneCall> get children {
+    final ids = android.CallManager.getChildIds(_id);
+    if (ids == null) return const [];
+    return [
+      for (var i = 0; i < ids.length; i++)
+        PhoneCall._(TelephonyKit._str(ids[i])),
+    ];
+  }
+
+  /// The conference this call is part of, or null.
+  PhoneCall? get parent {
+    final id = TelephonyKit._str(android.CallManager.getParentId(_id));
+    return id.isEmpty ? null : PhoneCall._(id);
+  }
+
+  /// Merges this call with the calls it can be conferenced with.
+  bool merge() => android.CallManager.mergeConference(_id);
+
+  /// Joins this call and [other] into a conference.
+  bool conferenceWith(PhoneCall other) =>
+      android.CallManager.conference(_id, other._id);
+
+  /// Swaps the active party in a two-party conference.
+  bool swap() => android.CallManager.swapConference(_id);
+
+  /// Takes this call out of its conference.
+  bool splitFromConference() => android.CallManager.splitFromConference(_id);
+
   @override
   String toString() => 'PhoneCall($id)';
+}
+
+/// Rules used by the call screening service. Read and change them through
+/// `TelephonyKit.instance.screening`.
+///
+/// Screening runs when the app is the default dialer or holds the call
+/// screening role, and the app declares the screening service (see README).
+class CallScreeningSettings {
+  CallScreeningSettings._(this._kit);
+
+  final TelephonyKit _kit;
+
+  android.Context get _ctx => _kit._context;
+
+  static List<String> _list(JArray<JString?>? array) => [
+    if (array != null)
+      for (var i = 0; i < array.length; i++) TelephonyKit._str(array[i]),
+  ];
+
+  /// Whether screening is on. When off, every call rings.
+  bool get enabled => android.CallScreening.isEnabled(_ctx);
+  set enabled(bool value) => android.CallScreening.setEnabled(_ctx, value);
+
+  /// What to do with blocked numbers and prefixes. Defaults to reject.
+  ScreeningAction get blockedAction => ScreeningAction.fromValue(
+    android.CallScreening.getBlockedNumberAction(_ctx),
+  );
+  set blockedAction(ScreeningAction value) =>
+      android.CallScreening.setBlockedNumberAction(_ctx, value.value);
+
+  /// What to do with callers that are not in contacts. Defaults to allow.
+  /// Needs `TelephonyPermission.readContacts` to have any effect.
+  ScreeningAction get unknownCallerAction => ScreeningAction.fromValue(
+    android.CallScreening.getUnknownCallerAction(_ctx),
+  );
+  set unknownCallerAction(ScreeningAction value) =>
+      android.CallScreening.setUnknownCallerAction(_ctx, value.value);
+
+  /// What to do with private or hidden numbers. Defaults to allow.
+  ScreeningAction get hiddenNumberAction => ScreeningAction.fromValue(
+    android.CallScreening.getHiddenNumberAction(_ctx),
+  );
+  set hiddenNumberAction(ScreeningAction value) =>
+      android.CallScreening.setHiddenNumberAction(_ctx, value.value);
+
+  /// Numbers blocked by the app (digits only). Matching ignores formatting and
+  /// local versus international prefixes.
+  List<String> get blockedNumbers =>
+      _list(android.CallScreening.getBlockedNumbers(_ctx));
+
+  /// Blocks [number] in the app's own list.
+  void blockNumber(String number) =>
+      android.CallScreening.addBlockedNumber(_ctx, number.toJString());
+
+  /// Removes [number] from the app's own list.
+  void unblockNumber(String number) =>
+      android.CallScreening.removeBlockedNumber(_ctx, number.toJString());
+
+  /// Blocked number prefixes (digits only).
+  List<String> get blockedPrefixes =>
+      _list(android.CallScreening.getBlockedPrefixes(_ctx));
+
+  /// Blocks every number starting with [prefix], such as `0900` or `+44`.
+  void blockPrefix(String prefix) =>
+      android.CallScreening.addBlockedPrefix(_ctx, prefix.toJString());
+
+  /// Removes a blocked prefix.
+  void unblockPrefix(String prefix) =>
+      android.CallScreening.removeBlockedPrefix(_ctx, prefix.toJString());
 }
