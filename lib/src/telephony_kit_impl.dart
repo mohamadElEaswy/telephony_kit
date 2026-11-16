@@ -248,6 +248,10 @@ class TelephonyKit {
     label: _str(
       android.CallManager.getPhoneAccountLabel(_context, id.toJString()),
     ),
+    slotIndex: android.CallManager.getPhoneAccountSlot(
+      _context,
+      id.toJString(),
+    ),
   );
 
   /// Whether any call is in progress on the device, in any app.
@@ -1278,6 +1282,23 @@ class PhoneCall {
   PhoneCall? get parent {
     final id = TelephonyKit._str(android.CallManager.getParentId(_id));
     return id.isEmpty ? null : PhoneCall._(id);
+  }
+
+  /// The phone account (SIM) this call uses, or null before one is chosen
+  /// (see [selectablePhoneAccounts]).
+  ///
+  /// Show [PhoneAccount.displayName] (for example `SIM 2 · Vodafone`) on the
+  /// in-call screen of dual SIM phones.
+  PhoneAccount? get phoneAccount {
+    final id = TelephonyKit._str(android.CallManager.getPhoneAccountId(_id));
+    if (id.isEmpty) return null;
+    return PhoneAccount(
+      id: id,
+      label: TelephonyKit._str(
+        android.CallManager.getCallPhoneAccountLabel(_id),
+      ),
+      slotIndex: android.CallManager.getCallPhoneAccountSlot(_id),
+    );
   }
 
   /// The phone accounts (SIMs) the user can choose from while the call is

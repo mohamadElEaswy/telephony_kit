@@ -258,14 +258,14 @@ class KeypadPage extends StatefulWidget {
 
 class _KeypadPageState extends State<KeypadPage> {
   String _number = '';
-  List<String> _accounts = const [];
+  List<PhoneAccount> _accounts = const [];
   String? _account;
 
   @override
   void initState() {
     super.initState();
     try {
-      _accounts = telephony.getPhoneAccounts();
+      _accounts = telephony.getPhoneAccountDetails();
     } on TelephonyException {
       _accounts = const [];
     }
@@ -337,8 +337,12 @@ class _KeypadPageState extends State<KeypadPage> {
                 const ButtonSegment(value: null, label: Text('Ask')),
                 for (var i = 0; i < _accounts.length; i++)
                   ButtonSegment(
-                    value: _accounts[i],
-                    label: Text('SIM ${i + 1}'),
+                    value: _accounts[i].id,
+                    label: Text(
+                      _accounts[i].slotIndex >= 0
+                          ? 'SIM ${_accounts[i].slotIndex + 1}'
+                          : 'SIM ${i + 1}',
+                    ),
                   ),
               ],
               selected: {_account},
@@ -773,6 +777,19 @@ class _InCallScreenState extends State<InCallScreen> {
               state == CallState.active ? _elapsed() : state.name,
               style: Theme.of(context).textTheme.titleMedium,
             ),
+            if (call.phoneAccount case final account?
+                when account.displayName.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(Icons.sim_card_outlined, size: 16),
+                    const SizedBox(width: 4),
+                    Text(account.displayName),
+                  ],
+                ),
+              ),
             const Spacer(),
             if (state == CallState.selectPhoneAccount)
               _SimPicker(call: call, onPicked: widget.onChanged)

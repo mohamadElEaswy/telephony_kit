@@ -6526,6 +6526,161 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
     ).object<jni$_.JString?>();
   }
 
+  static final _id_getPhoneAccountSlot = _class.staticMethodId(
+    r'getPhoneAccountSlot',
+    r'(Landroid/content/Context;Ljava/lang/String;)I',
+  );
+
+  static final _getPhoneAccountSlot =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getPhoneAccountSlot(android.content.Context context, java.lang.String accountId)`
+  ///
+  /// The SIM slot (0 based) of a call capable phone account, or -1 when
+  ///unknown or before Android 11.
+  static core$_.int getPhoneAccountSlot(
+    Context? context,
+    jni$_.JString? accountId,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$accountId = accountId?.reference ?? jni$_.jNullReference;
+    return _getPhoneAccountSlot(
+      _$$classRef.pointer,
+      _id_getPhoneAccountSlot.pointer,
+      _$context.pointer,
+      _$accountId.pointer,
+    ).integer;
+  }
+
+  static final _id_getPhoneAccountId = _class.staticMethodId(
+    r'getPhoneAccountId',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getPhoneAccountId =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getPhoneAccountId(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The id of the phone account (SIM) the call uses, or "" if not chosen yet.
+  static jni$_.JString? getPhoneAccountId(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getPhoneAccountId(
+      _$$classRef.pointer,
+      _id_getPhoneAccountId.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getCallPhoneAccountLabel = _class.staticMethodId(
+    r'getCallPhoneAccountLabel',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getCallPhoneAccountLabel =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getCallPhoneAccountLabel(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The label of the phone account the call uses (usually the carrier), or "".
+  static jni$_.JString? getCallPhoneAccountLabel(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getCallPhoneAccountLabel(
+      _$$classRef.pointer,
+      _id_getCallPhoneAccountLabel.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getCallPhoneAccountSlot = _class.staticMethodId(
+    r'getCallPhoneAccountSlot',
+    r'(Ljava/lang/String;)I',
+  );
+
+  static final _getCallPhoneAccountSlot =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getCallPhoneAccountSlot(java.lang.String callId)`
+  ///
+  /// The SIM slot of the phone account the call uses, or -1.
+  static core$_.int getCallPhoneAccountSlot(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getCallPhoneAccountSlot(
+      _$$classRef.pointer,
+      _id_getCallPhoneAccountSlot.pointer,
+      _$callId.pointer,
+    ).integer;
+  }
+
   static final _id_selectPhoneAccount = _class.staticMethodId(
     r'selectPhoneAccount',
     r'(Ljava/lang/String;Ljava/lang/String;Z)Z',

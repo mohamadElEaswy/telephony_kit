@@ -1,12 +1,15 @@
 package dev.telephonykit.telephony_kit;
 
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.telecom.Call;
 import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,6 +60,23 @@ final class PhoneAccounts {
       if (id.equals(h.getId())) return h;
     }
     return null;
+  }
+
+  /**
+   * The SIM slot (0 based) of a SIM phone account, or -1 when unknown, not a
+   * SIM, or before Android 11. Needs no permission.
+   */
+  static int slot(Context context, PhoneAccountHandle handle) {
+    if (context == null || handle == null || Build.VERSION.SDK_INT < 30) return -1;
+    TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+    if (tm == null) return -1;
+    try {
+      int subId = tm.getSubscriptionId(handle);
+      if (subId == SubscriptionManager.INVALID_SUBSCRIPTION_ID) return -1;
+      return SubscriptionManager.getSlotIndex(subId);
+    } catch (RuntimeException e) {
+      return -1;
+    }
   }
 
   /** The label the system shows for the account (usually the carrier), or "". */

@@ -1,5 +1,9 @@
 ## Unreleased
 
+* Which SIM a call uses: `PhoneCall.phoneAccount` (id, carrier label, slot;
+  `displayName` such as `SIM 2 · Vodafone`). `PhoneAccount.slotIndex` is
+  filled on Android 11+. The example shows it on the in-call screen and uses
+  slots on the keypad SIM selector.
 * Reject with a message: `PhoneCall.reject(message: ...)` texts the caller
   (Telecom sends it, no SMS permission needed); `reject()` still works.
   `PhoneCall.cannedTextResponses` (the user's replies from the phone

@@ -391,6 +391,38 @@ public final class CallManager {
   }
 
   /**
+   * The SIM slot (0 based) of a call capable phone account, or -1 when
+   * unknown or before Android 11.
+   */
+  public static int getPhoneAccountSlot(Context context, String accountId) {
+    Context ctx = context != null ? context.getApplicationContext() : appContext;
+    if (ctx == null) return -1;
+    return PhoneAccounts.slot(ctx, PhoneAccounts.find(PhoneAccounts.callCapable(ctx), accountId));
+  }
+
+  /** The id of the phone account (SIM) the call uses, or "" if not chosen yet. */
+  public static String getPhoneAccountId(String callId) {
+    Call call = find(callId);
+    if (call == null || call.getDetails() == null) return "";
+    PhoneAccountHandle handle = call.getDetails().getAccountHandle();
+    return handle == null || handle.getId() == null ? "" : handle.getId();
+  }
+
+  /** The label of the phone account the call uses (usually the carrier), or "". */
+  public static String getCallPhoneAccountLabel(String callId) {
+    Call call = find(callId);
+    if (call == null || call.getDetails() == null) return "";
+    return PhoneAccounts.label(appContext, call.getDetails().getAccountHandle());
+  }
+
+  /** The SIM slot of the phone account the call uses, or -1. */
+  public static int getCallPhoneAccountSlot(String callId) {
+    Call call = find(callId);
+    if (call == null || call.getDetails() == null) return -1;
+    return PhoneAccounts.slot(appContext, call.getDetails().getAccountHandle());
+  }
+
+  /**
    * Places a call that waits in {@code STATE_SELECT_PHONE_ACCOUNT} on the
    * account with this id. {@code setDefault} also makes it the default for
    * calls. Returns false if the call or account is unknown.
