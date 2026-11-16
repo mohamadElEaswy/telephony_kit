@@ -705,7 +705,9 @@ class _InCallScreenState extends State<InCallScreen> {
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const Spacer(),
-            if (!ringing)
+            if (state == CallState.selectPhoneAccount)
+              _SimPicker(call: call, onPicked: widget.onChanged)
+            else if (!ringing)
               InCallControls(
                 call: call,
                 allCalls: widget.allCalls,
@@ -766,6 +768,49 @@ class _InCallScreenState extends State<InCallScreen> {
     } on TelephonyException {
       return null;
     }
+  }
+}
+
+/// Lets the user pick the SIM for an outgoing call on a multi SIM phone
+/// with no default SIM.
+class _SimPicker extends StatefulWidget {
+  const _SimPicker({required this.call, required this.onPicked});
+
+  final PhoneCall call;
+  final VoidCallback onPicked;
+
+  @override
+  State<_SimPicker> createState() => _SimPickerState();
+}
+
+class _SimPickerState extends State<_SimPicker> {
+  bool _remember = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final accounts = widget.call.selectablePhoneAccounts;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text('Call with', style: Theme.of(context).textTheme.titleMedium),
+        for (final account in accounts)
+          ListTile(
+            leading: const Icon(Icons.sim_card),
+            title: Text(
+              account.displayName.isEmpty ? account.id : account.displayName,
+            ),
+            onTap: () {
+              widget.call.selectPhoneAccount(account.id, setDefault: _remember);
+              widget.onPicked();
+            },
+          ),
+        CheckboxListTile(
+          value: _remember,
+          title: const Text('Remember this choice'),
+          onChanged: (v) => setState(() => _remember = v ?? false),
+        ),
+      ],
+    );
   }
 }
 

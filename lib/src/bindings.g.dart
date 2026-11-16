@@ -5847,6 +5847,145 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
     ).boolean;
   }
 
+  static final _id_getSelectablePhoneAccountIds = _class.staticMethodId(
+    r'getSelectablePhoneAccountIds',
+    r'(Ljava/lang/String;)[Ljava/lang/String;',
+  );
+
+  static final _getSelectablePhoneAccountIds =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] getSelectablePhoneAccountIds(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Ids of the phone accounts the user can pick for a call in {@code
+  ///STATE_SELECT_PHONE_ACCOUNT} (an outgoing call on a multi SIM device with
+  ///no default SIM). Empty if the call is unknown.
+  static jni$_.JArray<jni$_.JString?>? getSelectablePhoneAccountIds(
+    jni$_.JString? callId,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getSelectablePhoneAccountIds(
+      _$$classRef.pointer,
+      _id_getSelectablePhoneAccountIds.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+
+  static final _id_getPhoneAccountLabel = _class.staticMethodId(
+    r'getPhoneAccountLabel',
+    r'(Landroid/content/Context;Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _getPhoneAccountLabel =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getPhoneAccountLabel(android.content.Context context, java.lang.String accountId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The label of a call capable phone account (usually the carrier), or "".
+  static jni$_.JString? getPhoneAccountLabel(
+    Context? context,
+    jni$_.JString? accountId,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$accountId = accountId?.reference ?? jni$_.jNullReference;
+    return _getPhoneAccountLabel(
+      _$$classRef.pointer,
+      _id_getPhoneAccountLabel.pointer,
+      _$context.pointer,
+      _$accountId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_selectPhoneAccount = _class.staticMethodId(
+    r'selectPhoneAccount',
+    r'(Ljava/lang/String;Ljava/lang/String;Z)Z',
+  );
+
+  static final _selectPhoneAccount =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public boolean selectPhoneAccount(java.lang.String callId, java.lang.String accountId, boolean setDefault)`
+  ///
+  /// Places a call that waits in {@code STATE_SELECT_PHONE_ACCOUNT} on the
+  ///account with this id. {@code setDefault} also makes it the default for
+  ///calls. Returns false if the call or account is unknown.
+  static core$_.bool selectPhoneAccount(
+    jni$_.JString? callId,
+    jni$_.JString? accountId,
+    core$_.bool setDefault,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    final _$accountId = accountId?.reference ?? jni$_.jNullReference;
+    return _selectPhoneAccount(
+      _$$classRef.pointer,
+      _id_selectPhoneAccount.pointer,
+      _$callId.pointer,
+      _$accountId.pointer,
+      setDefault ? 1 : 0,
+    ).boolean;
+  }
+
   static final _id_isConference = _class.staticMethodId(
     r'isConference',
     r'(Ljava/lang/String;)Z',

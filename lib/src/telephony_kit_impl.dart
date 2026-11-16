@@ -236,6 +236,20 @@ class TelephonyKit {
     ];
   });
 
+  /// The call capable phone accounts with their labels, usually one per SIM.
+  ///
+  /// Needs `TelephonyPermission.readPhoneState`.
+  List<PhoneAccount> getPhoneAccountDetails() => [
+    for (final id in getPhoneAccounts()) _phoneAccount(id),
+  ];
+
+  PhoneAccount _phoneAccount(String id) => PhoneAccount(
+    id: id,
+    label: _str(
+      android.CallManager.getPhoneAccountLabel(_context, id.toJString()),
+    ),
+  );
+
   /// Whether any call is in progress on the device, in any app.
   ///
   /// Needs `TelephonyPermission.readPhoneState`.
@@ -1139,6 +1153,30 @@ class PhoneCall {
     final id = TelephonyKit._str(android.CallManager.getParentId(_id));
     return id.isEmpty ? null : PhoneCall._(id);
   }
+
+  /// The phone accounts (SIMs) the user can choose from while the call is
+  /// in [CallState.selectPhoneAccount].
+  ///
+  /// That happens for outgoing calls on multi SIM devices with no default
+  /// SIM for calls. Show a picker and call [selectPhoneAccount].
+  List<PhoneAccount> get selectablePhoneAccounts {
+    final ids = android.CallManager.getSelectablePhoneAccountIds(_id);
+    if (ids == null) return const [];
+    return [
+      for (var i = 0; i < ids.length; i++)
+        TelephonyKit.instance._phoneAccount(TelephonyKit._str(ids[i])),
+    ];
+  }
+
+  /// Places a call waiting in [CallState.selectPhoneAccount] on the phone
+  /// account with [accountId]. With [setDefault], the account also becomes
+  /// the default for calls. Returns false if the call or account is unknown.
+  bool selectPhoneAccount(String accountId, {bool setDefault = false}) =>
+      android.CallManager.selectPhoneAccount(
+        _id,
+        accountId.toJString(),
+        setDefault,
+      );
 
   /// Merges this call with the calls it can be conferenced with.
   bool merge() => android.CallManager.mergeConference(_id);

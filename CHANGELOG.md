@@ -1,5 +1,11 @@
 ## Unreleased
 
+* SIM choice for outgoing calls: while a call is in
+  `CallState.selectPhoneAccount` (multi SIM, no default SIM), read
+  `PhoneCall.selectablePhoneAccounts` and call
+  `PhoneCall.selectPhoneAccount(id, setDefault: ...)`. New `PhoneAccount`
+  model (id, label, slot) and `getPhoneAccountDetails()`. The example shows a
+  SIM picker.
 * `takeDialNumber()` reads the number of the dial intent (`tel:` link) that
   opened the app. The example shows it on the keypad instead of crashing on
   an unknown Flutter route.

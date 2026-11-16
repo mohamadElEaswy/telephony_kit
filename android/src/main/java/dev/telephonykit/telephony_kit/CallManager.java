@@ -10,6 +10,7 @@ import android.os.Looper;
 import android.telecom.Call;
 import android.telecom.CallAudioState;
 import android.telecom.InCallService;
+import android.telecom.PhoneAccountHandle;
 import android.telecom.VideoProfile;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -232,6 +233,44 @@ public final class CallManager {
     }
     if (current == null) return false;
     current.setAudioRoute(on ? CallAudioState.ROUTE_SPEAKER : CallAudioState.ROUTE_WIRED_OR_EARPIECE);
+    return true;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Phone accounts (SIMs)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Ids of the phone accounts the user can pick for a call in {@code
+   * STATE_SELECT_PHONE_ACCOUNT} (an outgoing call on a multi SIM device with
+   * no default SIM). Empty if the call is unknown.
+   */
+  public static String[] getSelectablePhoneAccountIds(String callId) {
+    Call call = find(callId);
+    if (call == null) return new String[0];
+    List<String> ids = new ArrayList<>();
+    for (PhoneAccountHandle h : PhoneAccounts.selectable(appContext, call)) ids.add(h.getId());
+    return ids.toArray(new String[0]);
+  }
+
+  /** The label of a call capable phone account (usually the carrier), or "". */
+  public static String getPhoneAccountLabel(Context context, String accountId) {
+    Context ctx = context != null ? context.getApplicationContext() : appContext;
+    if (ctx == null) return "";
+    return PhoneAccounts.label(ctx, PhoneAccounts.find(PhoneAccounts.callCapable(ctx), accountId));
+  }
+
+  /**
+   * Places a call that waits in {@code STATE_SELECT_PHONE_ACCOUNT} on the
+   * account with this id. {@code setDefault} also makes it the default for
+   * calls. Returns false if the call or account is unknown.
+   */
+  public static boolean selectPhoneAccount(String callId, String accountId, boolean setDefault) {
+    Call call = find(callId);
+    if (call == null) return false;
+    PhoneAccountHandle handle = PhoneAccounts.find(PhoneAccounts.selectable(appContext, call), accountId);
+    if (handle == null) return false;
+    call.phoneAccountSelected(handle, setDefault);
     return true;
   }
 

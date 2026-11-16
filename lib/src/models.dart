@@ -162,6 +162,35 @@ class SimCard {
       'carrier: $carrierName)';
 }
 
+/// A phone account that can place calls, usually one per SIM.
+class PhoneAccount {
+  const PhoneAccount({
+    required this.id,
+    required this.label,
+    this.slotIndex = -1,
+  });
+
+  /// The id to pass to `PhoneCall.selectPhoneAccount` or
+  /// `TelephonyKit.placeCall`.
+  final String id;
+
+  /// The name the system shows for it, usually the carrier. May be empty.
+  final String label;
+
+  /// The SIM slot, starting at 0, or -1 when unknown (Android 11+ and
+  /// `TelephonyPermission.readPhoneState` needed).
+  final int slotIndex;
+
+  /// A short name for a picker, for example `SIM 1 · Vodafone`.
+  String get displayName {
+    final slot = slotIndex >= 0 ? 'SIM ${slotIndex + 1}' : '';
+    return [slot, label].where((s) => s.isNotEmpty).join(' · ');
+  }
+
+  @override
+  String toString() => 'PhoneAccount($id, $label, slot: $slotIndex)';
+}
+
 /// Information about the device and the network it is registered on.
 class NetworkInfo {
   const NetworkInfo({
