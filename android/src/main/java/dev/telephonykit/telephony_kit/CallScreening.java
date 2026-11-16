@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
+import android.telephony.PhoneNumberUtils;
+import android.telephony.TelephonyManager;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -117,9 +120,36 @@ public final class CallScreening {
     p.edit().putStringSet(key, set).apply();
   }
 
+  /**
+   * True if {@code number} is an emergency number in the current country,
+   * such as 112 or 911. Uses {@code TelephonyManager.isEmergencyNumber} on
+   * Android 10+ and {@code PhoneNumberUtils} before.
+   */
+  @SuppressWarnings("deprecation")
+  public static boolean isEmergencyNumber(Context context, String number) {
+    if (number == null || number.trim().isEmpty()) return false;
+    if (Build.VERSION.SDK_INT >= 29) {
+      TelephonyManager tm = context.getSystemService(TelephonyManager.class);
+      if (tm != null) {
+        try {
+          return tm.isEmergencyNumber(number);
+        } catch (RuntimeException ignored) {
+          // No telephony; fall back below.
+        }
+      }
+    }
+    try {
+      return PhoneNumberUtils.isEmergencyNumber(number);
+    } catch (RuntimeException e) {
+      return false;
+    }
+  }
+
   /** Decides what to do with an incoming call. Returns {action, reason}. */
   static Object[] evaluate(Context context, String number) {
     if (!isEnabled(context)) return new Object[] {ACTION_ALLOW, "disabled"};
+    // Never block or silence emergency services calling back.
+    if (isEmergencyNumber(context, number)) return new Object[] {ACTION_ALLOW, "emergency"};
     String d = digits(number);
     if (d.isEmpty()) {
       int action = getHiddenNumberAction(context);

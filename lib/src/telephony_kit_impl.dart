@@ -299,6 +299,17 @@ class TelephonyKit {
     ];
   });
 
+  /// Whether [number] is an emergency number in the current country, such
+  /// as 112 or 911.
+  ///
+  /// Uses `TelephonyManager.isEmergencyNumber` on Android 10+ and
+  /// `PhoneNumberUtils` before. Call screening never blocks these numbers.
+  /// Needs no permission.
+  bool isEmergencyNumber(String number) => _guard(
+    'Checking emergency number',
+    () => android.CallScreening.isEmergencyNumber(_context, number.toJString()),
+  );
+
   // ---------------------------------------------------------------------------
   // Call log
   // ---------------------------------------------------------------------------

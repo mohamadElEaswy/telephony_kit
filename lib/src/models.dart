@@ -542,7 +542,7 @@ class ScreenedCall {
   final ScreeningAction action;
 
   /// Why: `blocked_number`, `blocked_prefix`, `unknown_caller`,
-  /// `hidden_number`, `allowed` or `disabled`.
+  /// `hidden_number`, `emergency` (never blocked), `allowed` or `disabled`.
   final String reason;
 
   @override

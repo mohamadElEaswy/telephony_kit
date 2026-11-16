@@ -1,5 +1,8 @@
 ## Unreleased
 
+* Emergency numbers: `isEmergencyNumber(number)`. Call screening never
+  blocks or silences emergency numbers (reason `emergency`). The example
+  keypad labels them.
 * Post-dial digits: a wait (`;`) in the dialed number sends a
   `PostDialWait` event; answer with `PhoneCall.continuePostDial(proceed)`.
   `PhoneCall.postDialRemaining`. Pauses (`,`) need nothing. Example: a

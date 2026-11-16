@@ -7645,6 +7645,52 @@ extension type CallScreening._(jni$_.JObject _$this) implements jni$_.JObject {
       _$context.pointer,
     ).object<jni$_.JArray<jni$_.JString?>?>();
   }
+
+  static final _id_isEmergencyNumber = _class.staticMethodId(
+    r'isEmergencyNumber',
+    r'(Landroid/content/Context;Ljava/lang/String;)Z',
+  );
+
+  static final _isEmergencyNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isEmergencyNumber(android.content.Context context, java.lang.String number)`
+  ///
+  /// True if {@code number} is an emergency number in the current country,
+  ///such as 112 or 911. Uses {@code TelephonyManager.isEmergencyNumber} on
+  ///Android 10+ and {@code PhoneNumberUtils} before.
+  static core$_.bool isEmergencyNumber(
+    Context? context,
+    jni$_.JString? number,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$number = number?.reference ?? jni$_.jNullReference;
+    return _isEmergencyNumber(
+      _$$classRef.pointer,
+      _id_isEmergencyNumber.pointer,
+      _$context.pointer,
+      _$number.pointer,
+    ).boolean;
+  }
 }
 
 final class $CallScreening$Type$ extends jni$_.JType<CallScreening> {

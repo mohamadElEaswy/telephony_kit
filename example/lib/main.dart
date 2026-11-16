@@ -287,6 +287,15 @@ class _KeypadPageState extends State<KeypadPage> {
     setState(() => _number = number);
   }
 
+  bool _isEmergency(String number) {
+    if (number.length < 2) return false;
+    try {
+      return telephony.isEmergencyNumber(number);
+    } on TelephonyException {
+      return false;
+    }
+  }
+
   void _call() {
     if (_number.isEmpty) return;
     if (!telephony.hasPermission(TelephonyPermission.callPhone)) {
@@ -308,11 +317,16 @@ class _KeypadPageState extends State<KeypadPage> {
     return Column(
       children: [
         Expanded(
-          child: Center(
-            child: Text(
-              _number,
-              style: Theme.of(context).textTheme.displaySmall,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(_number, style: Theme.of(context).textTheme.displaySmall),
+              if (_isEmergency(_number))
+                Text(
+                  'Emergency number',
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+            ],
           ),
         ),
         if (_accounts.length > 1)
