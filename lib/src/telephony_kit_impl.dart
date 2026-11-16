@@ -736,26 +736,34 @@ class TelephonyKit {
   ///
   /// Pass [subscriptionId] (from [getSimCards]) to choose the SIM. Needs
   /// `TelephonyPermission.callPhone` and Android 8.0+. Codes that open an
-  /// interactive menu only return the first screen.
-  Future<String> sendUssd(String code, {int? subscriptionId}) {
+  /// interactive menu only return the first screen. Fails with a
+  /// [TelephonyException] if the network does not reply within [timeout].
+  Future<String> sendUssd(
+    String code, {
+    int? subscriptionId,
+    Duration timeout = const Duration(seconds: 30),
+  }) {
     final completer = Completer<String>();
     late final android.ResultListener listener;
     listener = android.ResultListener.implement(
       android.$ResultListener(
         onSuccess: (value) {
           _pending.remove(listener);
-          completer.complete(_str(value));
+          if (!completer.isCompleted) completer.complete(_str(value));
         },
         onSuccess$async: true,
         onFailure: (code, message) {
           _pending.remove(listener);
-          completer.completeError(
-            TelephonyException('USSD failed ($code): ${_str(message)}'),
-          );
+          if (!completer.isCompleted) {
+            completer.completeError(
+              TelephonyException('USSD failed ($code): ${_str(message)}'),
+            );
+          }
         },
         onFailure$async: true,
       ),
     );
+    // Kept until Android calls back, even after a timeout.
     _pending.add(listener);
     _guard(
       'Sending USSD',
@@ -766,7 +774,13 @@ class TelephonyKit {
         listener,
       ),
     );
-    return completer.future;
+    return completer.future.timeout(
+      timeout,
+      onTimeout: () => throw TelephonyException(
+        'USSD failed: no reply from the network within '
+        '${timeout.inSeconds} seconds.',
+      ),
+    );
   }
 
   // ---------------------------------------------------------------------------

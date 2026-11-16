@@ -61,9 +61,9 @@ class _NetworkSectionState extends State<NetworkSection> {
     });
     try {
       final reply = await _telephony.sendUssd(_ussd.text.trim());
-      setState(() => _ussdReply = reply);
+      if (mounted) setState(() => _ussdReply = reply);
     } on TelephonyException catch (e) {
-      setState(() => _ussdReply = e.message);
+      if (mounted) setState(() => _ussdReply = e.message);
     } finally {
       if (mounted) setState(() => _ussdBusy = false);
     }
