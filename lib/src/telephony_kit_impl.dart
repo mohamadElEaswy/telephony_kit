@@ -6,6 +6,7 @@ import 'package:jni_flutter/jni_flutter.dart' as jni_flutter;
 
 import 'bindings.g.dart' as android;
 import 'models.dart';
+import 'search.dart';
 
 /// The entry point of telephony_kit.
 ///
@@ -253,47 +254,195 @@ class TelephonyKit {
   /// Needs `TelephonyPermission.readCallLog`. Google Play only allows this
   /// permission for apps that are the default dialer.
   List<CallLogEntry> getCallLog({int limit = 100}) =>
-      _guard('Reading call log', () {
-        final calls = android.CallLog$Calls.CONTENT_URI;
-        final cursor = _context.contentResolver?.query(
-          calls,
-          null,
-          null,
-          null,
-          android.CallLog$Calls.DEFAULT_SORT_ORDER,
+      searchCallLog(limit: limit);
+
+  /// Searches the call log, newest first.
+  ///
+  /// - [query] matches the number or the cached contact name. Spaces, dashes
+  ///   and brackets in a number are ignored, and a leading 0 also matches
+  ///   numbers saved with a country code (so `0100 123` finds `+20100123...`).
+  /// - [types] keeps only these kinds of calls, for example only missed.
+  /// - [from] and [to] limit the call start time.
+  ///
+  /// Filtering runs in Android's call log provider, so only matching rows
+  /// cross into Dart. Needs `TelephonyPermission.readCallLog`.
+  List<CallLogEntry> searchCallLog({
+    String? query,
+    Set<CallLogType>? types,
+    DateTime? from,
+    DateTime? to,
+    int limit = 100,
+  }) => _guard('Searching call log', () {
+    final where = <String>[];
+    final args = <String>[];
+
+    final text = query?.trim() ?? '';
+    if (text.isNotEmpty) {
+      final options = <String>['name LIKE ?'];
+      args.add('%$text%');
+      for (final digits in numberSearchPatterns(text)) {
+        options.add('number LIKE ?');
+        args.add('%$digits%');
+      }
+      where.add('(${options.join(' OR ')})');
+    }
+    if (types != null && types.isNotEmpty) {
+      final values = [
+        for (final t in types)
+          if (t != CallLogType.unknown) t.value,
+      ];
+      if (values.isNotEmpty) where.add('type IN (${values.join(',')})');
+    }
+    if (from != null) {
+      where.add('date >= ?');
+      args.add('${from.millisecondsSinceEpoch}');
+    }
+    if (to != null) {
+      where.add('date <= ?');
+      args.add('${to.millisecondsSinceEpoch}');
+    }
+
+    final rows = _queryRows(
+      'content://call_log/calls',
+      projection: const ['number', 'name', 'type', 'date', 'duration'],
+      selection: where.isEmpty ? null : where.join(' AND '),
+      selectionArgs: args,
+      sortOrder: 'date DESC',
+      limit: limit,
+    );
+    return [
+      for (final row in rows)
+        CallLogEntry(
+          number: row['number'] ?? '',
+          name: row['name'] ?? '',
+          type: CallLogType.fromValue(int.tryParse(row['type'] ?? '') ?? -1),
+          date: DateTime.fromMillisecondsSinceEpoch(
+            int.tryParse(row['date'] ?? '') ?? 0,
+          ),
+          duration: Duration(seconds: int.tryParse(row['duration'] ?? '') ?? 0),
+        ),
+    ];
+  });
+
+  // ---------------------------------------------------------------------------
+  // Contacts
+  // ---------------------------------------------------------------------------
+
+  /// Searches contacts that have a phone number, by name or number.
+  ///
+  /// An empty [query] lists all such contacts, favorites first, then by name.
+  /// Uses Android's own phone filter, which matches name prefixes and
+  /// numbers in any format. Needs `TelephonyPermission.readContacts`.
+  List<Contact> searchContacts(String query, {int limit = 100}) =>
+      _guard('Searching contacts', () {
+        final text = query.trim();
+        final uri = text.isEmpty
+            ? 'content://com.android.contacts/data/phones'
+            : 'content://com.android.contacts/data/phones/filter/'
+                  '${Uri.encodeComponent(text)}';
+        final rows = _queryRows(
+          uri,
+          projection: const [
+            'contact_id',
+            'display_name',
+            'data1', // Phone.NUMBER
+            'data2', // Phone.TYPE
+            'data3', // Phone.LABEL
+            'photo_thumb_uri',
+            'starred',
+          ],
+          sortOrder: text.isEmpty
+              ? 'starred DESC, display_name COLLATE LOCALIZED ASC'
+              : null,
+          // Rows are one per number, so read extra to fill [limit] contacts.
+          limit: limit * 4,
         );
-        if (cursor == null) return const <CallLogEntry>[];
-        try {
-          int column(JString? name) => cursor.getColumnIndex(name);
-          final numberCol = column(android.CallLog$Calls.NUMBER);
-          final nameCol = column(android.CallLog$Calls.CACHED_NAME);
-          final typeCol = column(android.CallLog$Calls.TYPE);
-          final dateCol = column(android.CallLog$Calls.DATE);
-          final durationCol = column(android.CallLog$Calls.DURATION);
-          String text(int col) => col < 0 ? '' : _str(cursor.getString(col));
-          final entries = <CallLogEntry>[];
-          while (entries.length < limit && cursor.moveToNext()) {
-            entries.add(
-              CallLogEntry(
-                number: text(numberCol),
-                name: text(nameCol),
-                type: CallLogType.fromValue(
-                  typeCol < 0 ? -1 : cursor.getInt(typeCol),
-                ),
-                date: DateTime.fromMillisecondsSinceEpoch(
-                  dateCol < 0 ? 0 : cursor.getLong(dateCol),
-                ),
-                duration: Duration(
-                  seconds: durationCol < 0 ? 0 : cursor.getLong(durationCol),
-                ),
-              ),
-            );
-          }
-          return entries;
-        } finally {
-          cursor.close();
-        }
+        return groupContactRows(rows).take(limit).toList();
       });
+
+  /// The contact saved for [number], or null if it is not in the address book.
+  ///
+  /// Useful for showing the caller's name on an in-call screen. Needs
+  /// `TelephonyPermission.readContacts`.
+  Contact? lookupNumber(String number) => _guard('Looking up number', () {
+    final text = number.trim();
+    if (text.isEmpty) return null;
+    final rows = _queryRows(
+      'content://com.android.contacts/phone_lookup/'
+      '${Uri.encodeComponent(text)}',
+      projection: const [
+        '_id',
+        'display_name',
+        'number',
+        'type',
+        'label',
+        'photo_thumb_uri',
+        'starred',
+      ],
+      limit: 1,
+    );
+    if (rows.isEmpty) return null;
+    final row = rows.first;
+    return Contact(
+      id: row['_id'] ?? '',
+      displayName: row['display_name'] ?? '',
+      phones: [
+        ContactPhone(
+          number: row['number'] ?? text,
+          label: phoneTypeLabel(
+            int.tryParse(row['type'] ?? '') ?? 0,
+            row['label'],
+          ),
+        ),
+      ],
+      photoUri: row['photo_thumb_uri'],
+      isStarred: row['starred'] == '1',
+    );
+  });
+
+  /// Runs a content provider query and returns each row as column -> text.
+  List<Map<String, String?>> _queryRows(
+    String uri, {
+    required List<String> projection,
+    String? selection,
+    List<String> selectionArgs = const [],
+    String? sortOrder,
+    int limit = 100,
+  }) {
+    final resolver = _context.contentResolver;
+    if (resolver == null) return const [];
+    final cursor = resolver.query(
+      android.Uri.parse(uri.toJString()),
+      JArray.of(JString.type, [for (final p in projection) p.toJString()]),
+      selection?.toJString(),
+      selectionArgs.isEmpty
+          ? null
+          : JArray.of(JString.type, [
+              for (final a in selectionArgs) a.toJString(),
+            ]),
+      sortOrder?.toJString(),
+    );
+    if (cursor == null) return const [];
+    try {
+      final columns = [
+        for (final p in projection) cursor.getColumnIndex(p.toJString()),
+      ];
+      final rows = <Map<String, String?>>[];
+      while (rows.length < limit && cursor.moveToNext()) {
+        rows.add({
+          for (var i = 0; i < projection.length; i++)
+            projection[i]: columns[i] < 0 || cursor.isNull$1(columns[i])
+                ? null
+                : cursor
+                      .getString(columns[i])
+                      ?.toDartString(releaseOriginal: true),
+        });
+      }
+      return rows;
+    } finally {
+      cursor.close();
+    }
+  }
 
   // ---------------------------------------------------------------------------
   // In-call control (default dialer only)

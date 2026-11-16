@@ -1,3 +1,15 @@
+## 0.2.0
+
+* `searchCallLog`: filter the call log by name or number, call type and date
+  range. Number search ignores formatting and matches local and international
+  forms.
+* `searchContacts`: search contacts by name or number, with all their numbers,
+  photo and favorite flag.
+* `lookupNumber`: find the contact saved for a number, for caller names.
+* `TelephonyPermission.readContacts`.
+* Example: search on Recents, a missed calls filter, a Contacts tab, and
+  caller names on the in-call screen.
+
 ## 0.1.0
 
 * Initial release, Android only.

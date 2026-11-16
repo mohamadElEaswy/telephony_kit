@@ -102,6 +102,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         destinations: const [
           NavigationDestination(icon: Icon(Icons.dialpad), label: 'Keypad'),
           NavigationDestination(icon: Icon(Icons.history), label: 'Recents'),
+          NavigationDestination(icon: Icon(Icons.contacts), label: 'Contacts'),
           NavigationDestination(
             icon: Icon(Icons.sim_card_outlined),
             label: 'Device',
@@ -255,8 +256,16 @@ class _KeypadPageState extends State<KeypadPage> {
 // Recents
 // -----------------------------------------------------------------------------
 
-class RecentsPage extends StatelessWidget {
+class RecentsPage extends StatefulWidget {
   const RecentsPage({super.key});
+
+  @override
+  State<RecentsPage> createState() => _RecentsPageState();
+}
+
+class _RecentsPageState extends State<RecentsPage> {
+  String _query = '';
+  bool _missedOnly = false;
 
   @override
   Widget build(BuildContext context) {
@@ -265,29 +274,54 @@ class RecentsPage extends StatelessWidget {
         'Grant the call log permission to see recent calls.',
       );
     }
-    final List<CallLogEntry> entries;
+    Widget list;
     try {
-      entries = telephony.getCallLog(limit: 200);
+      final entries = telephony.searchCallLog(
+        query: _query,
+        types: _missedOnly ? {CallLogType.missed} : null,
+        limit: 200,
+      );
+      list = entries.isEmpty
+          ? const _Message('No calls found.')
+          : ListView.builder(
+              itemCount: entries.length,
+              itemBuilder: (context, i) => _tile(entries[i]),
+            );
     } on TelephonyException catch (e) {
-      return _Message(e.message);
+      list = _Message(e.message);
     }
-    if (entries.isEmpty) return const _Message('No recent calls.');
-    return ListView.builder(
-      itemCount: entries.length,
-      itemBuilder: (context, i) {
-        final entry = entries[i];
-        return ListTile(
-          leading: Icon(_iconFor(entry.type), color: _colorFor(entry.type)),
-          title: Text(entry.name.isEmpty ? entry.number : entry.name),
-          subtitle: Text('${entry.date.toLocal()}'.split('.').first),
-          trailing: IconButton(
-            icon: const Icon(Icons.call),
-            onPressed: () => telephony.openDialer(entry.number),
+    return Column(
+      children: [
+        _SearchField(
+          hint: 'Search calls by name or number',
+          onChanged: (q) => setState(() => _query = q),
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              FilterChip(
+                label: const Text('Missed'),
+                selected: _missedOnly,
+                onSelected: (v) => setState(() => _missedOnly = v),
+              ),
+            ],
           ),
-        );
-      },
+        ),
+        Expanded(child: list),
+      ],
     );
   }
+
+  Widget _tile(CallLogEntry entry) => ListTile(
+    leading: Icon(_iconFor(entry.type), color: _colorFor(entry.type)),
+    title: Text(entry.name.isEmpty ? entry.number : entry.name),
+    subtitle: Text('${entry.date.toLocal()}'.split('.').first),
+    trailing: IconButton(
+      icon: const Icon(Icons.call),
+      onPressed: () => telephony.openDialer(entry.number),
+    ),
+  );
 
   IconData _iconFor(CallLogType type) => switch (type) {
     CallLogType.incoming => Icons.call_received,
@@ -299,6 +333,90 @@ class RecentsPage extends StatelessWidget {
 
   Color? _colorFor(CallLogType type) =>
       type == CallLogType.missed ? Colors.red : null;
+}
+
+// -----------------------------------------------------------------------------
+// Contacts
+// -----------------------------------------------------------------------------
+
+class ContactsPage extends StatefulWidget {
+  const ContactsPage({super.key});
+
+  @override
+  State<ContactsPage> createState() => _ContactsPageState();
+}
+
+class _ContactsPageState extends State<ContactsPage> {
+  String _query = '';
+
+  @override
+  Widget build(BuildContext context) {
+    if (!telephony.hasPermission(TelephonyPermission.readContacts)) {
+      return const _Message('Grant the contacts permission to see contacts.');
+    }
+    Widget list;
+    try {
+      final contacts = telephony.searchContacts(_query, limit: 200);
+      list = contacts.isEmpty
+          ? const _Message('No contacts found.')
+          : ListView.builder(
+              itemCount: contacts.length,
+              itemBuilder: (context, i) {
+                final c = contacts[i];
+                return ExpansionTile(
+                  leading: CircleAvatar(
+                    child: Text(c.displayName.isEmpty ? '?' : c.displayName[0]),
+                  ),
+                  title: Row(
+                    children: [
+                      Flexible(child: Text(c.displayName)),
+                      if (c.isStarred)
+                        const Icon(Icons.star, size: 16, color: Colors.amber),
+                    ],
+                  ),
+                  subtitle: Text(c.phones.isEmpty ? '' : '${c.phones.first}'),
+                  children: [
+                    for (final phone in c.phones)
+                      ListTile(
+                        title: Text(phone.number),
+                        subtitle: Text(phone.label),
+                        trailing: const Icon(Icons.call),
+                        onTap: () => telephony.openDialer(phone.number),
+                      ),
+                  ],
+                );
+              },
+            );
+    } on TelephonyException catch (e) {
+      list = _Message(e.message);
+    }
+    return Column(
+      children: [
+        _SearchField(
+          hint: 'Search contacts by name or number',
+          onChanged: (q) => setState(() => _query = q),
+        ),
+        Expanded(child: list),
+      ],
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.hint, required this.onChanged});
+
+  final String hint;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+    child: SearchBar(
+      hintText: hint,
+      leading: const Icon(Icons.search),
+      onChanged: onChanged,
+    ),
+  );
 }
 
 // -----------------------------------------------------------------------------
@@ -402,7 +520,9 @@ class _InCallScreenState extends State<InCallScreen> {
     final call = widget.call;
     final state = call.state;
     final ringing = state == CallState.ringing;
-    final name = call.displayName.isNotEmpty ? call.displayName : call.number;
+    final name = call.displayName.isNotEmpty
+        ? call.displayName
+        : (_contactName(call.number) ?? call.number);
     final muted = telephony.isMuted;
     final speaker = telephony.audioRoute == AudioRoute.speaker;
 
@@ -466,6 +586,28 @@ class _InCallScreenState extends State<InCallScreen> {
         ),
       ),
     );
+  }
+
+  String? _cachedName;
+  bool _lookedUp = false;
+
+  String? _contactName(String number) {
+    if (_lookedUp) return _cachedName;
+    _lookedUp = true;
+    _cachedName = _lookup(number);
+    return _cachedName;
+  }
+
+  String? _lookup(String number) {
+    if (number.isEmpty ||
+        !telephony.hasPermission(TelephonyPermission.readContacts)) {
+      return null;
+    }
+    try {
+      return telephony.lookupNumber(number)?.displayName;
+    } on TelephonyException {
+      return null;
+    }
   }
 
   Widget _toggle(IconData icon, String label, bool on, VoidCallback onTap) {

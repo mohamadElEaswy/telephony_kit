@@ -12,7 +12,8 @@ every call except the event stream is a direct, synchronous JNI call.
 | Open the system dialer with a number | nothing |
 | Place a call, choose the SIM | `CALL_PHONE` |
 | Network, SIM and phone details | `READ_PHONE_STATE` for SIM list and phone accounts |
-| Call log | `READ_CALL_LOG` |
+| Call log, call log search | `READ_CALL_LOG` |
+| Contact search, caller lookup by number | `READ_CONTACTS` |
 | Default dialer check and request | nothing |
 | Incoming and outgoing call events, answer, reject, hang up, hold, DTMF, mute, speaker | the app must be the default dialer and declare the in-call service |
 
@@ -23,7 +24,7 @@ call data, so it is not supported. On other platforms the APIs throw.
 
 ```yaml
 dependencies:
-  telephony_kit: ^0.1.0
+  telephony_kit: ^0.2.0
 ```
 
 Minimum Android version is API 24 (Android 7.0).
@@ -56,6 +57,31 @@ for (final entry in telephony.getCallLog(limit: 20)) {
 }
 ```
 
+### Search
+
+```dart
+// Call log: by name or number, call type and date. Runs in Android's
+// provider, so only matching rows reach Dart.
+final missedToday = telephony.searchCallLog(
+  query: '0100',            // also matches +20100...
+  types: {CallLogType.missed},
+  from: DateTime.now().subtract(const Duration(days: 1)),
+);
+
+// Contacts with a phone number, by name or number (needs READ_CONTACTS).
+for (final contact in telephony.searchContacts('ahm')) {
+  print('${contact.displayName}: ${contact.phones}');
+}
+
+// Who is calling?
+final caller = telephony.lookupNumber('+201001234567');
+print(caller?.displayName ?? 'Unknown');
+```
+
+An empty query to `searchContacts` lists all contacts that have a number,
+favorites first. Queries run synchronously on the calling isolate, which is
+fast for normal address books; use `limit` to keep results small.
+
 Errors from Android, such as a missing permission, are thrown as
 `TelephonyException`.
 
@@ -70,6 +96,7 @@ the ones you use in `android/app/src/main/AndroidManifest.xml`:
 <uses-permission android:name="android.permission.CALL_PHONE" />
 <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 <uses-permission android:name="android.permission.READ_CALL_LOG" />
+<uses-permission android:name="android.permission.READ_CONTACTS" />
 ```
 
 ## Building a dialer app
@@ -167,7 +194,7 @@ before you publish.
 ## Example
 
 [`example/`](example) is a small dialer with a keypad (with SIM choice), recent
-calls, device details, and an in-call screen with answer, reject, hang up,
+calls with search and a missed filter, contacts with search, device details, and an in-call screen with answer, reject, hang up,
 mute, speaker and hold.
 
 ```sh

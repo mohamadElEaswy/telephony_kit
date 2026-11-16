@@ -20,6 +20,9 @@ abstract final class TelephonyPermission {
   /// Needed by `TelephonyKit.endCall` on Android 9 and newer.
   static const answerPhoneCalls = 'android.permission.ANSWER_PHONE_CALLS';
 
+  /// Needed by `TelephonyKit.searchContacts` and `TelephonyKit.lookupNumber`.
+  static const readContacts = 'android.permission.READ_CONTACTS';
+
   /// Needed to read the device's own phone numbers.
   static const readPhoneNumbers = 'android.permission.READ_PHONE_NUMBERS';
 }

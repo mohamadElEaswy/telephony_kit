@@ -291,3 +291,46 @@ class TelephonyException implements Exception {
   @override
   String toString() => 'TelephonyException: $message';
 }
+
+/// A phone number saved on a contact.
+class ContactPhone {
+  const ContactPhone({required this.number, required this.label});
+
+  /// The number as stored in the contact.
+  final String number;
+
+  /// Mobile, home, work and so on, or a custom label. Empty when unknown.
+  final String label;
+
+  @override
+  String toString() => label.isEmpty ? number : '$number ($label)';
+}
+
+/// A contact from the device address book.
+class Contact {
+  const Contact({
+    required this.id,
+    required this.displayName,
+    required this.phones,
+    required this.photoUri,
+    required this.isStarred,
+  });
+
+  /// The contact id from `ContactsContract`.
+  final String id;
+
+  /// The contact's name.
+  final String displayName;
+
+  /// The contact's phone numbers.
+  final List<ContactPhone> phones;
+
+  /// A `content://` URI of the contact's thumbnail photo, or null.
+  final String? photoUri;
+
+  /// Whether the contact is a favorite.
+  final bool isStarred;
+
+  @override
+  String toString() => 'Contact($displayName, $phones)';
+}
