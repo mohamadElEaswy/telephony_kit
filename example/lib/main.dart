@@ -22,6 +22,7 @@ class DialerApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'telephony_kit dialer',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
       darkTheme: ThemeData(
         colorSchemeSeed: Colors.teal,
@@ -773,10 +774,15 @@ class _InCallScreenState extends State<InCallScreen> {
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 8),
-            Text(
-              state == CallState.active ? _elapsed() : state.name,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            Text(switch (state) {
+              CallState.active => _elapsed(),
+              CallState.ringing => 'Incoming call',
+              CallState.dialing || CallState.connecting => 'Calling…',
+              CallState.holding => 'On hold',
+              CallState.selectPhoneAccount => 'Choose a SIM',
+              CallState.disconnecting || CallState.disconnected => 'Call ended',
+              _ => state.name,
+            }, style: Theme.of(context).textTheme.titleMedium),
             if (call.phoneAccount case final account?
                 when account.displayName.isNotEmpty)
               Padding(
