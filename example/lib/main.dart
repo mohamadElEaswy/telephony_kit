@@ -109,13 +109,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    if (_calls.isNotEmpty) {
+    // Calls inside a conference are shown through the conference itself.
+    final topLevel = _calls.where((c) => c.parent == null).toList();
+    if (topLevel.isNotEmpty) {
       // Show the ringing call first, then the active one, then the newest.
-      final call = _calls.firstWhere(
+      final call = topLevel.firstWhere(
         (c) => c.state == CallState.ringing,
-        orElse: () => _calls.firstWhere(
+        orElse: () => topLevel.firstWhere(
           (c) => c.state == CallState.active,
-          orElse: () => _calls.last,
+          orElse: () => topLevel.last,
         ),
       );
       return InCallScreen(
@@ -676,7 +678,9 @@ class _InCallScreenState extends State<InCallScreen> {
     final call = widget.call;
     final state = call.state;
     final ringing = state == CallState.ringing;
-    final name = call.displayName.isNotEmpty
+    final name = call.isConference
+        ? 'Conference (${call.children.length})'
+        : call.displayName.isNotEmpty
         ? call.displayName
         : (_contactName(call.number) ?? call.number);
 

@@ -328,18 +328,16 @@ public final class CallManager {
    */
   @SuppressWarnings("deprecation")
   public static boolean swapCalls() {
-    Call active = null;
     Call held = null;
     synchronized (lock) {
       for (Call c : calls.values()) {
         if (c.getParent() != null) continue;
-        int state = c.getState();
-        if (state == Call.STATE_ACTIVE && active == null) active = c;
-        if (state == Call.STATE_HOLDING && held == null) held = c;
+        if (c.getState() == Call.STATE_HOLDING && held == null) held = c;
       }
     }
     if (held == null) return false;
-    if (active != null) active.hold();
+    // Telecom holds the active call itself when another call is resumed.
+    // Holding it here too starts a second hold that can fail.
     held.unhold();
     return true;
   }
@@ -455,6 +453,24 @@ public final class CallManager {
             CallEventListener l = currentListener();
             if (l != null) l.onCallStateChanged(id, state);
           }
+
+          // Conference changes do not change the state, but the UI must
+          // update (merge and swap buttons, which call to show), so report
+          // them as a state event with the current state.
+          @Override
+          public void onParentChanged(Call c, Call parent) {
+            conferenceChanged(id);
+          }
+
+          @Override
+          public void onChildrenChanged(Call c, List<Call> children) {
+            conferenceChanged(id);
+          }
+
+          @Override
+          public void onConferenceableCallsChanged(Call c, List<Call> conferenceable) {
+            conferenceChanged(id);
+          }
         };
     synchronized (lock) {
       callbacks.put(call, callback);
@@ -468,6 +484,12 @@ public final class CallManager {
     if (launchAppOnIncomingCall && call.getState() == Call.STATE_RINGING) {
       launchApp(context);
     }
+  }
+
+  private static void conferenceChanged(String id) {
+    updateNotification();
+    CallEventListener l = currentListener();
+    if (l != null) l.onCallStateChanged(id, getState(id));
   }
 
   static void removeCall(Call call) {
