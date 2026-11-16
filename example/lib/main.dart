@@ -1,0 +1,502 @@
+import 'dart:async';
+
+import 'package:material_ui/material_ui.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:telephony_kit/telephony_kit.dart';
+
+void main() {
+  runApp(const DialerApp());
+}
+
+final telephony = TelephonyKit.instance;
+
+class DialerApp extends StatelessWidget {
+  const DialerApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'telephony_kit dialer',
+      theme: ThemeData(colorSchemeSeed: Colors.teal, useMaterial3: true),
+      darkTheme: ThemeData(
+        colorSchemeSeed: Colors.teal,
+        brightness: Brightness.dark,
+        useMaterial3: true,
+      ),
+      home: const HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
+  int _tab = 0;
+  bool _isDefaultDialer = false;
+  StreamSubscription<CallEvent>? _subscription;
+  List<PhoneCall> _calls = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _requestPermissions();
+    _refresh();
+    _subscription = telephony.callEvents.listen((_) => _refresh());
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _subscription?.cancel();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _refresh();
+  }
+
+  Future<void> _requestPermissions() async {
+    await [Permission.phone, Permission.contacts].request();
+    _refresh();
+  }
+
+  void _refresh() {
+    if (!mounted) return;
+    setState(() {
+      _isDefaultDialer = telephony.isDefaultDialer;
+      _calls = telephony.calls.where((c) => c.state.isLive).toList();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_calls.isNotEmpty) {
+      return InCallScreen(call: _calls.last, onChanged: _refresh);
+    }
+    final pages = [const KeypadPage(), const RecentsPage(), const DevicePage()];
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Phone'),
+        bottom: _isDefaultDialer
+            ? null
+            : PreferredSize(
+                preferredSize: const Size.fromHeight(56),
+                child: _DefaultDialerBanner(
+                  onRequest: () {
+                    telephony.requestDefaultDialer();
+                  },
+                ),
+              ),
+      ),
+      body: pages[_tab],
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _tab,
+        onDestinationSelected: (i) => setState(() => _tab = i),
+        destinations: const [
+          NavigationDestination(icon: Icon(Icons.dialpad), label: 'Keypad'),
+          NavigationDestination(icon: Icon(Icons.history), label: 'Recents'),
+          NavigationDestination(
+            icon: Icon(Icons.sim_card_outlined),
+            label: 'Device',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _DefaultDialerBanner extends StatelessWidget {
+  const _DefaultDialerBanner({required this.onRequest});
+
+  final VoidCallback onRequest;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: Row(
+        children: [
+          const Expanded(
+            child: Text('Set as default phone app to handle calls.'),
+          ),
+          FilledButton.tonal(
+            onPressed: onRequest,
+            child: const Text('Set default'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Keypad
+// -----------------------------------------------------------------------------
+
+class KeypadPage extends StatefulWidget {
+  const KeypadPage({super.key});
+
+  @override
+  State<KeypadPage> createState() => _KeypadPageState();
+}
+
+class _KeypadPageState extends State<KeypadPage> {
+  String _number = '';
+  List<String> _accounts = const [];
+  String? _account;
+
+  @override
+  void initState() {
+    super.initState();
+    try {
+      _accounts = telephony.getPhoneAccounts();
+    } on TelephonyException {
+      _accounts = const [];
+    }
+  }
+
+  void _call() {
+    if (_number.isEmpty) return;
+    if (!telephony.hasPermission(TelephonyPermission.callPhone)) {
+      telephony.openDialer(_number);
+      return;
+    }
+    try {
+      telephony.placeCall(_number, phoneAccountId: _account);
+    } on TelephonyException catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.message)));
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const keys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '*', '0', '#'];
+    return Column(
+      children: [
+        Expanded(
+          child: Center(
+            child: Text(
+              _number,
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+          ),
+        ),
+        if (_accounts.length > 1)
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: SegmentedButton<String?>(
+              segments: [
+                const ButtonSegment(value: null, label: Text('Ask')),
+                for (var i = 0; i < _accounts.length; i++)
+                  ButtonSegment(
+                    value: _accounts[i],
+                    label: Text('SIM ${i + 1}'),
+                  ),
+              ],
+              selected: {_account},
+              onSelectionChanged: (s) => setState(() => _account = s.first),
+            ),
+          ),
+        GridView.count(
+          shrinkWrap: true,
+          crossAxisCount: 3,
+          childAspectRatio: 1.6,
+          physics: const NeverScrollableScrollPhysics(),
+          children: [
+            for (final key in keys)
+              TextButton(
+                onPressed: () => setState(() => _number += key),
+                child: Text(key, style: const TextStyle(fontSize: 28)),
+              ),
+          ],
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const SizedBox(width: 56),
+              const SizedBox(width: 24),
+              FloatingActionButton.large(
+                heroTag: 'call',
+                backgroundColor: Colors.green,
+                onPressed: _call,
+                child: const Icon(Icons.call, color: Colors.white),
+              ),
+              const SizedBox(width: 24),
+              IconButton(
+                iconSize: 32,
+                onPressed: _number.isEmpty
+                    ? null
+                    : () => setState(
+                        () =>
+                            _number = _number.substring(0, _number.length - 1),
+                      ),
+                icon: const Icon(Icons.backspace_outlined),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// -----------------------------------------------------------------------------
+// Recents
+// -----------------------------------------------------------------------------
+
+class RecentsPage extends StatelessWidget {
+  const RecentsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    if (!telephony.hasPermission(TelephonyPermission.readCallLog)) {
+      return const _Message(
+        'Grant the call log permission to see recent calls.',
+      );
+    }
+    final List<CallLogEntry> entries;
+    try {
+      entries = telephony.getCallLog(limit: 200);
+    } on TelephonyException catch (e) {
+      return _Message(e.message);
+    }
+    if (entries.isEmpty) return const _Message('No recent calls.');
+    return ListView.builder(
+      itemCount: entries.length,
+      itemBuilder: (context, i) {
+        final entry = entries[i];
+        return ListTile(
+          leading: Icon(_iconFor(entry.type), color: _colorFor(entry.type)),
+          title: Text(entry.name.isEmpty ? entry.number : entry.name),
+          subtitle: Text('${entry.date.toLocal()}'.split('.').first),
+          trailing: IconButton(
+            icon: const Icon(Icons.call),
+            onPressed: () => telephony.openDialer(entry.number),
+          ),
+        );
+      },
+    );
+  }
+
+  IconData _iconFor(CallLogType type) => switch (type) {
+    CallLogType.incoming => Icons.call_received,
+    CallLogType.outgoing => Icons.call_made,
+    CallLogType.missed => Icons.call_missed,
+    CallLogType.rejected || CallLogType.blocked => Icons.block,
+    _ => Icons.call,
+  };
+
+  Color? _colorFor(CallLogType type) =>
+      type == CallLogType.missed ? Colors.red : null;
+}
+
+// -----------------------------------------------------------------------------
+// Device
+// -----------------------------------------------------------------------------
+
+class DevicePage extends StatelessWidget {
+  const DevicePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final NetworkInfo info;
+    try {
+      info = telephony.getNetworkInfo();
+    } on TelephonyException catch (e) {
+      return _Message(e.message);
+    }
+    List<SimCard> sims = const [];
+    if (telephony.hasPermission(TelephonyPermission.readPhoneState)) {
+      try {
+        sims = telephony.getSimCards();
+      } on TelephonyException {
+        sims = const [];
+      }
+    }
+    return ListView(
+      children: [
+        _row('Network', info.networkOperatorName),
+        _row('Network country', info.networkCountryIso),
+        _row('SIM operator', info.simOperatorName),
+        _row('SIM state', info.simState.name),
+        _row('Phone type', info.phoneType.name),
+        _row('Roaming', info.isRoaming ? 'Yes' : 'No'),
+        _row('Voice capable', info.isVoiceCapable ? 'Yes' : 'No'),
+        _row('SIM slots', '${info.slotCount}'),
+        _row('Default dialer', telephony.defaultDialerPackage ?? '-'),
+        const Divider(),
+        for (final sim in sims)
+          ListTile(
+            leading: const Icon(Icons.sim_card),
+            title: Text(sim.displayName),
+            subtitle: Text(
+              'Slot ${sim.slotIndex + 1} · ${sim.carrierName}'
+              '${sim.isEmbedded ? ' · eSIM' : ''}',
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _row(String label, String value) => ListTile(
+    dense: true,
+    title: Text(label),
+    trailing: Text(value.isEmpty ? '-' : value),
+  );
+}
+
+// -----------------------------------------------------------------------------
+// In-call screen
+// -----------------------------------------------------------------------------
+
+class InCallScreen extends StatefulWidget {
+  const InCallScreen({super.key, required this.call, required this.onChanged});
+
+  final PhoneCall call;
+  final VoidCallback onChanged;
+
+  @override
+  State<InCallScreen> createState() => _InCallScreenState();
+}
+
+class _InCallScreenState extends State<InCallScreen> {
+  Timer? _ticker;
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(
+      const Duration(seconds: 1),
+      (_) => setState(() {}),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
+
+  String _elapsed() {
+    final start = widget.call.connectedAt;
+    if (start == null) return '';
+    final d = DateTime.now().difference(start);
+    final m = d.inMinutes.toString().padLeft(2, '0');
+    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
+    return '$m:$s';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final call = widget.call;
+    final state = call.state;
+    final ringing = state == CallState.ringing;
+    final name = call.displayName.isNotEmpty ? call.displayName : call.number;
+    final muted = telephony.isMuted;
+    final speaker = telephony.audioRoute == AudioRoute.speaker;
+
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 48),
+            Text(
+              name.isEmpty ? 'Unknown' : name,
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              state == CallState.active ? _elapsed() : state.name,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const Spacer(),
+            if (!ringing)
+              Wrap(
+                spacing: 24,
+                children: [
+                  _toggle(Icons.mic_off, 'Mute', muted, () {
+                    telephony.setMuted(!muted);
+                  }),
+                  _toggle(Icons.volume_up, 'Speaker', speaker, () {
+                    telephony.setSpeakerOn(!speaker);
+                  }),
+                  _toggle(Icons.pause, 'Hold', state == CallState.holding, () {
+                    state == CallState.holding ? call.unhold() : call.hold();
+                  }),
+                ],
+              ),
+            const SizedBox(height: 48),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                if (ringing)
+                  FloatingActionButton.large(
+                    heroTag: 'answer',
+                    backgroundColor: Colors.green,
+                    onPressed: () {
+                      call.answer();
+                      widget.onChanged();
+                    },
+                    child: const Icon(Icons.call, color: Colors.white),
+                  ),
+                FloatingActionButton.large(
+                  heroTag: 'hangup',
+                  backgroundColor: Colors.red,
+                  onPressed: () {
+                    ringing ? call.reject() : call.hangUp();
+                    widget.onChanged();
+                  },
+                  child: const Icon(Icons.call_end, color: Colors.white),
+                ),
+              ],
+            ),
+            const SizedBox(height: 48),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _toggle(IconData icon, String label, bool on, VoidCallback onTap) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        IconButton.filledTonal(
+          isSelected: on,
+          iconSize: 32,
+          onPressed: () {
+            onTap();
+            setState(() {});
+          },
+          icon: Icon(icon),
+        ),
+        Text(label),
+      ],
+    );
+  }
+}
+
+class _Message extends StatelessWidget {
+  const _Message(this.text);
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) => Center(
+    child: Padding(
+      padding: const EdgeInsets.all(24),
+      child: Text(text, textAlign: TextAlign.center),
+    ),
+  );
+}

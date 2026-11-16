@@ -1,0 +1,4 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Permissions and the in-call service are declared by the app, not the
+         library. See the README. -->
+</manifest>
