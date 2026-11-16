@@ -386,27 +386,47 @@ class TelephonyKit {
   List<Contact> searchContacts(String query, {int limit = 100}) =>
       _guard('Searching contacts', () {
         final text = query.trim();
+        const projection = [
+          'contact_id',
+          'display_name',
+          'data1', // Phone.NUMBER
+          'data2', // Phone.TYPE
+          'data3', // Phone.LABEL
+          'photo_thumb_uri',
+          'starred',
+        ];
         final uri = text.isEmpty
             ? 'content://com.android.contacts/data/phones'
             : 'content://com.android.contacts/data/phones/filter/'
                   '${Uri.encodeComponent(text)}';
+        // Rows are one per number, so read extra to fill [limit] contacts.
         final rows = _queryRows(
           uri,
-          projection: const [
-            'contact_id',
-            'display_name',
-            'data1', // Phone.NUMBER
-            'data2', // Phone.TYPE
-            'data3', // Phone.LABEL
-            'photo_thumb_uri',
-            'starred',
-          ],
+          projection: projection,
           sortOrder: text.isEmpty
               ? 'starred DESC, display_name COLLATE LOCALIZED ASC'
               : null,
-          // Rows are one per number, so read extra to fill [limit] contacts.
           limit: limit * 4,
         );
+        // The phone filter only matches whole numbers or their last digits,
+        // so "650" would not find "+1 650-555-6789". Also match the digits
+        // anywhere in the number, ignoring formatting.
+        final patterns = numberSearchPatterns(text);
+        if (patterns.isNotEmpty) {
+          const digitsOnly =
+              "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(data1, ' ', ''), "
+              "'-', ''), '(', ''), ')', ''), '.', '')";
+          rows.addAll(
+            _queryRows(
+              'content://com.android.contacts/data/phones',
+              projection: projection,
+              selection: patterns.map((_) => '$digitsOnly LIKE ?').join(' OR '),
+              selectionArgs: [for (final p in patterns) '%$p%'],
+              sortOrder: 'starred DESC, display_name COLLATE LOCALIZED ASC',
+              limit: limit * 4,
+            ),
+          );
+        }
         return groupContactRows(rows).take(limit).toList();
       });
 
