@@ -166,6 +166,9 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
     final canWrite = _telephony.hasPermission(
       TelephonyPermission.writeContacts,
     );
+    final photo = _telephony.getContactPhoto(contact.id, fullSize: true);
+    final groups = {for (final g in _telephony.getContactGroups()) g.id: g};
+    final memberOf = _telephony.getContactGroupIds(contact.id);
 
     Widget section(String title, List<Widget> children) => children.isEmpty
         ? const SizedBox.shrink()
@@ -219,6 +222,16 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
       ),
       body: ListView(
         children: [
+          if (photo != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 16),
+              child: Center(
+                child: CircleAvatar(
+                  radius: 56,
+                  backgroundImage: MemoryImage(photo),
+                ),
+              ),
+            ),
           section('Name', [
             if (nameParts().isNotEmpty) ListTile(title: Text(nameParts())),
             if (contact.nickname.isNotEmpty)
@@ -258,6 +271,61 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
           ]),
           section('Websites', [
             for (final w in contact.websites) ListTile(title: Text(w)),
+          ]),
+          section('Messaging and relations', [
+            for (final im in contact.ims)
+              ListTile(title: Text(im.address), subtitle: Text(im.protocol)),
+            for (final r in contact.relations)
+              ListTile(title: Text(r.name), subtitle: Text(r.label)),
+            for (final s in contact.sipAddresses)
+              ListTile(title: Text(s), subtitle: const Text('Internet call')),
+          ]),
+          section('Groups', [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Wrap(
+                spacing: 8,
+                children: [
+                  for (final g in groups.values)
+                    FilterChip(
+                      label: Text(g.title),
+                      selected: memberOf.contains(g.id),
+                      onSelected: canWrite
+                          ? (on) {
+                              on
+                                  ? _telephony.addContactToGroup(
+                                      contact.id,
+                                      g.id,
+                                    )
+                                  : _telephony.removeContactFromGroup(
+                                      contact.id,
+                                      g.id,
+                                    );
+                              setState(() {});
+                            }
+                          : null,
+                    ),
+                ],
+              ),
+            ),
+          ]),
+          section('System screens', [
+            ListTile(
+              title: const Text('Show in Contacts app'),
+              onTap: () => _telephony.showContact(contact.id),
+            ),
+            ListTile(
+              title: const Text('Edit in Contacts app'),
+              onTap: () => _telephony.openContactEditor(contact.id),
+            ),
+            if (canWrite && photo != null)
+              ListTile(
+                title: const Text('Remove photo'),
+                onTap: () {
+                  _telephony.setContactPhoto(contact.id, null);
+                  setState(() {});
+                },
+              ),
           ]),
           section('Other', [
             if (contact.birthday != null)

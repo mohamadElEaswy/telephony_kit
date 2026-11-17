@@ -15,15 +15,16 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 | `String? takeDialNumber()` | Number from a `tel:` intent that opened the app, once |
 
 `TelephonyPermission`: `callPhone`, `readPhoneState`, `readCallLog`,
-`writeCallLog`, `answerPhoneCalls`, `readContacts`, `sendSms`, `readSms`,
-`postNotifications`, `bluetoothConnect`, `readPhoneNumbers`.
+`writeCallLog`, `answerPhoneCalls`, `readContacts`, `writeContacts`, `sendSms`,
+`readSms`, `postNotifications`, `bluetoothConnect`, `readPhoneNumbers`,
+`accessFineLocation`.
 
 ## Placing calls
 
 | Member | Notes |
 | --- | --- |
 | `void openDialer(String number)` | No permission |
-| `void placeCall(String number, {String? phoneAccountId})` | CALL_PHONE |
+| `void placeCall(String number, {String? phoneAccountId, bool video = false})` | CALL_PHONE; `video` starts a video call (state only, no frames) |
 | `List<String> getPhoneAccounts()` | Account ids, usually one per SIM |
 | `List<PhoneAccount> getPhoneAccountDetails()` | `id`, `label`, `slotIndex` (Android 11+), `displayName` |
 | `bool isEmergencyNumber(String number)` | |
@@ -56,6 +57,14 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 `isFailure`), `postDialRemaining`, `continuePostDial(bool)`. Actions return
 `false` if the call is gone.
 
+More on `PhoneCall`: `videoState` (0 audio, 1 TX, 2 RX, 3 both), `isVideo`,
+`answerWithVideo()`, `numberVerification` (`NumberVerification.passed/
+notVerified/failed/unknown`, Android 11+), `isWifiCall`, `isHdAudio`; real-time
+text (Android 9+): `isRttActive`, `requestRtt()`, `stopRtt()`,
+`pendingRttRequestId`, `respondToRtt(accept:)`, `sendRttText(text)`,
+`readRttText()` (non blocking, poll it). RTT and video changes arrive as
+`CallStateChanged` events.
+
 `CallState`: `newCall, dialing, ringing, holding, active, disconnected,
 selectPhoneAccount, connecting, disconnecting, pulling, audioProcessing,
 simulatedRinging, unknown`; `isLive`.
@@ -75,15 +84,28 @@ simulatedRinging, unknown`; `isLive`.
 | `bool updateContact(ContactDetails)` | WRITE_CONTACTS; needs `id`; false if the contact is gone |
 | `bool setContactStarred(String id, bool starred)` | WRITE_CONTACTS |
 | `bool deleteContact(String id)`, `int deleteContacts(Iterable<String> ids)` | WRITE_CONTACTS; cannot be undone |
+| `Uint8List? getContactPhoto(String id, {bool fullSize = false})`, `bool setContactPhoto(String id, Uint8List? image)` | READ / WRITE_CONTACTS; null removes |
+| `List<ContactAccount> getContactAccounts()` | READ_CONTACTS |
+| `List<ContactGroup> getContactGroups({bool includeSystem})`, `String addContactGroup(title, {accountType, accountName})`, `bool renameContactGroup(id, title)`, `bool deleteContactGroup(id)` | READ / WRITE_CONTACTS |
+| `List<String> getContactGroupIds(contactId)`, `List<ContactDetails> getGroupMembers(groupId)`, `bool addContactToGroup(contactId, groupId)`, `bool removeContactFromGroup(...)` | |
+| `List<List<ContactDetails>> findDuplicateContacts()`, `String? mergeContacts(ids)`, `int splitContact(id)` | merge/split need WRITE_CONTACTS |
+| `String exportContactsAsVCard({ids})`, `List<String> importVCard(String)` | pure Dart `exportVCard(contacts)`, `parseVCard(text)` need no permission |
+| `bool showContact(id)`, `bool openContactEditor(id)`, `void openNewContactScreen({name, phone, email})` | system screens; the new contact screen needs no permission |
+| `Stream<void> get contactChanges` / `callLogChanges` / `smsChanges` | debounced; need the matching read permission |
+| `String addCallLogEntry({number, type, date, duration, name, subscriptionId})` | WRITE_CALL_LOG |
+| `List<CallLogNumberStats> getCallLogStats({from, to, limit})`, `List<CallLogGroup> getGroupedCallLog({limit})` | READ_CALL_LOG; pure Dart `callLogStats`, `groupCallLog` |
 
 `CallLogEntry`: `id`, `number`, `name`, `type` (`CallLogType`), `date`,
-`duration`, `isNew`. `Contact`: `id`, `displayName`, `phones`
+`duration`, `isNew`, `geocodedLocation`, `subscriptionId`, `features`,
+`hasVideo`, `isWifi`, `isHd`, `isRtt`, `isRead`, `countryIso`. `Contact`: `id`, `displayName`, `phones`
 (`ContactPhone(number, label)`), `photoUri`, `isStarred`. `ContactDetails`:
 `id`, `lookupKey`, `displayName`, `givenName`, `middleName`, `familyName`,
 `namePrefix`, `nameSuffix`, `nickname`, `company`, `department`, `jobTitle`,
 `phones`, `emails` (`ContactEmail(address, label)`), `addresses`
 (`ContactAddress(address, label)`), `websites`, `note`, `birthday`
-(`yyyy-MM-dd` or `--MM-dd`), `photoUri`, `isStarred`, and `copyWith(...)`.
+(`yyyy-MM-dd` or `--MM-dd`), `ims` (`ContactIm(address, protocol)`), `relations`
+(`ContactRelation(name, label)`), `sipAddresses`, `photoUri`, `isStarred`, and
+`copyWith(...)`.
 All fields are optional, so `ContactDetails(displayName: 'Sara')` is valid.
 
 ## Blocking
@@ -111,3 +133,14 @@ System list (default dialer or SMS app): `bool get canBlockNumbers`,
 | `Future<String> sendUssd(String code, {int? subscriptionId, Duration timeout = 30s})` | CALL_PHONE, Android 8+ |
 | `Future<int> sendSms(String to, String text, {int? subscriptionId})` | SEND_SMS; completes with part count when sent |
 | `List<SmsMessage> searchSms({String? query, SmsType? type, String? threadId, int limit = 100})` | READ_SMS |
+| `List<SmsThread> getSmsThreads({int messageLimit = 1000})` | READ_SMS; pure Dart `groupSmsThreads` |
+| `Stream<SmsMessage> get incomingSms` | READ_SMS; watches the inbox, no receiver needed |
+| `List<MmsMessage> getMmsMessages({String? threadId, int limit = 50})` | READ_SMS; read only (`text`, `parts`, `addresses`) |
+| `bool get isDefaultSmsApp`, `String? get defaultSmsPackage`, `bool requestDefaultSmsApp()` | the app must declare the SMS components, see manifest.md |
+| `int deleteSmsMessages(ids)`, `int deleteSmsThread(id)`, `int markSmsRead(ids)`, `int markSmsThreadRead(id)` | default SMS app only, others get 0 |
+| `Future<String> setCallForwarding(CallForwardingCondition, number)`, `cancelCallForwarding(c)`, `queryCallForwarding(c)` | via USSD (`**21*n#`); `unconditional/busy/noReply/notReachable` |
+| `Future<String> setCallWaiting(bool)`, `queryCallWaiting()` | via USSD `*43#`, `#43#`, `*#43#` |
+| `List<PhoneNumberInfo> getPhoneNumbers()` | READ_PHONE_NUMBERS; number often empty |
+| `List<CellInfo> getCellInfo()`, `int? get signalDbm` | ACCESS_FINE_LOCATION for cells; dBm needs Android 10+ |
+| `bool get isMobileDataEnabled`, `bool get isDataRoamingAllowed`, `DataConnectionState get dataConnectionState` | READ_PHONE_STATE |
+| `EsimInfo getEsimInfo()` | `isSupported`, `eid` (carrier apps only), `profiles` |

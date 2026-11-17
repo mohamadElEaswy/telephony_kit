@@ -5,10 +5,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:telephony_kit/telephony_kit.dart';
 
 import 'blocking_page.dart';
+import 'call_extras.dart';
 import 'contacts_page.dart';
 import 'in_call_controls.dart';
 import 'messages_page.dart';
 import 'network_section.dart';
+import 'tools_page.dart';
 
 void main() {
   runApp(const DialerApp());
@@ -127,6 +129,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       Permission.contacts,
       Permission.notification,
       Permission.sms,
+      Permission.location,
       Permission.bluetoothConnect,
     ].request();
     _refresh();
@@ -182,6 +185,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             onPressed: () => Navigator.of(context).push(
               MaterialPageRoute<void>(builder: (_) => const MessagesPage()),
             ),
+          ),
+          IconButton(
+            tooltip: 'More tools',
+            icon: const Icon(Icons.build_outlined),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute<void>(builder: (_) => const ToolsPage())),
           ),
           IconButton(
             tooltip: 'Blocking',
@@ -734,7 +744,13 @@ class _InCallScreenState extends State<InCallScreen> {
                   ],
                 ),
               ),
+            Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: CallBadges(call: call),
+            ),
             const Spacer(),
+            if (state == CallState.active || call.pendingRttRequestId != null)
+              RttPanel(call: call, onChanged: widget.onChanged),
             if (state == CallState.selectPhoneAccount)
               _SimPicker(call: call, onPicked: widget.onChanged)
             else if (!ringing)
@@ -744,6 +760,15 @@ class _InCallScreenState extends State<InCallScreen> {
                 onChanged: () {
                   widget.onChanged();
                   setState(() {});
+                },
+              ),
+            if (ringing && call.isVideo)
+              TextButton.icon(
+                icon: const Icon(Icons.videocam_outlined),
+                label: const Text('Answer with video'),
+                onPressed: () {
+                  call.answerWithVideo();
+                  widget.onChanged();
                 },
               ),
             if (ringing)
