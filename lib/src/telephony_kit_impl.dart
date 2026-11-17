@@ -1663,52 +1663,11 @@ class TelephonyKit {
   Future<String> setCallWaiting(bool enabled, {int? subscriptionId}) =>
       sendUssd(enabled ? '*43#' : '#43#', subscriptionId: subscriptionId);
 
-  /// Whether call waiting is on, or null if the network or SIM does not
-  /// support it. Needs `TelephonyPermission.readPhoneState` and Android 13+;
-  /// older versions throw [TelephonyException] (use `sendUssd('*#43#')`).
-  Future<bool?> isCallWaitingEnabled({int? subscriptionId}) {
-    final completer = Completer<bool?>();
-    late final android.ResultListener listener;
-    listener = android.ResultListener.implement(
-      android.$ResultListener(
-        onSuccess: (value) {
-          _pending.remove(listener);
-          final text = _str(value);
-          if (!completer.isCompleted) {
-            completer.complete(
-              text == 'unsupported' ? null : text == 'enabled',
-            );
-          }
-        },
-        onSuccess$async: true,
-        onFailure: (code, message) {
-          _pending.remove(listener);
-          if (!completer.isCompleted) {
-            completer.completeError(
-              TelephonyException(
-                'Reading call waiting failed ($code): ${_str(message)}',
-              ),
-            );
-          }
-        },
-        onFailure$async: true,
-      ),
-    );
-    _pending.add(listener);
-    _guard(
-      'Reading call waiting',
-      () => android.DeviceTools.getCallWaiting(
-        _context,
-        subscriptionId ?? -1,
-        listener,
-      ),
-    );
-    return completer.future.timeout(
-      const Duration(seconds: 20),
-      onTimeout: () =>
-          throw const TelephonyException('Reading call waiting timed out.'),
-    );
-  }
+  /// Asks the carrier whether call waiting is on (`*#43#`). Returns the
+  /// carrier's own wording, which is not standardized. Needs
+  /// `TelephonyPermission.callPhone` and Android 8+.
+  Future<String> queryCallWaiting({int? subscriptionId}) =>
+      sendUssd('*#43#', subscriptionId: subscriptionId);
 
   // ---------------------------------------------------------------------------
   // Device and network: numbers, cells, data, eSIM

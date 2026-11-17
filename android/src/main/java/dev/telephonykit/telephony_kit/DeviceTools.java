@@ -17,12 +17,11 @@ import android.telephony.TelephonyManager;
 import android.telephony.euicc.EuiccManager;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Executor;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-/** Phone numbers, cell info, data and eSIM state, and the call waiting query. */
+/** Phone numbers, cell info, mobile data and eSIM state. */
 public final class DeviceTools {
   private DeviceTools() {}
 
@@ -158,46 +157,6 @@ public final class DeviceTools {
       return eid == null ? "" : eid;
     } catch (RuntimeException e) {
       return "";
-    }
-  }
-
-  /**
-   * Asks the network if call waiting is on. The listener gets {@code
-   * enabled}, {@code disabled} or {@code unsupported}. Needs Android 13+ and
-   * READ_PHONE_STATE; fails on older versions.
-   */
-  public static void getCallWaiting(Context context, int subscriptionId, ResultListener listener) {
-    if (Build.VERSION.SDK_INT < 33) {
-      listener.onFailure(-1, "Reading call waiting needs Android 13 or newer");
-      return;
-    }
-    TelephonyManager tm = context.getSystemService(TelephonyManager.class);
-    if (tm == null) {
-      listener.onFailure(-1, "Telephony is not available");
-      return;
-    }
-    if (subscriptionId >= 0) tm = tm.createForSubscriptionId(subscriptionId);
-    Executor executor = context.getMainExecutor();
-    try {
-      tm.getCallWaitingStatus(
-          executor,
-          status -> {
-            switch (status) {
-              case TelephonyManager.CALL_WAITING_STATUS_ENABLED:
-                listener.onSuccess("enabled");
-                break;
-              case TelephonyManager.CALL_WAITING_STATUS_DISABLED:
-                listener.onSuccess("disabled");
-                break;
-              case TelephonyManager.CALL_WAITING_STATUS_NOT_SUPPORTED:
-                listener.onSuccess("unsupported");
-                break;
-              default:
-                listener.onFailure(status, "The network did not answer");
-            }
-          });
-    } catch (SecurityException e) {
-      listener.onFailure(-2, "READ_PHONE_STATE permission is missing");
     }
   }
 }

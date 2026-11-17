@@ -8931,7 +8931,7 @@ final class $ContactTools$Type$ extends jni$_.JType<ContactTools> {
 
 /// from: `dev.telephonykit.telephony_kit.DeviceTools`
 ///
-/// Phone numbers, cell info, data and eSIM state, and the call waiting query.
+/// Phone numbers, cell info, mobile data and eSIM state.
 extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/DeviceTools',
@@ -9233,59 +9233,6 @@ extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
       _id_getEid.pointer,
       _$context.pointer,
     ).object<jni$_.JString?>();
-  }
-
-  static final _id_getCallWaiting = _class.staticMethodId(
-    r'getCallWaiting',
-    r'(Landroid/content/Context;ILdev/telephonykit/telephony_kit/ResultListener;)V',
-  );
-
-  static final _getCallWaiting =
-      jni$_.ProtectedJniExtensions.lookup<
-            jni$_.NativeFunction<
-              jni$_.JThrowablePtr Function(
-                jni$_.Pointer<jni$_.Void>,
-                jni$_.JMethodIDPtr,
-                jni$_.VarArgs<
-                  (
-                    jni$_.Pointer<jni$_.Void>,
-                    jni$_.Int32,
-                    jni$_.Pointer<jni$_.Void>,
-                  )
-                >,
-              )
-            >
-          >('globalEnv_CallStaticVoidMethod')
-          .asFunction<
-            jni$_.JThrowablePtr Function(
-              jni$_.Pointer<jni$_.Void>,
-              jni$_.JMethodIDPtr,
-              jni$_.Pointer<jni$_.Void>,
-              core$_.int,
-              jni$_.Pointer<jni$_.Void>,
-            )
-          >();
-
-  /// from: `static public void getCallWaiting(android.content.Context context, int subscriptionId, dev.telephonykit.telephony_kit.ResultListener listener)`
-  ///
-  /// Asks the network if call waiting is on. The listener gets {@code
-  ///enabled}, {@code disabled} or {@code unsupported}. Needs Android 13+ and
-  ///READ_PHONE_STATE; fails on older versions.
-  static void getCallWaiting(
-    Context? context,
-    core$_.int subscriptionId,
-    ResultListener? listener,
-  ) {
-    final _$$classRef = _class.reference;
-    final _$context = context?.reference ?? jni$_.jNullReference;
-    final _$listener = listener?.reference ?? jni$_.jNullReference;
-    _getCallWaiting(
-      _$$classRef.pointer,
-      _id_getCallWaiting.pointer,
-      _$context.pointer,
-      subscriptionId,
-      _$listener.pointer,
-    ).check();
   }
 }
 
