@@ -41,6 +41,9 @@ abstract final class TelephonyPermission {
   /// Needed for Bluetooth device names on Android 12+.
   static const bluetoothConnect = 'android.permission.BLUETOOTH_CONNECT';
 
+  /// Needed by `TelephonyKit.getCellInfo`.
+  static const accessFineLocation = 'android.permission.ACCESS_FINE_LOCATION';
+
   /// Needed to read the device's own phone numbers.
   static const readPhoneNumbers = 'android.permission.READ_PHONE_NUMBERS';
 }

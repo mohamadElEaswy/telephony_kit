@@ -247,6 +247,11 @@ class CallLogEntry {
     required this.type,
     required this.date,
     required this.duration,
+    this.geocodedLocation = '',
+    this.subscriptionId,
+    this.features = 0,
+    this.isRead = true,
+    this.countryIso = '',
   });
 
   /// The row id, used by `TelephonyKit.deleteCallLogEntries`.
@@ -269,6 +274,36 @@ class CallLogEntry {
 
   /// How long the call lasted.
   final Duration duration;
+
+  /// Where the number is from, such as "Cairo, Egypt", or an empty string.
+  final String geocodedLocation;
+
+  /// The id of the SIM subscription that handled the call (compare with
+  /// `SimCard.subscriptionId`), or null when unknown.
+  final int? subscriptionId;
+
+  /// `CallLog.Calls.FEATURES_*` bits. Prefer [hasVideo], [isWifi], [isHd]
+  /// and [isRtt].
+  final int features;
+
+  /// Whether the user has seen the entry.
+  final bool isRead;
+
+  /// The country the number was dialed or received in, such as `EG`, or an
+  /// empty string.
+  final String countryIso;
+
+  /// The call was a video call.
+  bool get hasVideo => features & 1 != 0;
+
+  /// The call went over Wi-Fi.
+  bool get isWifi => features & 8 != 0;
+
+  /// The call used HD voice.
+  bool get isHd => features & 4 != 0;
+
+  /// The call used real-time text.
+  bool get isRtt => features & 32 != 0;
 
   @override
   String toString() => 'CallLogEntry($type, $number, $date, $duration)';
@@ -534,6 +569,35 @@ class ContactAddress {
   String toString() => label.isEmpty ? address : '$address ($label)';
 }
 
+/// An instant messaging handle saved on a contact.
+class ContactIm {
+  const ContactIm({required this.address, this.protocol = ''});
+
+  /// The handle or user name.
+  final String address;
+
+  /// The service, such as Skype, Google Talk or Jabber, or a custom name.
+  /// Empty when unknown.
+  final String protocol;
+
+  @override
+  String toString() => protocol.isEmpty ? address : '$address ($protocol)';
+}
+
+/// A related person saved on a contact, such as a spouse or manager.
+class ContactRelation {
+  const ContactRelation({required this.name, this.label = ''});
+
+  /// The related person's name.
+  final String name;
+
+  /// Spouse, Mother, Manager, Friend and so on, or a custom label.
+  final String label;
+
+  @override
+  String toString() => label.isEmpty ? name : '$name ($label)';
+}
+
 /// Everything saved on a contact, and also what you pass to
 /// `TelephonyKit.addContact` and `TelephonyKit.updateContact`.
 ///
@@ -558,6 +622,9 @@ class ContactDetails {
     this.emails = const [],
     this.addresses = const [],
     this.websites = const [],
+    this.ims = const [],
+    this.relations = const [],
+    this.sipAddresses = const [],
     this.note = '',
     this.birthday,
     this.photoUri,
@@ -614,6 +681,15 @@ class ContactDetails {
   /// Website URLs.
   final List<String> websites;
 
+  /// Instant messaging handles.
+  final List<ContactIm> ims;
+
+  /// Related people (spouse, manager and so on).
+  final List<ContactRelation> relations;
+
+  /// Internet call (SIP) addresses.
+  final List<String> sipAddresses;
+
   /// Free text notes.
   final String note;
 
@@ -643,6 +719,9 @@ class ContactDetails {
     List<ContactEmail>? emails,
     List<ContactAddress>? addresses,
     List<String>? websites,
+    List<ContactIm>? ims,
+    List<ContactRelation>? relations,
+    List<String>? sipAddresses,
     String? note,
     String? birthday,
     bool? isStarred,
@@ -663,6 +742,9 @@ class ContactDetails {
     emails: emails ?? this.emails,
     addresses: addresses ?? this.addresses,
     websites: websites ?? this.websites,
+    ims: ims ?? this.ims,
+    relations: relations ?? this.relations,
+    sipAddresses: sipAddresses ?? this.sipAddresses,
     note: note ?? this.note,
     birthday: birthday ?? this.birthday,
     photoUri: photoUri,
@@ -952,4 +1034,363 @@ class SmsMessage {
 
   @override
   String toString() => 'SmsMessage($type, $address, $date)';
+}
+
+/// A contact group (a label such as Family or Work).
+class ContactGroup {
+  const ContactGroup({
+    required this.id,
+    required this.title,
+    this.accountName = '',
+    this.accountType = '',
+    this.isReadOnly = false,
+    this.memberCount = 0,
+  });
+
+  /// The group id.
+  final String id;
+
+  /// The group name.
+  final String title;
+
+  /// The account the group belongs to, or an empty string for the device.
+  final String accountName;
+
+  /// The account type, such as `com.google`, or an empty string.
+  final String accountType;
+
+  /// System groups cannot be renamed or deleted.
+  final bool isReadOnly;
+
+  /// How many contacts are in the group.
+  final int memberCount;
+
+  @override
+  String toString() => 'ContactGroup($title, $memberCount)';
+}
+
+/// An account that holds contacts (Google, SIM, device and so on).
+class ContactAccount {
+  const ContactAccount({required this.name, required this.type});
+
+  /// The account name, such as an email address.
+  final String name;
+
+  /// The account type, such as `com.google`.
+  final String type;
+
+  @override
+  String toString() => 'ContactAccount($name, $type)';
+}
+
+/// Call counts for one phone number, from `TelephonyKit.getCallLogStats`.
+class CallLogNumberStats {
+  const CallLogNumberStats({
+    required this.number,
+    required this.name,
+    required this.total,
+    required this.incoming,
+    required this.outgoing,
+    required this.missed,
+    required this.rejected,
+    required this.blocked,
+    required this.totalDuration,
+    required this.lastCall,
+  });
+
+  /// The number as stored in the first entry seen.
+  final String number;
+
+  /// The cached contact name, or an empty string.
+  final String name;
+
+  /// All entries for the number.
+  final int total;
+  final int incoming;
+  final int outgoing;
+  final int missed;
+  final int rejected;
+  final int blocked;
+
+  /// Time spent talking, over all entries.
+  final Duration totalDuration;
+
+  /// When the most recent call happened.
+  final DateTime lastCall;
+
+  @override
+  String toString() => 'CallLogNumberStats($number, $total calls)';
+}
+
+/// Consecutive call log entries for the same number, shown as one row such
+/// as "Sara (3)".
+class CallLogGroup {
+  const CallLogGroup({required this.number, required this.entries});
+
+  /// The shared number.
+  final String number;
+
+  /// The entries, newest first.
+  final List<CallLogEntry> entries;
+
+  /// The newest entry.
+  CallLogEntry get latest => entries.first;
+
+  /// The contact name of the newest entry that has one, or an empty string.
+  String get name {
+    for (final e in entries) {
+      if (e.name.isNotEmpty) return e.name;
+    }
+    return '';
+  }
+
+  @override
+  String toString() => 'CallLogGroup($number, ${entries.length})';
+}
+
+/// One SMS conversation.
+class SmsThread {
+  const SmsThread({
+    required this.threadId,
+    required this.address,
+    required this.snippet,
+    required this.lastDate,
+    required this.messageCount,
+    required this.unreadCount,
+  });
+
+  /// The conversation id, for `TelephonyKit.searchSms(threadId: ...)`.
+  final String threadId;
+
+  /// The other party's number or sender name.
+  final String address;
+
+  /// The text of the newest message.
+  final String snippet;
+
+  /// When the newest message was received or sent.
+  final DateTime lastDate;
+
+  /// How many messages were read from the provider for this thread.
+  final int messageCount;
+
+  /// How many of them are unread.
+  final int unreadCount;
+
+  @override
+  String toString() => 'SmsThread($address, $messageCount)';
+}
+
+/// One attachment or text part of an MMS.
+class MmsPart {
+  const MmsPart({
+    required this.id,
+    required this.contentType,
+    required this.name,
+    required this.text,
+    required this.uri,
+  });
+
+  /// The part id.
+  final String id;
+
+  /// The MIME type, such as `image/jpeg` or `text/plain`.
+  final String contentType;
+
+  /// The file name, or an empty string.
+  final String name;
+
+  /// The text for a `text/plain` part, otherwise an empty string.
+  final String text;
+
+  /// A `content://` URI of the part's data, for example to show an image.
+  final String uri;
+
+  /// Whether this is a text part.
+  bool get isText => contentType == 'text/plain';
+
+  /// Whether this is an image.
+  bool get isImage => contentType.startsWith('image/');
+
+  @override
+  String toString() => 'MmsPart($contentType)';
+}
+
+/// A multimedia message (MMS), read only.
+class MmsMessage {
+  const MmsMessage({
+    required this.id,
+    required this.threadId,
+    required this.date,
+    required this.subject,
+    required this.addresses,
+    required this.isIncoming,
+    required this.isRead,
+    required this.parts,
+  });
+
+  /// The row id.
+  final String id;
+
+  /// The conversation id.
+  final String threadId;
+
+  /// When it was received or sent.
+  final DateTime date;
+
+  /// The subject, or an empty string.
+  final String subject;
+
+  /// The other parties' numbers.
+  final List<String> addresses;
+
+  /// Whether it was received.
+  final bool isIncoming;
+
+  /// Whether the user has read it.
+  final bool isRead;
+
+  /// The text and attachments.
+  final List<MmsPart> parts;
+
+  /// All text parts joined.
+  String get text => parts.where((p) => p.isText).map((p) => p.text).join('\n');
+
+  @override
+  String toString() => 'MmsMessage($id, $addresses, ${parts.length} parts)';
+}
+
+/// The result of the STIR/SHAKEN check on a caller's number (Android 11+).
+enum NumberVerification {
+  /// The network did not verify the number.
+  notVerified,
+
+  /// The network confirmed the caller owns the number.
+  passed,
+
+  /// The check failed, so the number may be spoofed.
+  failed,
+
+  /// Not available on this device, call or Android version.
+  unknown;
+
+  /// Converts `Call.Details.getCallerNumberVerificationStatus` (0, 1, 2).
+  static NumberVerification fromValue(int value) => switch (value) {
+    0 => notVerified,
+    1 => passed,
+    2 => failed,
+    _ => unknown,
+  };
+}
+
+/// When a call is forwarded to another number.
+enum CallForwardingCondition {
+  /// Always.
+  unconditional('21'),
+
+  /// When you are busy.
+  busy('67'),
+
+  /// When you do not answer.
+  noReply('61'),
+
+  /// When your phone is off or has no signal.
+  notReachable('62');
+
+  const CallForwardingCondition(this.code);
+
+  /// The GSM service code (`*21*number#` and so on).
+  final String code;
+}
+
+/// A phone number of one of the device's SIMs.
+class PhoneNumberInfo {
+  const PhoneNumberInfo({
+    required this.subscriptionId,
+    required this.slotIndex,
+    required this.number,
+  });
+
+  /// Matches `SimCard.subscriptionId`.
+  final int subscriptionId;
+
+  /// The SIM slot, starting at 0.
+  final int slotIndex;
+
+  /// The number, or an empty string when the carrier did not store it.
+  final String number;
+
+  @override
+  String toString() => 'PhoneNumberInfo(slot $slotIndex, $number)';
+}
+
+/// A nearby cell tower.
+class CellInfo {
+  const CellInfo({
+    required this.type,
+    required this.isRegistered,
+    required this.dbm,
+    required this.level,
+    required this.cellId,
+  });
+
+  /// `lte`, `nr`, `gsm`, `wcdma`, `cdma` or `unknown`.
+  final String type;
+
+  /// Whether the device is connected to this cell.
+  final bool isRegistered;
+
+  /// Signal strength in dBm, or null when unknown.
+  final int? dbm;
+
+  /// Signal level from 0 to 4, or -1 when unknown.
+  final int level;
+
+  /// The cell id, or -1 when unknown.
+  final int cellId;
+
+  @override
+  String toString() => 'CellInfo($type, $dbm dBm)';
+}
+
+/// Mobile data connection state, mirroring `TelephonyManager.DATA_*`.
+enum DataConnectionState {
+  disconnected(0),
+  connecting(1),
+  connected(2),
+  suspended(3),
+  unknown(-1);
+
+  const DataConnectionState(this.value);
+
+  /// The raw Android value.
+  final int value;
+
+  /// Converts a raw value.
+  static DataConnectionState fromValue(int value) =>
+      DataConnectionState.values.firstWhere(
+        (s) => s.value == value,
+        orElse: () => DataConnectionState.unknown,
+      );
+}
+
+/// eSIM support and the eSIM profiles on the device.
+class EsimInfo {
+  const EsimInfo({
+    required this.isSupported,
+    required this.eid,
+    required this.profiles,
+  });
+
+  /// Whether the device has an eSIM chip that is enabled.
+  final bool isSupported;
+
+  /// The chip's EID. Empty unless the app has carrier privileges.
+  final String eid;
+
+  /// Active SIMs that are eSIM profiles.
+  final List<SimCard> profiles;
+
+  @override
+  String toString() => 'EsimInfo(supported: $isSupported, ${profiles.length})';
 }

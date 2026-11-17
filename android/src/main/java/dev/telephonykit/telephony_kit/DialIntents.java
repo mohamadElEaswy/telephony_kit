@@ -3,6 +3,9 @@ package dev.telephonykit.telephony_kit;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
+import android.telecom.PhoneAccountHandle;
+import android.telecom.TelecomManager;
 
 /**
  * Reads the number from a dial intent ({@code ACTION_DIAL} or {@code
@@ -33,5 +36,16 @@ public final class DialIntents {
     // Handled: replace the intent so the number is not returned again.
     activity.setIntent(new Intent(Intent.ACTION_MAIN));
     return number == null ? "" : number;
+  }
+
+  /**
+   * Extras for {@code TelecomManager.placeCall}: the SIM to use (or null) and
+   * the starting video state ({@code VideoProfile.STATE_*}; 0 for audio).
+   */
+  public static Bundle callExtras(PhoneAccountHandle handle, int videoState) {
+    Bundle extras = new Bundle();
+    if (handle != null) extras.putParcelable(TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE, handle);
+    if (videoState != 0) extras.putInt(TelecomManager.EXTRA_START_CALL_WITH_VIDEO_STATE, videoState);
+    return extras;
   }
 }
