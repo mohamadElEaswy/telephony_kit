@@ -69,10 +69,22 @@ simulatedRinging, unknown`; `isLive`.
 | `int deleteCallLogEntries(Iterable<String> ids)`, `int deleteCallLogForNumber(String)`, `int markMissedCallsRead()` | WRITE_CALL_LOG |
 | `List<Contact> searchContacts(String query, {int limit = 100})` | READ_CONTACTS; empty query lists all |
 | `Contact? lookupNumber(String number)` | READ_CONTACTS |
+| `List<ContactDetails> getContacts({String query = '', int limit = 100})` | READ_CONTACTS; includes contacts without numbers; query matches name, email or number |
+| `ContactDetails? getContact(String id)` | READ_CONTACTS |
+| `String addContact(ContactDetails, {String? accountType, String? accountName})` | WRITE_CONTACTS; returns the new id |
+| `bool updateContact(ContactDetails)` | WRITE_CONTACTS; needs `id`; false if the contact is gone |
+| `bool setContactStarred(String id, bool starred)` | WRITE_CONTACTS |
+| `bool deleteContact(String id)`, `int deleteContacts(Iterable<String> ids)` | WRITE_CONTACTS; cannot be undone |
 
 `CallLogEntry`: `id`, `number`, `name`, `type` (`CallLogType`), `date`,
 `duration`, `isNew`. `Contact`: `id`, `displayName`, `phones`
-(`ContactPhone(number, label)`), `photoUri`, `isStarred`.
+(`ContactPhone(number, label)`), `photoUri`, `isStarred`. `ContactDetails`:
+`id`, `lookupKey`, `displayName`, `givenName`, `middleName`, `familyName`,
+`namePrefix`, `nameSuffix`, `nickname`, `company`, `department`, `jobTitle`,
+`phones`, `emails` (`ContactEmail(address, label)`), `addresses`
+(`ContactAddress(address, label)`), `websites`, `note`, `birthday`
+(`yyyy-MM-dd` or `--MM-dd`), `photoUri`, `isStarred`, and `copyWith(...)`.
+All fields are optional, so `ContactDetails(displayName: 'Sara')` is valid.
 
 ## Blocking
 

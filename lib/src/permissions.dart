@@ -21,8 +21,13 @@ abstract final class TelephonyPermission {
   /// Needed by `TelephonyKit.endCall` on Android 9 and newer.
   static const answerPhoneCalls = 'android.permission.ANSWER_PHONE_CALLS';
 
-  /// Needed by `TelephonyKit.searchContacts` and `TelephonyKit.lookupNumber`.
+  /// Needed by `TelephonyKit.searchContacts`, `TelephonyKit.lookupNumber`,
+  /// `TelephonyKit.getContact` and `TelephonyKit.getContacts`.
   static const readContacts = 'android.permission.READ_CONTACTS';
+
+  /// Needed by `TelephonyKit.addContact`, `TelephonyKit.updateContact`,
+  /// `TelephonyKit.deleteContacts` and `TelephonyKit.setContactStarred`.
+  static const writeContacts = 'android.permission.WRITE_CONTACTS';
 
   /// Needed by `TelephonyKit.sendSms`.
   static const sendSms = 'android.permission.SEND_SMS';

@@ -1,3 +1,16 @@
+## 0.5.0
+
+* Full contact management: `getContacts` and `getContact` return
+  `ContactDetails` with name parts, phones, emails, addresses, company, job
+  title, nickname, websites, note, birthday, photo and favorite (contacts
+  without a phone number are included). `addContact`, `updateContact`,
+  `deleteContact`, `deleteContacts` and `setContactStarred` change the address
+  book. New models `ContactDetails`, `ContactEmail`, `ContactAddress` and
+  permission name `TelephonyPermission.writeContacts` (`WRITE_CONTACTS`). No
+  new bindings were needed. The example Contacts tab can now open a contact,
+  add, edit, favorite and delete.
+* Agent skill and docs updated with the new contacts API.
+
 ## 0.4.0
 
 * Agent support: `AGENTS.md` for contributors and an agent skill in

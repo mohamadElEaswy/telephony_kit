@@ -33,7 +33,8 @@ USSD codes and send SMS.
 | Network, SIM and phone details, live signal and 2G to 5G events | `READ_PHONE_STATE` for some details |
 | Call log and call log search | `READ_CALL_LOG` |
 | Delete call log entries, mark missed calls seen | `WRITE_CALL_LOG` |
-| Contact search, caller lookup by number | `READ_CONTACTS` |
+| Contact search, caller lookup by number, every detail of a contact | `READ_CONTACTS` |
+| Add, edit, delete contacts and favorites | `WRITE_CONTACTS` |
 | USSD codes such as `*100#` | `CALL_PHONE`, Android 8.0+ |
 | Send SMS / search SMS | `SEND_SMS` / `READ_SMS` |
 | Default dialer and call screening roles | nothing |
@@ -50,7 +51,7 @@ throw.
 
 ```yaml
 dependencies:
-  telephony_kit: ^0.4.0
+  telephony_kit: ^0.5.0
 ```
 
 Minimum Android version is API 24 (Android 7.0).
@@ -111,6 +112,56 @@ fast for normal address books; use `limit` to keep results small.
 Errors from Android, such as a missing permission, are thrown as
 `TelephonyException`.
 
+### Contacts: read, add, edit and delete
+
+`searchContacts` is a quick phone picker. For everything saved on a contact,
+use `getContacts` and `getContact`, which return `ContactDetails` (name parts,
+all phones, emails, addresses, company and job title, nickname, websites,
+note, birthday, photo and favorite):
+
+```dart
+// All contacts with every detail, even those without a number.
+// A query matches the name, an email, or a phone number in any format.
+final all = telephony.getContacts(limit: 500);
+final sara = telephony.getContacts(query: 'sara').first;
+final same = telephony.getContact(sara.id); // null if it was deleted
+
+// Add. Returns the new contact id.
+final id = telephony.addContact(
+  const ContactDetails(
+    givenName: 'Sara',
+    familyName: 'Ali',
+    phones: [ContactPhone(number: '+20 100 123 4567', label: 'Mobile')],
+    emails: [ContactEmail(address: 'sara@example.com', label: 'Work')],
+    company: 'Acme',
+    birthday: '1990-05-04',
+  ),
+);
+
+// Edit: read, change with copyWith, save. Returns false if it was deleted.
+final edited = telephony.getContact(id)!.copyWith(
+  jobTitle: 'CTO',
+  phones: [
+    ...telephony.getContact(id)!.phones,
+    const ContactPhone(number: '0222345678', label: 'Work'),
+  ],
+);
+telephony.updateContact(edited);
+
+telephony.setContactStarred(id, true); // favorite
+telephony.deleteContact(id);           // cannot be undone
+telephony.deleteContacts([id1, id2]);  // returns how many were deleted
+```
+
+Reading needs `READ_CONTACTS`; adding, editing, favoriting and deleting need
+`WRITE_CONTACTS`. `updateContact` replaces the name, phones, emails,
+addresses, company, nickname, websites, note and birthday with what you pass,
+and leaves photos, groups and other data alone. `addContact` accepts
+`accountType` and `accountName` to save into a synced account such as Google.
+Contacts in a synced account are removed from the account when it next syncs.
+Labels such as `Mobile`, `Home` and `Work` map to Android's types; any other
+text becomes a custom label.
+
 ### Permissions
 
 telephony_kit checks permissions but does not request them, because asking
@@ -123,6 +174,8 @@ the ones you use in `android/app/src/main/AndroidManifest.xml`:
 <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 <uses-permission android:name="android.permission.READ_CALL_LOG" />
 <uses-permission android:name="android.permission.READ_CONTACTS" />
+<!-- Only to add, edit or delete contacts -->
+<uses-permission android:name="android.permission.WRITE_CONTACTS" />
 ```
 
 ## Building a dialer app

@@ -1,6 +1,6 @@
 ---
 name: telephony-kit
-description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log or contacts search, USSD balance check or SMS sending on Android.
+description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete), USSD balance check or SMS sending on Android.
 ---
 
 # Using telephony_kit in a Flutter app
@@ -52,7 +52,9 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Several calls | `swapCalls()`, `PhoneCall.merge/conferenceWith/swap/splitFromConference/children/parent` |
 | Search call log | `searchCallLog(query:, types:, from:, to:, limit:)` |
 | Change call log | `deleteCallLogEntries(ids)`, `deleteCallLogForNumber`, `markMissedCallsRead()` |
-| Contacts | `searchContacts(query)`, `lookupNumber(number)` |
+| Contacts (pick / caller name) | `searchContacts(query)`, `lookupNumber(number)` |
+| Contact details | `getContacts(query:, limit:)`, `getContact(id)` return every field (`ContactDetails`) |
+| Add / edit / delete contacts | `addContact(details)`, `updateContact(details)` (read, `copyWith`, save), `deleteContact(id)`, `deleteContacts(ids)`, `setContactStarred(id, bool)` (WRITE_CONTACTS) |
 | Block calls | `screening` rules, `screenedCalls`, system list: `canBlockNumbers`, `blockNumber`, `unblockNumber`, `getBlockedNumbers` |
 | SIM / network | `getSimCards()`, `getNetworkInfo()`, `signalLevel`, `networkGeneration`, `networkEvents` |
 | USSD / voicemail | `await sendUssd('*100#')`, `voicemailNumber`, `callVoicemail()` |
@@ -94,6 +96,13 @@ debounce search-as-you-type.
 **Caller name.** `PhoneCall.displayName` can be empty; fall back to
 `lookupNumber(call.number)?.displayName`, then the number. Cache the result per
 call; do not look it up on every frame.
+
+**Editing contacts.** Read with `getContact(id)`, change with `copyWith`, then
+`updateContact`. It *replaces* name, phones, emails, addresses, company,
+nickname, websites, note and birthday, so always start from the full contact
+or fields are lost. Photos and groups are untouched. Deleting cannot be
+undone: confirm with the user first. Need `WRITE_CONTACTS` as well as
+`READ_CONTACTS`; `Permission.contacts` requests both.
 
 **Screening rules** persist on the device and apply when the app is closed.
 Set them once from settings UI; do not rewrite them on every app start.

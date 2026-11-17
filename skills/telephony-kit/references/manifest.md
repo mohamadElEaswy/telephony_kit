@@ -15,6 +15,8 @@ for features the app uses.
 <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
 <!-- Contact search, caller names, "callers not in contacts" screening -->
 <uses-permission android:name="android.permission.READ_CONTACTS" />
+<!-- Add, edit, delete contacts -->
+<uses-permission android:name="android.permission.WRITE_CONTACTS" />
 <!-- Call notifications (dialer) -->
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
@@ -30,7 +32,7 @@ for features the app uses.
 
 Runtime requests with `permission_handler`: `Permission.phone` covers
 CALL_PHONE, READ_PHONE_STATE and the call log; also request
-`Permission.contacts`, `Permission.notification`, `Permission.sms` and
+`Permission.contacts` (covers READ and WRITE_CONTACTS), `Permission.notification`, `Permission.sms` and
 `Permission.bluetoothConnect` as needed.
 
 ## Default dialer (in-call UI)

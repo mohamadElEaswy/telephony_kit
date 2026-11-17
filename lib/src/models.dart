@@ -506,6 +506,173 @@ class Contact {
   String toString() => 'Contact($displayName, $phones)';
 }
 
+/// An email address saved on a contact.
+class ContactEmail {
+  const ContactEmail({required this.address, this.label = ''});
+
+  /// The email address.
+  final String address;
+
+  /// Home, Work, Mobile, Other, or a custom label. Empty when unknown.
+  final String label;
+
+  @override
+  String toString() => label.isEmpty ? address : '$address ($label)';
+}
+
+/// A postal address saved on a contact.
+class ContactAddress {
+  const ContactAddress({required this.address, this.label = ''});
+
+  /// The whole address as one text, with line breaks.
+  final String address;
+
+  /// Home, Work, Other, or a custom label. Empty when unknown.
+  final String label;
+
+  @override
+  String toString() => label.isEmpty ? address : '$address ($label)';
+}
+
+/// Everything saved on a contact, and also what you pass to
+/// `TelephonyKit.addContact` and `TelephonyKit.updateContact`.
+///
+/// Every field except [id] is optional, so a new contact can be as small as
+/// `ContactDetails(displayName: 'Sara', phones: [ContactPhone(...)])`. Use
+/// [copyWith] to change a contact you read and save it again.
+class ContactDetails {
+  const ContactDetails({
+    this.id = '',
+    this.lookupKey = '',
+    this.displayName = '',
+    this.givenName = '',
+    this.middleName = '',
+    this.familyName = '',
+    this.namePrefix = '',
+    this.nameSuffix = '',
+    this.nickname = '',
+    this.company = '',
+    this.department = '',
+    this.jobTitle = '',
+    this.phones = const [],
+    this.emails = const [],
+    this.addresses = const [],
+    this.websites = const [],
+    this.note = '',
+    this.birthday,
+    this.photoUri,
+    this.isStarred = false,
+  });
+
+  /// The contact id from `ContactsContract`. Empty for a contact that has not
+  /// been added yet.
+  final String id;
+
+  /// A key that stays valid when the contact is merged or synced. Read only.
+  final String lookupKey;
+
+  /// The name shown in lists. When you save a contact and give no
+  /// [givenName] or [familyName], Android splits this text into them.
+  final String displayName;
+
+  /// First name.
+  final String givenName;
+
+  /// Middle name.
+  final String middleName;
+
+  /// Last name.
+  final String familyName;
+
+  /// Dr, Mrs and so on.
+  final String namePrefix;
+
+  /// Jr, III and so on.
+  final String nameSuffix;
+
+  /// Nickname.
+  final String nickname;
+
+  /// Company or organization.
+  final String company;
+
+  /// Department in the [company].
+  final String department;
+
+  /// Job title in the [company].
+  final String jobTitle;
+
+  /// Phone numbers.
+  final List<ContactPhone> phones;
+
+  /// Email addresses.
+  final List<ContactEmail> emails;
+
+  /// Postal addresses.
+  final List<ContactAddress> addresses;
+
+  /// Website URLs.
+  final List<String> websites;
+
+  /// Free text notes.
+  final String note;
+
+  /// The birthday as `yyyy-MM-dd`, or `--MM-dd` when the year is unknown.
+  final String? birthday;
+
+  /// A `content://` URI of the contact's photo, or null. Read only: photos
+  /// are not changed by `TelephonyKit.updateContact`.
+  final String? photoUri;
+
+  /// Whether the contact is a favorite.
+  final bool isStarred;
+
+  /// A copy with the given fields changed.
+  ContactDetails copyWith({
+    String? displayName,
+    String? givenName,
+    String? middleName,
+    String? familyName,
+    String? namePrefix,
+    String? nameSuffix,
+    String? nickname,
+    String? company,
+    String? department,
+    String? jobTitle,
+    List<ContactPhone>? phones,
+    List<ContactEmail>? emails,
+    List<ContactAddress>? addresses,
+    List<String>? websites,
+    String? note,
+    String? birthday,
+    bool? isStarred,
+  }) => ContactDetails(
+    id: id,
+    lookupKey: lookupKey,
+    displayName: displayName ?? this.displayName,
+    givenName: givenName ?? this.givenName,
+    middleName: middleName ?? this.middleName,
+    familyName: familyName ?? this.familyName,
+    namePrefix: namePrefix ?? this.namePrefix,
+    nameSuffix: nameSuffix ?? this.nameSuffix,
+    nickname: nickname ?? this.nickname,
+    company: company ?? this.company,
+    department: department ?? this.department,
+    jobTitle: jobTitle ?? this.jobTitle,
+    phones: phones ?? this.phones,
+    emails: emails ?? this.emails,
+    addresses: addresses ?? this.addresses,
+    websites: websites ?? this.websites,
+    note: note ?? this.note,
+    birthday: birthday ?? this.birthday,
+    photoUri: photoUri,
+    isStarred: isStarred ?? this.isStarred,
+  );
+
+  @override
+  String toString() => 'ContactDetails($id, $displayName)';
+}
+
 /// What call screening does with a matching call.
 enum ScreeningAction {
   /// Let the call ring normally.

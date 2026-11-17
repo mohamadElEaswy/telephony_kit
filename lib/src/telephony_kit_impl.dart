@@ -5,6 +5,7 @@ import 'package:jni/jni.dart';
 import 'package:jni_flutter/jni_flutter.dart' as jni_flutter;
 
 import 'bindings.g.dart' as android;
+import 'contacts.dart';
 import 'models.dart';
 import 'search.dart';
 
@@ -498,6 +499,306 @@ class TelephonyKit {
       isStarred: row['starred'] == '1',
     );
   });
+
+  // ---------------------------------------------------------------------------
+  // Contact details and changes
+  // ---------------------------------------------------------------------------
+
+  static const _contactsUri = 'content://com.android.contacts/contacts';
+  static const _rawContactsUri = 'content://com.android.contacts/raw_contacts';
+  static const _dataUri = 'content://com.android.contacts/data';
+  static const _contactSort =
+      'starred DESC, display_name COLLATE LOCALIZED ASC';
+  static const _contactColumns = [
+    '_id',
+    'lookup',
+    'display_name',
+    'photo_uri',
+    'photo_thumb_uri',
+    'starred',
+  ];
+  static const _dataColumns = [
+    'contact_id',
+    'mimetype',
+    'data1',
+    'data2',
+    'data3',
+    'data4',
+    'data5',
+    'data6',
+  ];
+
+  /// Everything saved on the contact with [id] (a [Contact.id] or
+  /// [ContactDetails.id]): name parts, all phones, emails, addresses,
+  /// company, websites, note and birthday. Null if there is no such contact.
+  ///
+  /// Needs `TelephonyPermission.readContacts`.
+  ContactDetails? getContact(String id) => _guard('Reading contact', () {
+    if (id.isEmpty) return null;
+    return _loadContacts(
+      selection: '_id = ?',
+      args: [id],
+      limit: 1,
+    ).firstOrNull;
+  });
+
+  /// Lists contacts with all their details, favorites first, then by name.
+  ///
+  /// Unlike [searchContacts] this also returns contacts without a phone
+  /// number. A non-empty [query] matches the name, an email address, or a
+  /// phone number in any format. Needs `TelephonyPermission.readContacts`.
+  List<ContactDetails> getContacts({
+    String query = '',
+    int limit = 100,
+  }) => _guard('Reading contacts', () {
+    final text = query.trim();
+    if (text.isEmpty) return _loadContacts(limit: limit);
+
+    // Contacts whose phone or email matches, found in the data table.
+    final patterns = numberSearchPatterns(text);
+    const digitsOnly =
+        "REPLACE(REPLACE(REPLACE(REPLACE(REPLACE(data1, ' ', ''), "
+        "'-', ''), '(', ''), ')', ''), '.', '')";
+    final dataRows = _queryRows(
+      _dataUri,
+      projection: const ['contact_id'],
+      selection:
+          '(mimetype = ? AND data1 LIKE ?)'
+          '${patterns.isEmpty ? '' : ' OR (mimetype = ? AND (${patterns.map((_) => '$digitsOnly LIKE ?').join(' OR ')}))'}',
+      selectionArgs: [
+        ContactMime.email,
+        '%$text%',
+        if (patterns.isNotEmpty) ContactMime.phone,
+        for (final p in patterns) '%$p%',
+      ],
+      limit: 500,
+    );
+    final ids = {
+      for (final r in dataRows)
+        if (r['contact_id'] != null) r['contact_id']!,
+    };
+    return _loadContacts(
+      selection:
+          'display_name LIKE ?'
+          '${ids.isEmpty ? '' : ' OR _id IN (${List.filled(ids.length, '?').join(',')})'}',
+      args: ['%$text%', ...ids],
+      limit: limit,
+    );
+  });
+
+  /// Reads contacts and their data with two queries per 200 contacts.
+  List<ContactDetails> _loadContacts({
+    String? selection,
+    List<String> args = const [],
+    required int limit,
+  }) {
+    final contactRows = _queryRows(
+      _contactsUri,
+      projection: _contactColumns,
+      selection: selection,
+      selectionArgs: args,
+      sortOrder: _contactSort,
+      limit: limit,
+    );
+    final dataByContact = <String, List<Map<String, String?>>>{};
+    for (var i = 0; i < contactRows.length; i += 200) {
+      final chunk = [
+        for (final r in contactRows.skip(i).take(200)) r['_id'] ?? '',
+      ];
+      final rows = _queryRows(
+        _dataUri,
+        projection: _dataColumns,
+        selection:
+            'contact_id IN (${List.filled(chunk.length, '?').join(',')}) '
+            'AND mimetype IN (${List.filled(ContactMime.managed.length, '?').join(',')})',
+        selectionArgs: [...chunk, ...ContactMime.managed],
+        limit: chunk.length * 80,
+      );
+      for (final row in rows) {
+        dataByContact.putIfAbsent(row['contact_id'] ?? '', () => []).add(row);
+      }
+    }
+    return [
+      for (final row in contactRows)
+        buildContactDetails(row, dataByContact[row['_id']] ?? const []),
+    ];
+  }
+
+  /// Adds a new contact and returns its id.
+  ///
+  /// Only the fields set on [contact] are saved ([ContactDetails.id] and
+  /// [ContactDetails.photoUri] are ignored). Pass [accountType] and
+  /// [accountName] (for example `com.google` and an email) to save into a
+  /// synced account; without them Android chooses the default account or
+  /// keeps the contact on the device.
+  ///
+  /// Throws [TelephonyException] if there is nothing to save or Android
+  /// refuses. Needs `TelephonyPermission.writeContacts`.
+  String addContact(
+    ContactDetails contact, {
+    String? accountType,
+    String? accountName,
+  }) => _guard('Adding contact', () {
+    final rows = contactDataRows(contact);
+    if (rows.isEmpty) {
+      throw const TelephonyException(
+        'Adding contact failed: give the contact a name, number or email.',
+      );
+    }
+    final resolver = _context.contentResolver;
+    if (resolver == null) {
+      throw const TelephonyException('Adding contact failed: no resolver.');
+    }
+    final raw = android.ContentValues();
+    if (accountType != null && accountName != null) {
+      raw.put$8('account_type'.toJString(), accountType.toJString());
+      raw.put$8('account_name'.toJString(), accountName.toJString());
+    }
+    final rawUri = resolver.insert(
+      android.Uri.parse(_rawContactsUri.toJString()),
+      raw,
+    );
+    final rawId = rawUri?.toString().split('/').last ?? '';
+    if (rawId.isEmpty) {
+      throw const TelephonyException(
+        'Adding contact failed: Android did not accept the contact. '
+        'Check WRITE_CONTACTS.',
+      );
+    }
+    try {
+      for (final row in rows) {
+        _insertData(resolver, rawId, row);
+      }
+    } catch (_) {
+      _delete(_rawContactsUri, '_id = ?', [rawId]);
+      rethrow;
+    }
+    final contactRows = _queryRows(
+      _rawContactsUri,
+      projection: const ['contact_id'],
+      selection: '_id = ?',
+      selectionArgs: [rawId],
+      limit: 1,
+    );
+    final id = contactRows.firstOrNull?['contact_id'] ?? '';
+    if (contact.isStarred && id.isNotEmpty) setContactStarred(id, true);
+    return id;
+  });
+
+  void _insertData(
+    android.ContentResolver resolver,
+    String rawId,
+    Map<String, Object> row,
+  ) {
+    final values = android.ContentValues()
+      ..put$6('raw_contact_id'.toJString(), int.parse(rawId).toJLong());
+    row.forEach((key, value) {
+      if (value is int) {
+        values.put$5(key.toJString(), value.toJInteger());
+      } else {
+        values.put$8(key.toJString(), value.toString().toJString());
+      }
+    });
+    if (resolver.insert(android.Uri.parse(_dataUri.toJString()), values) ==
+        null) {
+      throw const TelephonyException('Saving contact data failed.');
+    }
+  }
+
+  /// Saves changes to the contact with [ContactDetails.id].
+  ///
+  /// The name, phones, emails, addresses, company, nickname, websites, note
+  /// and birthday are replaced by what is on [contact], so read the contact
+  /// with [getContact], change it with [ContactDetails.copyWith] and pass it
+  /// back. Photos, groups and other data kinds are not touched, and
+  /// [ContactDetails.isStarred] is saved too.
+  ///
+  /// New data is saved before the old data is removed, so a failure does not
+  /// lose the contact. Returns false if the contact no longer exists. Needs
+  /// `TelephonyPermission.writeContacts`.
+  bool updateContact(ContactDetails contact) => _guard('Updating contact', () {
+    final id = contact.id;
+    if (id.isEmpty) {
+      throw ArgumentError.value(contact.id, 'contact.id', 'must not be empty');
+    }
+    final resolver = _context.contentResolver;
+    if (resolver == null) return false;
+    final raws = _queryRows(
+      _rawContactsUri,
+      projection: const ['_id'],
+      selection: 'contact_id = ? AND deleted = 0',
+      selectionArgs: [id],
+      sortOrder: '_id ASC',
+      limit: 1,
+    );
+    final rawId = raws.firstOrNull?['_id'];
+    if (rawId == null) return false;
+
+    final oldRows = _queryRows(
+      _dataUri,
+      projection: const ['_id'],
+      selection:
+          'contact_id = ? AND mimetype IN '
+          '(${List.filled(ContactMime.managed.length, '?').join(',')})',
+      selectionArgs: [id, ...ContactMime.managed],
+      limit: 1000,
+    );
+    for (final row in contactDataRows(contact)) {
+      _insertData(resolver, rawId, row);
+    }
+    final oldIds = [for (final r in oldRows) r['_id'] ?? ''];
+    for (var i = 0; i < oldIds.length; i += 200) {
+      final chunk = oldIds.skip(i).take(200).toList();
+      _delete(
+        _dataUri,
+        '_id IN (${List.filled(chunk.length, '?').join(',')})',
+        chunk,
+      );
+    }
+    setContactStarred(id, contact.isStarred);
+    return true;
+  });
+
+  /// Marks the contact with [id] as a favorite or not. Returns false if the
+  /// contact does not exist. Needs `TelephonyPermission.writeContacts`.
+  bool setContactStarred(String id, bool starred) =>
+      _guard('Changing favorite', () {
+        final resolver = _context.contentResolver;
+        if (resolver == null || id.isEmpty) return false;
+        final values = android.ContentValues()
+          ..put$5('starred'.toJString(), (starred ? 1 : 0).toJInteger());
+        return resolver.update$1(
+              android.Uri.parse(_contactsUri.toJString()),
+              values,
+              '_id = ?'.toJString(),
+              JArray.of(JString.type, [id.toJString()]),
+            ) >
+            0;
+      });
+
+  /// Deletes the contacts with these ids (all their raw contacts, so a
+  /// contact merged from several accounts is removed everywhere). Returns how
+  /// many contacts were deleted. Needs `TelephonyPermission.writeContacts`.
+  ///
+  /// This cannot be undone. Contacts in a synced account are removed from the
+  /// account the next time it syncs.
+  int deleteContacts(Iterable<String> ids) => _guard('Deleting contacts', () {
+    final list = ids.where((id) => id.isNotEmpty).toSet().toList();
+    var deleted = 0;
+    for (var i = 0; i < list.length; i += 200) {
+      final chunk = list.skip(i).take(200).toList();
+      deleted += _delete(
+        _contactsUri,
+        '_id IN (${List.filled(chunk.length, '?').join(',')})',
+        chunk,
+      );
+    }
+    return deleted;
+  });
+
+  /// Deletes the contact with [id]. Returns whether it existed. See
+  /// [deleteContacts].
+  bool deleteContact(String id) => deleteContacts([id]) > 0;
 
   // ---------------------------------------------------------------------------
   // Call log changes

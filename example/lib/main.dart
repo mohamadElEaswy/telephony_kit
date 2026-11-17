@@ -5,6 +5,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:telephony_kit/telephony_kit.dart';
 
 import 'blocking_page.dart';
+import 'contacts_page.dart';
 import 'in_call_controls.dart';
 import 'messages_page.dart';
 import 'network_section.dart';
@@ -550,69 +551,6 @@ class _RecentsPageState extends State<RecentsPage> {
 // -----------------------------------------------------------------------------
 // Contacts
 // -----------------------------------------------------------------------------
-
-class ContactsPage extends StatefulWidget {
-  const ContactsPage({super.key});
-
-  @override
-  State<ContactsPage> createState() => _ContactsPageState();
-}
-
-class _ContactsPageState extends State<ContactsPage> {
-  String _query = '';
-
-  @override
-  Widget build(BuildContext context) {
-    if (!telephony.hasPermission(TelephonyPermission.readContacts)) {
-      return const _Message('Grant the contacts permission to see contacts.');
-    }
-    Widget list;
-    try {
-      final contacts = telephony.searchContacts(_query, limit: 200);
-      list = contacts.isEmpty
-          ? const _Message('No contacts found.')
-          : ListView.builder(
-              itemCount: contacts.length,
-              itemBuilder: (context, i) {
-                final c = contacts[i];
-                return ExpansionTile(
-                  leading: CircleAvatar(
-                    child: Text(c.displayName.isEmpty ? '?' : c.displayName[0]),
-                  ),
-                  title: Row(
-                    children: [
-                      Flexible(child: Text(c.displayName)),
-                      if (c.isStarred)
-                        const Icon(Icons.star, size: 16, color: Colors.amber),
-                    ],
-                  ),
-                  subtitle: Text(c.phones.isEmpty ? '' : '${c.phones.first}'),
-                  children: [
-                    for (final phone in c.phones)
-                      ListTile(
-                        title: Text(phone.number),
-                        subtitle: Text(phone.label),
-                        trailing: const Icon(Icons.call),
-                        onTap: () => telephony.openDialer(phone.number),
-                      ),
-                  ],
-                );
-              },
-            );
-    } on TelephonyException catch (e) {
-      list = _Message(e.message);
-    }
-    return Column(
-      children: [
-        _SearchField(
-          hint: 'Search contacts by name or number',
-          onChanged: (q) => setState(() => _query = q),
-        ),
-        Expanded(child: list),
-      ],
-    );
-  }
-}
 
 class _SearchField extends StatelessWidget {
   const _SearchField({required this.hint, required this.onChanged});
