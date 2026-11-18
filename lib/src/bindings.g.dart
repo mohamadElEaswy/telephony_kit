@@ -4771,8 +4771,8 @@ final class $BlockedNumberContract$Type$
 ///
 /// Receives call events from CallManager.
 ///
-///Implemented from Dart through jnigen. All callbacks are delivered on the
-///Android main thread and must return quickly.
+/// Implemented from Dart through jnigen. All callbacks are delivered on the
+/// Android main thread and must return quickly.
 extension type CallEventListener._(jni$_.JObject _$this)
     implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
@@ -5007,8 +5007,8 @@ extension CallEventListener$$Methods on CallEventListener {
   /// from: `public abstract void onCallDisconnected(java.lang.String callId, int code, java.lang.String label, java.lang.String reason)`
   ///
   /// A call ended. {@code code} is one of {@code android.telecom.DisconnectCause}
-  ///codes, {@code label} a short text for the user (may be empty) and {@code
-  ///reason} a technical reason for logs. Sent just before \#onCallRemoved.
+  /// codes, {@code label} a short text for the user (may be empty) and {@code
+  /// reason} a technical reason for logs. Sent just before \#onCallRemoved.
   void onCallDisconnected(
     jni$_.JString? callId,
     core$_.int code,
@@ -5058,8 +5058,8 @@ extension CallEventListener$$Methods on CallEventListener {
   /// from: `public abstract void onPostDialWait(java.lang.String callId, java.lang.String remaining)`
   ///
   /// The dialed number had a wait character (';'). Ask the user, then call
-  ///CallManager\#continuePostDial. {@code remaining} is the digits
-  ///still to send.
+  /// CallManager\#continuePostDial. {@code remaining} is the digits
+  /// still to send.
   void onPostDialWait(jni$_.JString? callId, jni$_.JString? remaining) {
     final _$$selfRef = reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -5133,7 +5133,7 @@ extension CallEventListener$$Methods on CallEventListener {
   /// from: `public abstract void onAudioStateChanged(boolean muted, int route)`
   ///
   /// The audio state changed. {@code route} is one of
-  ///{@code android.telecom.CallAudioState.ROUTE_*}.
+  /// {@code android.telecom.CallAudioState.ROUTE_*}.
   void onAudioStateChanged(core$_.bool muted, core$_.int route) {
     final _$$selfRef = reference;
     _onAudioStateChanged(
@@ -5282,7 +5282,7 @@ final class $CallEventListener$Type$ extends jni$_.JType<CallEventListener> {
 /// from: `dev.telephonykit.telephony_kit.CallManager`
 ///
 /// Tracks calls reported by TelephonyKitInCallService and exposes
-///simple, id based controls that are easy to call from Dart through jnigen.
+/// simple, id based controls that are easy to call from Dart through jnigen.
 extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/CallManager',
@@ -5387,8 +5387,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void setShowCallNotifications(boolean enabled)`
   ///
   /// Whether incoming and ongoing call notifications are shown (default true).
-  ///The incoming notification has answer and decline buttons and opens the
-  ///app full screen on the lock screen.
+  /// The incoming notification has answer and decline buttons and opens the
+  /// app full screen on the lock screen.
   static set showCallNotifications(core$_.bool enabled) {
     final _$$classRef = _class.reference;
     _set$showCallNotifications(
@@ -5424,8 +5424,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void setProximitySensorEnabled(boolean enabled)`
   ///
   /// Whether the screen turns off when the phone is near the ear during a
-  ///call (default true). Only applies to calls that are active or dialing
-  ///with audio on the earpiece or a wired headset.
+  /// call (default true). Only applies to calls that are active or dialing
+  /// with audio on the earpiece or a wired headset.
   static set proximitySensorEnabled(core$_.bool enabled) {
     final _$$classRef = _class.reference;
     _set$proximitySensorEnabled(
@@ -5903,7 +5903,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean rejectWithMessage(java.lang.String callId, java.lang.String message)`
   ///
   /// Rejects a ringing call and sends {@code message} to the caller as a text
-  ///message. Telecom sends it; the app needs no SMS permission.
+  /// message. Telecom sends it; the app needs no SMS permission.
   static core$_.bool rejectWithMessage(
     jni$_.JString? callId,
     jni$_.JString? message,
@@ -5946,7 +5946,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The quick reply texts Telecom offers for a ringing call (the user's
-  ///"respond via message" settings), or an empty array if not loaded yet.
+  /// "respond via message" settings), or an empty array if not loaded yet.
   static jni$_.JArray<jni$_.JString?>? getCannedTextResponses(
     jni$_.JString? callId,
   ) {
@@ -6238,7 +6238,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Digits waiting to be sent after a wait character (';') in the dialed
-  ///number, or "" when the call is not waiting.
+  /// number, or "" when the call is not waiting.
   static jni$_.JString? getPostDialRemaining(jni$_.JString? callId) {
     final _$$classRef = _class.reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -6276,7 +6276,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean continuePostDial(java.lang.String callId, boolean proceed)`
   ///
   /// Answers a post-dial wait: {@code proceed} true sends the remaining
-  ///digits, false drops them. Returns false if the call is unknown.
+  /// digits, false drops them. Returns false if the call is unknown.
   static core$_.bool continuePostDial(
     jni$_.JString? callId,
     core$_.bool proceed,
@@ -6317,8 +6317,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getDisconnectCode(java.lang.String callId)`
   ///
   /// Why the call ended, one of {@code android.telecom.DisconnectCause} codes
-  ///(for example BUSY is 7), or -1 if it has not ended. Still available for a
-  ///while after the call was removed.
+  /// (for example BUSY is 7), or -1 if it has not ended. Still available for a
+  /// while after the call was removed.
   static core$_.int getDisconnectCode(jni$_.JString? callId) {
     final _$$classRef = _class.reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -6467,8 +6467,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Ids of the phone accounts the user can pick for a call in {@code
-  ///STATE_SELECT_PHONE_ACCOUNT} (an outgoing call on a multi SIM device with
-  ///no default SIM). Empty if the call is unknown.
+  /// STATE_SELECT_PHONE_ACCOUNT} (an outgoing call on a multi SIM device with
+  /// no default SIM). Empty if the call is unknown.
   static jni$_.JArray<jni$_.JString?>? getSelectablePhoneAccountIds(
     jni$_.JString? callId,
   ) {
@@ -6555,7 +6555,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getPhoneAccountSlot(android.content.Context context, java.lang.String accountId)`
   ///
   /// The SIM slot (0 based) of a call capable phone account, or -1 when
-  ///unknown or before Android 11.
+  /// unknown or before Android 11.
   static core$_.int getPhoneAccountSlot(
     Context? context,
     jni$_.JString? accountId,
@@ -6715,8 +6715,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean selectPhoneAccount(java.lang.String callId, java.lang.String accountId, boolean setDefault)`
   ///
   /// Places a call that waits in {@code STATE_SELECT_PHONE_ACCOUNT} on the
-  ///account with this id. {@code setDefault} also makes it the default for
-  ///calls. Returns false if the call or account is unknown.
+  /// account with this id. {@code setDefault} also makes it the default for
+  /// calls. Returns false if the call or account is unknown.
   static core$_.bool selectPhoneAccount(
     jni$_.JString? callId,
     jni$_.JString? accountId,
@@ -6837,7 +6837,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getNumberVerification(java.lang.String callId)`
   ///
   /// STIR/SHAKEN result for the caller's number: 0 not verified, 1 passed, 2
-  ///failed, or -1 when unknown or before Android 11.
+  /// failed, or -1 when unknown or before Android 11.
   static core$_.int getNumberVerification(jni$_.JString? callId) {
     final _$$classRef = _class.reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -7543,7 +7543,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean swapCalls()`
   ///
   /// Swaps between an active and a held call: holds the active one and
-  ///resumes the other. Use for call waiting.
+  /// resumes the other. Use for call waiting.
   static core$_.bool swapCalls() {
     final _$$classRef = _class.reference;
     return _swapCalls(_$$classRef.pointer, _id_swapCalls.pointer).boolean;
@@ -7676,7 +7676,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The name of a Bluetooth device, or an empty string. Needs
-  ///BLUETOOTH_CONNECT on Android 12+.
+  /// BLUETOOTH_CONNECT on Android 12+.
   static jni$_.JString? getBluetoothDeviceName(jni$_.JString? address) {
     final _$$classRef = _class.reference;
     final _$address = address?.reference ?? jni$_.jNullReference;
@@ -7770,8 +7770,8 @@ final class $CallManager$Type$ extends jni$_.JType<CallManager> {
 ///
 /// Block rules applied by TelephonyKitCallScreeningService.
 ///
-///Rules are saved in SharedPreferences so they work even when the Flutter
-///app is not running.
+/// Rules are saved in SharedPreferences so they work even when the Flutter
+/// app is not running.
 extension type CallScreening._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/CallScreening',
@@ -8369,8 +8369,8 @@ extension type CallScreening._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean isEmergencyNumber(android.content.Context context, java.lang.String number)`
   ///
   /// True if {@code number} is an emergency number in the current country,
-  ///such as 112 or 911. Uses {@code TelephonyManager.isEmergencyNumber} on
-  ///Android 10+ and {@code PhoneNumberUtils} before.
+  /// such as 112 or 911. Uses {@code TelephonyManager.isEmergencyNumber} on
+  /// Android 10+ and {@code PhoneNumberUtils} before.
   static core$_.bool isEmergencyNumber(
     Context? context,
     jni$_.JString? number,
@@ -8400,8 +8400,8 @@ final class $CallScreening$Type$ extends jni$_.JType<CallScreening> {
 ///
 /// Receives "something changed" notifications from ChangeMonitor.
 ///
-///Implemented from Dart through jnigen. Callbacks arrive on the Android
-///main thread and must return quickly.
+/// Implemented from Dart through jnigen. Callbacks arrive on the Android
+/// main thread and must return quickly.
 extension type ChangeListener._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/ChangeListener',
@@ -8550,8 +8550,8 @@ final class $ChangeListener$Type$ extends jni$_.JType<ChangeListener> {
 /// from: `dev.telephonykit.telephony_kit.ChangeMonitor`
 ///
 /// Watches a content provider URI (contacts, call log, SMS) and reports
-///changes. ContentObserver is an abstract class, so it cannot be
-///implemented from Dart.
+/// changes. ContentObserver is an abstract class, so it cannot be
+/// implemented from Dart.
 extension type ChangeMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/ChangeMonitor',
@@ -8593,7 +8593,7 @@ extension type ChangeMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `synchronized static public int start(android.content.Context context, java.lang.String uri, dev.telephonykit.telephony_kit.ChangeListener listener)`
   ///
   /// Starts watching {@code uri} (including everything below it). Returns a
-  ///token for \#stop. The caller needs read access to the provider.
+  /// token for \#stop. The caller needs read access to the provider.
   static core$_.int start(
     Context? context,
     jni$_.JString? uri,
@@ -8660,6 +8660,171 @@ final class $ChangeMonitor$Type$ extends jni$_.JType<ChangeMonitor> {
   String get signature => r'Ldev/telephonykit/telephony_kit/ChangeMonitor;';
 }
 
+/// from: `dev.telephonykit.telephony_kit.ContactPager`
+///
+/// Builds the ordered list of contact ids for a search once, natively, and
+/// hands out pages of it.
+///
+/// Scanning thousands of rows through JNI one cell at a time would block
+/// the UI, so this class does the scan in Java and keeps only the ids (a few
+/// bytes per contact). Dart then loads the details of one page at a time.
+///
+/// Each query keeps a snapshot until \#prepare is called again with
+/// {@code refresh} set, so offsets stay stable while the user scrolls even if
+/// contacts change. The four most recently used queries are cached.
+extension type ContactPager._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/ContactPager',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<ContactPager> type = $ContactPager$Type$();
+  static final _id_prepare = _class.staticMethodId(
+    r'prepare',
+    r'(Landroid/content/Context;Ljava/lang/String;Z)I',
+  );
+
+  static final _prepare =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `synchronized static public int prepare(android.content.Context context, java.lang.String query, boolean refresh)`
+  ///
+  /// Builds (or, with {@code refresh} false, reuses) the snapshot for
+  /// {@code query} and returns how many contacts match. An empty query matches
+  /// every contact. Needs READ_CONTACTS.
+  static core$_.int prepare(
+    Context? context,
+    jni$_.JString? query,
+    core$_.bool refresh,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$query = query?.reference ?? jni$_.jNullReference;
+    return _prepare(
+      _$$classRef.pointer,
+      _id_prepare.pointer,
+      _$context.pointer,
+      _$query.pointer,
+      refresh ? 1 : 0,
+    ).integer;
+  }
+
+  static final _id_page = _class.staticMethodId(
+    r'page',
+    r'(Landroid/content/Context;Ljava/lang/String;II)[Ljava/lang/String;',
+  );
+
+  static final _page =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                    jni$_.Int32,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              core$_.int,
+            )
+          >();
+
+  /// from: `synchronized static public java.lang.String[] page(android.content.Context context, java.lang.String query, int offset, int limit)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Up to {@code limit} contact ids starting at {@code offset}, in list order
+  /// (favorites first, then by name). Builds the snapshot first if needed.
+  static jni$_.JArray<jni$_.JString?>? page(
+    Context? context,
+    jni$_.JString? query,
+    core$_.int offset,
+    core$_.int limit,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$query = query?.reference ?? jni$_.jNullReference;
+    return _page(
+      _$$classRef.pointer,
+      _id_page.pointer,
+      _$context.pointer,
+      _$query.pointer,
+      offset,
+      limit,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+
+  static final _id_clear = _class.staticMethodId(r'clear', r'()V');
+
+  static final _clear =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `synchronized static public void clear()`
+  ///
+  /// Drops every cached snapshot, for example after contacts changed.
+  static void clear() {
+    final _$$classRef = _class.reference;
+    _clear(_$$classRef.pointer, _id_clear.pointer).check();
+  }
+}
+
+final class $ContactPager$Type$ extends jni$_.JType<ContactPager> {
+  @jni$_.internal
+  const $ContactPager$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/ContactPager;';
+}
+
 /// from: `dev.telephonykit.telephony_kit.ContactTools`
 ///
 /// Contact photos and the system contact screens.
@@ -8705,8 +8870,8 @@ extension type ContactTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The contact's photo bytes (JPEG or PNG), or an empty array if it has
-  ///none. {@code full} reads the high resolution photo when there is one.
-  ///Needs READ_CONTACTS.
+  /// none. {@code full} reads the high resolution photo when there is one.
+  /// Needs READ_CONTACTS.
   static jni$_.JByteArray? readPhoto(
     Context? context,
     jni$_.JString? contactId,
@@ -8758,8 +8923,8 @@ extension type ContactTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean writePhoto(android.content.Context context, java.lang.String contactId, byte[] bytes)`
   ///
   /// Sets the contact's photo to {@code bytes} (an encoded image), or removes
-  ///it when {@code bytes} is empty. Returns false if the contact does not
-  ///exist. Needs WRITE_CONTACTS.
+  /// it when {@code bytes} is empty. Returns false if the contact does not
+  /// exist. Needs WRITE_CONTACTS.
   static core$_.bool writePhoto(
     Context? context,
     jni$_.JString? contactId,
@@ -8896,8 +9061,8 @@ extension type ContactTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void insert(android.content.Context context, java.lang.String name, java.lang.String phone, java.lang.String email)`
   ///
   /// Opens the system "new contact" screen, filled with whatever of {@code
-  ///name}, {@code phone} and {@code email} is not empty. The user saves it
-  ///there, so no permission is needed.
+  /// name}, {@code phone} and {@code email} is not empty. The user saves it
+  /// there, so no permission is needed.
   static void insert(
     Context? context,
     jni$_.JString? name,
@@ -8966,8 +9131,8 @@ extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The device's own phone numbers, one {@code subscriptionId<TAB>slot<TAB>number}
-  ///line per active SIM. Numbers are often empty because the carrier did not
-  ///store them. Needs READ_PHONE_NUMBERS (or READ_PHONE_STATE before Android 13).
+  /// line per active SIM. Numbers are often empty because the carrier did not
+  /// store them. Needs READ_PHONE_NUMBERS (or READ_PHONE_STATE before Android 13).
   static jni$_.JArray<jni$_.JString?>? getPhoneNumbers(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -9005,8 +9170,8 @@ extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Nearby cells as a JSON array. Each item has {@code type} (lte, nr, gsm,
-  ///wcdma, cdma), {@code registered}, {@code dbm}, {@code level} and {@code
-  ///cellId} (-1 if unknown). Needs ACCESS_FINE_LOCATION.
+  /// wcdma, cdma), {@code registered}, {@code dbm}, {@code level} and {@code
+  /// cellId} (-1 if unknown). Needs ACCESS_FINE_LOCATION.
   static jni$_.JString? getCellInfoJson(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -9043,7 +9208,7 @@ extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getSignalDbm(android.content.Context context)`
   ///
   /// The signal strength of the serving cell in dBm, or Integer\#MIN_VALUE
-  ///if unknown. Needs Android 10+ and READ_PHONE_STATE.
+  /// if unknown. Needs Android 10+ and READ_PHONE_STATE.
   static core$_.int getSignalDbm(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -9248,10 +9413,10 @@ final class $DeviceTools$Type$ extends jni$_.JType<DeviceTools> {
 /// from: `dev.telephonykit.telephony_kit.DialIntents`
 ///
 /// Reads the number from a dial intent ({@code ACTION_DIAL} or {@code
-///ACTION_VIEW} with a {@code tel:} uri) that opened the activity.
+/// ACTION_VIEW} with a {@code tel:} uri) that opened the activity.
 ///
-///The default dialer must handle these intents. Other apps send them
-///when the user taps a phone number.
+/// The default dialer must handle these intents. Other apps send them
+/// when the user taps a phone number.
 extension type DialIntents._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/DialIntents',
@@ -9286,8 +9451,8 @@ extension type DialIntents._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Returns the number of the dial intent the activity was started with, or
-  ///an empty string, and marks the intent as handled so the number is only
-  ///returned once. Returns "" for a dial intent without a number.
+  /// an empty string, and marks the intent as handled so the number is only
+  /// returned once. Returns "" for a dial intent without a number.
   static jni$_.JString? takeNumber(Activity? activity) {
     final _$$classRef = _class.reference;
     final _$activity = activity?.reference ?? jni$_.jNullReference;
@@ -9326,7 +9491,7 @@ extension type DialIntents._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Extras for {@code TelecomManager.placeCall}: the SIM to use (or null) and
-  ///the starting video state ({@code VideoProfile.STATE_*}; 0 for audio).
+  /// the starting video state ({@code VideoProfile.STATE_*}; 0 for audio).
   static Bundle? callExtras(PhoneAccountHandle? handle, core$_.int videoState) {
     final _$$classRef = _class.reference;
     final _$handle = handle?.reference ?? jni$_.jNullReference;
@@ -9351,8 +9516,8 @@ final class $DialIntents$Type$ extends jni$_.JType<DialIntents> {
 /// from: `dev.telephonykit.telephony_kit.MissedCallNotifications`
 ///
 /// The missed call notification. As the default dialer the app is asked to
-///show it through TelephonyKitMissedCallReceiver; Telecom then does not
-///show its own.
+/// show it through TelephonyKitMissedCallReceiver; Telecom then does not
+/// show its own.
 extension type MissedCallNotifications._(jni$_.JObject _$this)
     implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
@@ -9683,8 +9848,8 @@ extension NetworkEventListener$$Methods on NetworkEventListener {
   /// from: `public abstract void onNetworkTypeChanged(int networkType, int overrideType)`
   ///
   /// {@code networkType} is a {@code TelephonyManager.NETWORK_TYPE_*} value.
-  ///{@code overrideType} is a {@code TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_*}
-  ///value (for example 5G NSA shown on LTE), or 0.
+  /// {@code overrideType} is a {@code TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_*}
+  /// value (for example 5G NSA shown on LTE), or 0.
   void onNetworkTypeChanged(core$_.int networkType, core$_.int overrideType) {
     final _$$selfRef = reference;
     _onNetworkTypeChanged(
@@ -9720,8 +9885,8 @@ extension NetworkEventListener$$Methods on NetworkEventListener {
   /// from: `public abstract void onCallStateChanged(int state, java.lang.String number)`
   ///
   /// Device call state: 0 idle, 1 ringing, 2 off hook. Only delivered when
-  ///READ_PHONE_STATE is granted. {@code number} is usually empty on modern
-  ///Android.
+  /// READ_PHONE_STATE is granted. {@code number} is usually empty on modern
+  /// Android.
   void onCallStateChanged(core$_.int state, jni$_.JString? number) {
     final _$$selfRef = reference;
     final _$number = number?.reference ?? jni$_.jNullReference;
@@ -9953,7 +10118,7 @@ extension type NetworkMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getDataNetworkType(android.content.Context context)`
   ///
   /// The current data network type ({@code TelephonyManager.NETWORK_TYPE_*}),
-  ///or 0 if unknown. Needs READ_PHONE_STATE.
+  /// or 0 if unknown. Needs READ_PHONE_STATE.
   static core$_.int getDataNetworkType(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -10311,8 +10476,8 @@ extension ScreeningListener$$Methods on ScreeningListener {
   /// from: `public abstract void onCallScreened(java.lang.String number, int action, java.lang.String reason)`
   ///
   /// {@code action} is CallScreening\#ACTION_ALLOW,
-  ///CallScreening\#ACTION_SILENCE or CallScreening\#ACTION_REJECT.
-  ///{@code reason} is a short machine readable reason such as "blocked_number".
+  /// CallScreening\#ACTION_SILENCE or CallScreening\#ACTION_REJECT.
+  /// {@code reason} is a short machine readable reason such as "blocked_number".
   void onCallScreened(
     jni$_.JString? number,
     core$_.int action,
@@ -10435,8 +10600,8 @@ extension type SmsHelper._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void send(android.content.Context context, java.lang.String destination, java.lang.String text, int subscriptionId, dev.telephonykit.telephony_kit.ResultListener listener)`
   ///
   /// Sends {@code text} to {@code destination}. Long messages are split into
-  ///parts. Pass a subscription id to pick the SIM, or -1 for the default.
-  ///Needs SEND_SMS. The listener gets the number of parts on success.
+  /// parts. Pass a subscription id to pick the SIM, or -1 for the default.
+  /// Needs SEND_SMS. The listener gets the number of parts on success.
   static void send(
     Context? context,
     jni$_.JString? destination,
@@ -10524,8 +10689,8 @@ extension type SmsHelper._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean requestDefaultLegacy(android.app.Activity activity, int requestCode)`
   ///
   /// Shows the system prompt that makes this app the default SMS app. Use it
-  ///before Android 10; from Android 10 the SMS role is requested instead.
-  ///Returns false if there is no activity.
+  /// before Android 10; from Android 10 the SMS role is requested instead.
+  /// Returns false if there is no activity.
   static core$_.bool requestDefaultLegacy(
     Activity? activity,
     core$_.int requestCode,
@@ -10596,7 +10761,7 @@ extension type UssdHelper._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void send(android.content.Context context, java.lang.String code, int subscriptionId, dev.telephonykit.telephony_kit.ResultListener listener)`
   ///
   /// Sends {@code code}. Pass a subscription id to use a specific SIM, or -1
-  ///for the default. Needs CALL_PHONE and Android 8.0+.
+  /// for the default. Needs CALL_PHONE and Android 8.0+.
   static void send(
     Context? context,
     jni$_.JString? code,

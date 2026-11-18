@@ -34,7 +34,7 @@ USSD codes and send SMS.
 | Call log and call log search | `READ_CALL_LOG` |
 | Delete call log entries, mark missed calls seen, add entries | `WRITE_CALL_LOG` |
 | Call log statistics and grouped rows, location, SIM and Wi-Fi/video/HD flags | `READ_CALL_LOG` |
-| Contact search, caller lookup by number, every detail of a contact | `READ_CONTACTS` |
+| Contact search, caller lookup by number, every detail of a contact, paging through thousands of contacts | `READ_CONTACTS` |
 | Add, edit, delete contacts and favorites, photos, groups, merge and split, vCard import and export, contact accounts | `WRITE_CONTACTS` |
 | Watch for contact, call log and SMS changes | the matching read permission |
 | Open the system contact screens | nothing |
@@ -167,6 +167,36 @@ and leaves photos, groups and other data alone. `addContact` accepts
 Contacts in a synced account are removed from the account when it next syncs.
 Labels such as `Mobile`, `Home` and `Work` map to Android's types; any other
 text becomes a custom label.
+
+### Long contact lists: paging
+
+`getContacts` returns at most `limit` contacts, which is fine for a picker but
+not for a screen that lists all of them. For that, use `getContactsPage`. It
+counts the matches natively and keeps only their ids, then loads the details
+of one small page at a time, so 5,000 contacts scroll without freezing the UI
+or filling memory:
+
+```dart
+var page = telephony.getContactsPage(query: 'sara', pageSize: 50);
+print('${page.totalCount} contacts match');
+show(page.contacts);
+
+// When the list nears its end:
+if (page.hasMore) {
+  page = telephony.getContactsPage(
+    query: 'sara',
+    offset: page.nextOffset,
+    pageSize: 50,
+  );
+  show(page.contacts);
+}
+```
+
+Offset 0 rebuilds the id list, later offsets reuse it, so pages never skip or
+repeat a contact while the user scrolls. Start again from offset 0 for a new
+search, a pull to refresh, or when `contactChanges` fires. Debounce
+search-as-you-type. The example app's Contacts tab is a complete
+infinite-scroll list built this way.
 
 ### Permissions
 

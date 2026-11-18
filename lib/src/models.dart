@@ -598,6 +598,49 @@ class ContactRelation {
   String toString() => label.isEmpty ? name : '$name ($label)';
 }
 
+/// One page of contacts from `TelephonyKit.getContactsPage`.
+///
+/// Load the next page by passing [nextOffset] as the offset, while [hasMore]
+/// is true.
+class ContactPage {
+  const ContactPage({
+    required this.contacts,
+    required this.offset,
+    required this.nextOffset,
+    required this.totalCount,
+  });
+
+  /// An empty page, before anything is loaded.
+  static const empty = ContactPage(
+    contacts: [],
+    offset: 0,
+    nextOffset: 0,
+    totalCount: 0,
+  );
+
+  /// The contacts on this page, in list order (favorites first, then by
+  /// name).
+  final List<ContactDetails> contacts;
+
+  /// Where this page starts in the full list.
+  final int offset;
+
+  /// The offset of the next page. Usually `offset + contacts.length`, but
+  /// larger when a contact was deleted after the list was counted.
+  final int nextOffset;
+
+  /// How many contacts match the query in total.
+  final int totalCount;
+
+  /// Whether there are contacts after this page.
+  bool get hasMore => nextOffset < totalCount;
+
+  @override
+  String toString() =>
+      'ContactPage(offset: $offset, count: ${contacts.length}, '
+      'total: $totalCount)';
+}
+
 /// Everything saved on a contact, and also what you pass to
 /// `TelephonyKit.addContact` and `TelephonyKit.updateContact`.
 ///
