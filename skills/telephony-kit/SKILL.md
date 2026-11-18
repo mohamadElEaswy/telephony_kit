@@ -1,6 +1,6 @@
 ---
 name: telephony-kit
-description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete), USSD balance check or SMS sending on Android.
+description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android.
 ---
 
 # Using telephony_kit in a Flutter app
@@ -55,6 +55,15 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Contacts (pick / caller name) | `searchContacts(query)`, `lookupNumber(number)` |
 | Contact details | `getContacts(query:, limit:)`, `getContact(id)` return every field (`ContactDetails`) |
 | Add / edit / delete contacts | `addContact(details)`, `updateContact(details)` (read, `copyWith`, save), `deleteContact(id)`, `deleteContacts(ids)`, `setContactStarred(id, bool)` (WRITE_CONTACTS) |
+| Contact photos, groups, accounts | `getContactPhoto/setContactPhoto`, `getContactGroups`, `addContactGroup`, `addContactToGroup`, `getContactAccounts` |
+| Duplicates, merge, vCard | `findDuplicateContacts()`, `mergeContacts(ids)`, `splitContact(id)`, `exportContactsAsVCard()`, `importVCard(text)` |
+| System contact screens | `showContact(id)`, `openContactEditor(id)`, `openNewContactScreen(name:, phone:)` (no permission) |
+| React to data changes | `contactChanges`, `callLogChanges`, `smsChanges`, `incomingSms` streams (re-query when they fire) |
+| Call log extras | `getCallLogStats()`, `getGroupedCallLog()`, `addCallLogEntry(...)`; entries have `geocodedLocation`, `hasVideo`, `isWifi`, `isHd` |
+| SMS threads, MMS, delete | `getSmsThreads()`, `getMmsMessages()` (read only), `isDefaultSmsApp`, `deleteSmsMessages`, `markSmsThreadRead` |
+| Video, verification, RTT | `placeCall(video: true)`, `PhoneCall.isVideo/answerWithVideo`, `numberVerification`, `isWifiCall`, `isHdAudio`, `requestRtt/sendRttText/readRttText` |
+| Forwarding, call waiting | `setCallForwarding(CallForwardingCondition.x, number)`, `cancelCallForwarding`, `queryCallForwarding`, `setCallWaiting(bool)` (USSD) |
+| Device details | `getPhoneNumbers()`, `signalDbm`, `getCellInfo()`, `isMobileDataEnabled`, `isDataRoamingAllowed`, `getEsimInfo()` |
 | Block calls | `screening` rules, `screenedCalls`, system list: `canBlockNumbers`, `blockNumber`, `unblockNumber`, `getBlockedNumbers` |
 | SIM / network | `getSimCards()`, `getNetworkInfo()`, `signalLevel`, `networkGeneration`, `networkEvents` |
 | USSD / voicemail | `await sendUssd('*100#')`, `voicemailNumber`, `callVoicemail()` |
@@ -103,6 +112,25 @@ nickname, websites, note and birthday, so always start from the full contact
 or fields are lost. Photos and groups are untouched. Deleting cannot be
 undone: confirm with the user first. Need `WRITE_CONTACTS` as well as
 `READ_CONTACTS`; `Permission.contacts` requests both.
+
+**Changing SMS needs the SMS role.** Only the default SMS app can delete or
+mark messages read; others silently get `0`. The package does not provide the
+SMS receivers the role requires (see references/manifest.md), so do not
+promise "delete SMS" unless the app implements them. Reading, sending and
+`incomingSms` work without the role. MMS is read only.
+
+**Watching for changes.** Listen to `contactChanges`, `callLogChanges` or
+`smsChanges` and re-query; they only say "something changed" and are
+debounced. Cancel the subscription when the screen goes away.
+
+**Video and RTT.** The package reports video state and can start or answer a
+video call, but never draws video frames; do not promise a video UI. RTT needs
+carrier support: after `requestRtt()` wait for `isRttActive`, and poll
+`readRttText()` on a short timer.
+
+**Forwarding and call waiting** send GSM codes through `sendUssd`, so they
+return the carrier's own text, not a parsed state, and need Android 8+.
+Wi-Fi calling can only be read per call (`isWifiCall`), not as a setting.
 
 **Screening rules** persist on the device and apply when the app is closed.
 Set them once from settings UI; do not rewrite them on every app start.

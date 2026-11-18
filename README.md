@@ -32,11 +32,17 @@ USSD codes and send SMS.
 | Place a call, choose the SIM, call voicemail | `CALL_PHONE` |
 | Network, SIM and phone details, live signal and 2G to 5G events | `READ_PHONE_STATE` for some details |
 | Call log and call log search | `READ_CALL_LOG` |
-| Delete call log entries, mark missed calls seen | `WRITE_CALL_LOG` |
+| Delete call log entries, mark missed calls seen, add entries | `WRITE_CALL_LOG` |
+| Call log statistics and grouped rows, location, SIM and Wi-Fi/video/HD flags | `READ_CALL_LOG` |
 | Contact search, caller lookup by number, every detail of a contact | `READ_CONTACTS` |
-| Add, edit, delete contacts and favorites | `WRITE_CONTACTS` |
+| Add, edit, delete contacts and favorites, photos, groups, merge and split, vCard import and export, contact accounts | `WRITE_CONTACTS` |
+| Watch for contact, call log and SMS changes | the matching read permission |
+| Open the system contact screens | nothing |
 | USSD codes such as `*100#` | `CALL_PHONE`, Android 8.0+ |
-| Send SMS / search SMS | `SEND_SMS` / `READ_SMS` |
+| Send SMS / search SMS, conversations, MMS (read), new SMS stream | `SEND_SMS` / `READ_SMS` |
+| Delete SMS, mark read, default SMS role | the app is the default SMS app |
+| Call forwarding and call waiting (through GSM codes) | `CALL_PHONE`, Android 8.0+ |
+| Phone numbers of the SIMs, mobile data and roaming state, eSIM, signal in dBm, nearby cells | `READ_PHONE_NUMBERS`, `READ_PHONE_STATE`, `ACCESS_FINE_LOCATION` for cells |
 | Default dialer and call screening roles | nothing |
 | Call events, answer, reject (with a text), hang up, hold, DTMF, mute, audio routes and Bluetooth, swap, merge and conference, SIM choice, why a call ended, pause digits, proximity screen off, call and missed call notifications | the app is the default dialer and declares the in-call service |
 | Emergency number check | nothing |
@@ -176,6 +182,9 @@ the ones you use in `android/app/src/main/AndroidManifest.xml`:
 <uses-permission android:name="android.permission.READ_CONTACTS" />
 <!-- Only to add, edit or delete contacts -->
 <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+<!-- Only for SIM phone numbers and nearby cells -->
+<uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 ```
 
 ## Building a dialer app
@@ -502,6 +511,161 @@ declare that in the Play Console. Only declare the permissions for the features
 you use. Read the
 [SMS and Call Log permissions policy](https://support.google.com/googleplay/android-developer/answer/10208820)
 before you publish.
+
+## Contacts in depth
+
+Contacts also hold IM handles, relatives and SIP addresses
+(`ContactDetails.ims`, `relations`, `sipAddresses`), and these are saved by
+`addContact` and `updateContact` like the other fields.
+
+```dart
+// Photos (encoded JPEG/PNG bytes).
+final bytes = telephony.getContactPhoto(id, fullSize: true); // Uint8List?
+telephony.setContactPhoto(id, jpegBytes);  // null removes it
+
+// Accounts and groups (labels).
+final accounts = telephony.getContactAccounts();      // Google, SIM, device
+final groupId = telephony.addContactGroup('Family');  // or pass accountType/accountName
+telephony.addContactToGroup(contactId, groupId);
+telephony.removeContactFromGroup(contactId, groupId);
+final members = telephony.getGroupMembers(groupId);
+telephony.renameContactGroup(groupId, 'Close family');
+telephony.deleteContactGroup(groupId);                // contacts are kept
+for (final g in telephony.getContactGroups()) print('${g.title}: ${g.memberCount}');
+
+// Duplicates: merge them (data is kept) or split them again.
+for (final group in telephony.findDuplicateContacts()) {
+  telephony.mergeContacts(group.map((c) => c.id));
+}
+telephony.splitContact(mergedId);
+
+// vCard (.vcf) text: share it, save it, or import it.
+final vcf = telephony.exportContactsAsVCard();
+final newIds = telephony.importVCard(vcf);
+// Pure Dart versions, no permissions: exportVCard(contacts), parseVCard(text).
+
+// Android's own contact screens (no permission needed for the new contact one).
+telephony.showContact(id);
+telephony.openContactEditor(id);
+telephony.openNewContactScreen(name: 'Sara', phone: '+201001234567');
+
+// Refresh your list when anything changes, here or in another app.
+telephony.contactChanges.listen((_) => reload());
+```
+
+`vCard` import reads versions 2.1, 3.0 and 4.0. Photos are not part of the
+vCard text. Merging and splitting use Android's aggregation rules, so a
+contact that Android re-merges on its own may need `splitContact` again.
+
+## Call log extras
+
+```dart
+// Each entry also has geocodedLocation, subscriptionId, countryIso, isRead
+// and the flags hasVideo, isWifi, isHd, isRtt.
+final stats = telephony.getCallLogStats(from: DateTime(2026, 1, 1));
+print('${stats.first.number}: ${stats.first.total} calls, '
+    '${stats.first.missed} missed, ${stats.first.totalDuration}');
+
+// "Sara (3)" rows: consecutive calls to one number joined.
+final rows = telephony.getGroupedCallLog();
+
+// Pure Dart on a list you already have: callLogStats(entries), groupCallLog(entries).
+
+telephony.addCallLogEntry(number: '+201001234567', type: CallLogType.outgoing,
+    duration: const Duration(minutes: 2));       // WRITE_CALL_LOG
+telephony.callLogChanges.listen((_) => reload()); // READ_CALL_LOG
+```
+
+## SMS and MMS in depth
+
+```dart
+final threads = telephony.getSmsThreads();                 // newest first
+final messages = telephony.searchSms(threadId: threads.first.threadId);
+
+// New messages as they arrive (watches the inbox; no receiver needed).
+telephony.incomingSms.listen((m) => print('${m.address}: ${m.body}'));
+telephony.smsChanges.listen((_) => reload());              // any change
+
+// MMS is read only: text, subject, addresses and attachment URIs.
+for (final mms in telephony.getMmsMessages(limit: 20)) {
+  print('${mms.addresses}: ${mms.text} ${mms.parts.where((p) => p.isImage)}');
+}
+
+// Changing messages is only allowed for the default SMS app.
+if (!telephony.isDefaultSmsApp) telephony.requestDefaultSmsApp();
+telephony.markSmsThreadRead(threadId);
+telephony.deleteSmsMessages([message.id]);
+telephony.deleteSmsThread(threadId);
+```
+
+`requestDefaultSmsApp` shows the system prompt, but Android only offers apps
+that declare the components a default SMS app must have: a receiver for
+`SMS_DELIVER` (permission `BROADCAST_SMS`), one for `WAP_PUSH_DELIVER`
+(`BROADCAST_WAP_PUSH`), an activity for `SENDTO` on `sms:`/`smsto:`/`mms:`/
+`mmsto:`, and a service for `RESPOND_VIA_MESSAGE` (`SEND_RESPOND_VIA_MESSAGE`).
+telephony_kit does not ship these, because a default SMS app must store the
+messages it receives; your app provides them. Sending MMS is not supported.
+`defaultSmsPackage` can be null on devices where Android does not report one;
+use `isDefaultSmsApp` to check your own role.
+
+## Video, caller verification, Wi-Fi calling, RTT and forwarding
+
+On a call (default dialer only):
+
+```dart
+telephony.placeCall('+201001234567', video: true);   // starts a video call
+call.videoState; call.isVideo;                       // 0 audio, 1 TX, 2 RX, 3 both
+call.answerWithVideo();                              // instead of call.answer()
+
+switch (call.numberVerification) {                   // STIR/SHAKEN, Android 11+
+  case NumberVerification.failed: showSpoofWarning();
+  case NumberVerification.passed: showVerifiedBadge();
+  default: break;
+}
+call.isWifiCall;  call.isHdAudio;                    // Wi-Fi calling, HD voice
+
+// Real-time text (Android 9+, needs carrier support).
+call.requestRtt();                                   // then watch call.isRttActive
+if (call.pendingRttRequestId != null) call.respondToRtt(accept: true);
+call.sendRttText('hello');  call.readRttText();      // poll on a short timer
+call.stopRtt();
+```
+
+The package reports video state and lets you start and answer video calls, but
+it does not draw camera or remote video frames. RTT and video changes arrive
+as `CallStateChanged` events; re-read the call when one comes.
+
+Call forwarding and call waiting use the standard GSM codes through
+`sendUssd`, so they work on most carriers and need no privileged permission:
+
+```dart
+await telephony.setCallForwarding(CallForwardingCondition.noReply, '+201001234567');
+final reply = await telephony.queryCallForwarding(CallForwardingCondition.busy);
+await telephony.cancelCallForwarding(CallForwardingCondition.unconditional);
+
+await telephony.setCallWaiting(true);
+await telephony.queryCallWaiting();   // the carrier's own wording
+```
+
+Whether a call is on Wi-Fi is per call (`PhoneCall.isWifiCall`,
+`CallLogEntry.isWifi`). Android gives third-party apps no setting to read
+whether Wi-Fi calling is switched on.
+
+## Device details
+
+```dart
+for (final n in telephony.getPhoneNumbers()) print('slot ${n.slotIndex}: ${n.number}');
+print(telephony.signalDbm);                 // about -50 excellent, -110 poor
+for (final c in telephony.getCellInfo()) print('${c.type} ${c.dbm} dBm');
+print(telephony.isMobileDataEnabled);
+print(telephony.isDataRoamingAllowed);      // the user setting; getNetworkInfo() says if roaming now
+print(telephony.dataConnectionState);
+final esim = telephony.getEsimInfo();       // isSupported, eid (carrier apps only), profiles
+```
+
+A SIM's own number is often empty because carriers do not store it. Cell
+info needs location permission, and Android may return nothing when location
+is off.
 
 ## Example
 

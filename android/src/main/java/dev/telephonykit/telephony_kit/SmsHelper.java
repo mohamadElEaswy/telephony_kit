@@ -98,6 +98,25 @@ public final class SmsHelper {
     }
   }
 
+  /** The package name of the default SMS app, or an empty string. */
+  public static String getDefaultPackage(Context context) {
+    String pkg = android.provider.Telephony.Sms.getDefaultSmsPackage(context);
+    return pkg == null ? "" : pkg;
+  }
+
+  /**
+   * Shows the system prompt that makes this app the default SMS app. Use it
+   * before Android 10; from Android 10 the SMS role is requested instead.
+   * Returns false if there is no activity.
+   */
+  public static boolean requestDefaultLegacy(Activity activity, int requestCode) {
+    if (activity == null) return false;
+    Intent intent = new Intent(android.provider.Telephony.Sms.Intents.ACTION_CHANGE_DEFAULT);
+    intent.putExtra(android.provider.Telephony.Sms.Intents.EXTRA_PACKAGE_NAME, activity.getPackageName());
+    activity.startActivityForResult(intent, requestCode);
+    return true;
+  }
+
   private static void safeUnregister(Context context, BroadcastReceiver receiver) {
     try {
       context.unregisterReceiver(receiver);

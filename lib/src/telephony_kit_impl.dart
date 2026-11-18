@@ -1,13 +1,16 @@
 import 'dart:async';
+import 'dart:typed_data';
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:jni/jni.dart';
 import 'package:jni_flutter/jni_flutter.dart' as jni_flutter;
 
+import 'analysis.dart';
 import 'bindings.g.dart' as android;
 import 'contacts.dart';
 import 'models.dart';
 import 'search.dart';
+import 'vcard.dart';
 
 /// The entry point of telephony_kit.
 ///
@@ -196,7 +199,11 @@ class TelephonyKit {
   /// Needs `TelephonyPermission.callPhone`. Pass [phoneAccountId] (from
   /// [getPhoneAccounts]) to choose the SIM on dual SIM devices; otherwise the
   /// system default is used, which may ask the user.
-  void placeCall(String number, {String? phoneAccountId}) =>
+  ///
+  /// With [video] true the call starts as a two way video call if the carrier
+  /// supports it (VoLTE video). The package reports the call's video state
+  /// ([PhoneCall.videoState]) but does not draw camera frames.
+  void placeCall(String number, {String? phoneAccountId, bool video = false}) =>
       _guard('Placing call', () {
         final telecom = _telecom;
         final uri = android.Uri.fromParts(
@@ -204,25 +211,25 @@ class TelephonyKit {
           number.toJString(),
           null,
         );
-        android.Bundle? extras;
+        android.PhoneAccountHandle? handle;
         if (phoneAccountId != null) {
           final accounts = telecom.callCapablePhoneAccounts?.asDart() ?? [];
-          for (final handle in accounts) {
-            if (handle != null && _str(handle.id) == phoneAccountId) {
-              extras = android.Bundle()
-                ..putParcelable(
-                  android.TelecomManager.EXTRA_PHONE_ACCOUNT_HANDLE,
-                  handle,
-                );
+          for (final h in accounts) {
+            if (h != null && _str(h.id) == phoneAccountId) {
+              handle = h;
               break;
             }
           }
-          if (extras == null) {
+          if (handle == null) {
             throw TelephonyException(
               'No call capable phone account with id $phoneAccountId.',
             );
           }
         }
+        // VideoProfile.STATE_BIDIRECTIONAL is 3.
+        final extras = handle == null && !video
+            ? null
+            : android.DialIntents.callExtras(handle, video ? 3 : 0);
         telecom.placeCall(uri, extras);
       });
 
@@ -382,6 +389,11 @@ class TelephonyKit {
         'date',
         'duration',
         'new',
+        'geocoded_location',
+        'subscription_id',
+        'features',
+        'is_read',
+        'countryiso',
       ],
       selection: where.isEmpty ? null : where.join(' AND '),
       selectionArgs: args,
@@ -400,6 +412,11 @@ class TelephonyKit {
             int.tryParse(row['date'] ?? '') ?? 0,
           ),
           duration: Duration(seconds: int.tryParse(row['duration'] ?? '') ?? 0),
+          geocodedLocation: row['geocoded_location'] ?? '',
+          subscriptionId: int.tryParse(row['subscription_id'] ?? ''),
+          features: int.tryParse(row['features'] ?? '') ?? 0,
+          isRead: row['is_read'] != '0',
+          countryIso: row['countryiso'] ?? '',
         ),
     ];
   });
@@ -857,6 +874,869 @@ class TelephonyKit {
       JArray.of(JString.type, [for (final a in args) a.toJString()]),
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // Contact photos, groups, accounts, merging, vCard and system screens
+  // ---------------------------------------------------------------------------
+
+  /// The contact's photo as encoded image bytes (JPEG or PNG), or null if it
+  /// has none. [fullSize] reads the high resolution photo when there is one
+  /// and the thumbnail otherwise. Needs `TelephonyPermission.readContacts`.
+  Uint8List? getContactPhoto(String id, {bool fullSize = false}) =>
+      _guard('Reading contact photo', () {
+        if (id.isEmpty) return null;
+        final bytes = android.ContactTools.readPhoto(
+          _context,
+          id.toJString(),
+          fullSize,
+        );
+        if (bytes == null) return null;
+        try {
+          if (bytes.length == 0) return null;
+          final signed = bytes.getRange(0, bytes.length);
+          return Uint8List.fromList(
+            signed.buffer.asUint8List(signed.offsetInBytes, signed.length),
+          );
+        } finally {
+          bytes.release();
+        }
+      });
+
+  /// Sets the contact's photo to [image] (encoded JPEG or PNG bytes), or
+  /// removes it when [image] is null or empty. Returns false if the contact
+  /// does not exist. Needs `TelephonyPermission.writeContacts`.
+  bool setContactPhoto(String id, Uint8List? image) => _guard(
+    'Saving contact photo',
+    () {
+      if (id.isEmpty) return false;
+      final data = image ?? Uint8List(0);
+      final array = JByteArray(data.length)..setRange(0, data.length, data);
+      try {
+        return android.ContactTools.writePhoto(_context, id.toJString(), array);
+      } finally {
+        array.release();
+      }
+    },
+  );
+
+  /// Opens the system screen that shows the contact. Returns false if the
+  /// contact does not exist. Needs `TelephonyPermission.readContacts`.
+  bool showContact(String id) => _guard(
+    'Opening contact',
+    () => id.isNotEmpty && android.ContactTools.view(_context, id.toJString()),
+  );
+
+  /// Opens the system screen that edits the contact, so the user can use
+  /// Android's own editor. Returns false if the contact does not exist.
+  bool openContactEditor(String id) => _guard(
+    'Opening contact editor',
+    () => id.isNotEmpty && android.ContactTools.edit(_context, id.toJString()),
+  );
+
+  /// Opens the system "new contact" screen with any of [name], [phone] and
+  /// [email] filled in. The user saves the contact there, so this needs no
+  /// permission.
+  void openNewContactScreen({String? name, String? phone, String? email}) =>
+      _guard(
+        'Opening new contact screen',
+        () => android.ContactTools.insert(
+          _context,
+          name?.toJString(),
+          phone?.toJString(),
+          email?.toJString(),
+        ),
+      );
+
+  static const _groupsUri = 'content://com.android.contacts/groups_summary';
+  static const _groupsWriteUri = 'content://com.android.contacts/groups';
+  static const _aggregationUri =
+      'content://com.android.contacts/aggregation_exceptions';
+
+  /// The accounts that hold contacts, such as Google accounts, the SIM and
+  /// the device. Use one as `accountType` and `accountName` of [addContact]
+  /// or [addContactGroup]. Needs `TelephonyPermission.readContacts`.
+  List<ContactAccount> getContactAccounts() =>
+      _guard('Reading contact accounts', () {
+        final seen = <String>{};
+        final accounts = <ContactAccount>[];
+        void add(List<Map<String, String?>> rows) {
+          for (final r in rows) {
+            final name = r['account_name'] ?? '';
+            final type = r['account_type'] ?? '';
+            if (name.isEmpty || type.isEmpty) continue;
+            if (seen.add('$type\u0000$name')) {
+              accounts.add(ContactAccount(name: name, type: type));
+            }
+          }
+        }
+
+        const columns = ['account_name', 'account_type'];
+        add(
+          _queryRows(
+            'content://com.android.contacts/settings',
+            projection: columns,
+            limit: 200,
+          ),
+        );
+        add(
+          _queryRows(
+            _rawContactsUri,
+            projection: columns,
+            selection: 'deleted = 0',
+            limit: 2000,
+          ),
+        );
+        return accounts;
+      });
+
+  /// The contact groups (labels). System groups are left out unless
+  /// [includeSystem] is true. Needs `TelephonyPermission.readContacts`.
+  List<ContactGroup> getContactGroups({bool includeSystem = false}) =>
+      _guard('Reading contact groups', () {
+        final rows = _queryRows(
+          _groupsUri,
+          projection: const [
+            '_id',
+            'title',
+            'account_name',
+            'account_type',
+            'group_is_read_only',
+            'summ_count',
+            'system_id',
+          ],
+          selection: 'deleted = 0',
+          sortOrder: 'title COLLATE LOCALIZED ASC',
+          limit: 500,
+        );
+        return [
+          for (final r in rows)
+            if (includeSystem || (r['system_id'] ?? '').isEmpty)
+              ContactGroup(
+                id: r['_id'] ?? '',
+                title: r['title'] ?? '',
+                accountName: r['account_name'] ?? '',
+                accountType: r['account_type'] ?? '',
+                isReadOnly: r['group_is_read_only'] == '1',
+                memberCount: int.tryParse(r['summ_count'] ?? '') ?? 0,
+              ),
+        ];
+      });
+
+  /// Creates a contact group and returns its id. Groups belong to an
+  /// account: pass [accountType] and [accountName] (see
+  /// [getContactAccounts]) or the first account found is used. Needs
+  /// `TelephonyPermission.writeContacts`.
+  String addContactGroup(
+    String title, {
+    String? accountType,
+    String? accountName,
+  }) => _guard('Adding group', () {
+    final text = title.trim();
+    if (text.isEmpty) {
+      throw const TelephonyException('Adding group failed: empty title.');
+    }
+    var type = accountType, name = accountName;
+    if (type == null || name == null) {
+      final accounts = getContactAccounts();
+      if (accounts.isEmpty) {
+        throw const TelephonyException(
+          'Adding group failed: no contact account found.',
+        );
+      }
+      type = accounts.first.type;
+      name = accounts.first.name;
+    }
+    final resolver = _context.contentResolver;
+    if (resolver == null) {
+      throw const TelephonyException('Adding group failed: no resolver.');
+    }
+    final values = android.ContentValues()
+      ..put$8('title'.toJString(), text.toJString())
+      ..put$8('account_type'.toJString(), type.toJString())
+      ..put$8('account_name'.toJString(), name.toJString());
+    final uri = resolver.insert(
+      android.Uri.parse(_groupsWriteUri.toJString()),
+      values,
+    );
+    final id = uri?.toString().split('/').last ?? '';
+    if (id.isEmpty) {
+      throw const TelephonyException(
+        'Adding group failed: Android did not accept it.',
+      );
+    }
+    return id;
+  });
+
+  /// Renames a group. Returns false if it does not exist or is read only.
+  /// Needs `TelephonyPermission.writeContacts`.
+  bool renameContactGroup(String groupId, String title) =>
+      _guard('Renaming group', () {
+        final text = title.trim();
+        if (text.isEmpty) return false;
+        final values = android.ContentValues()
+          ..put$8('title'.toJString(), text.toJString());
+        return _updateRows(
+              _groupsWriteUri,
+              values,
+              '_id = ? AND group_is_read_only = 0',
+              [groupId],
+            ) >
+            0;
+      });
+
+  /// Deletes a group. The contacts in it are kept. Returns false if it does
+  /// not exist or is read only. Needs `TelephonyPermission.writeContacts`.
+  bool deleteContactGroup(String groupId) => _guard(
+    'Deleting group',
+    () =>
+        _delete(_groupsWriteUri, '_id = ? AND group_is_read_only = 0', [
+          groupId,
+        ]) >
+        0,
+  );
+
+  /// The ids of the groups the contact belongs to. Needs
+  /// `TelephonyPermission.readContacts`.
+  List<String> getContactGroupIds(String contactId) =>
+      _guard('Reading contact groups', () {
+        final rows = _queryRows(
+          _dataUri,
+          projection: const ['data1'],
+          selection: 'contact_id = ? AND mimetype = ?',
+          selectionArgs: [contactId, ContactMime.groupMembership],
+          limit: 500,
+        );
+        return [
+          for (final r in rows)
+            if ((r['data1'] ?? '').isNotEmpty) r['data1']!,
+        ];
+      });
+
+  /// The contacts in a group, with all details. Needs
+  /// `TelephonyPermission.readContacts`.
+  List<ContactDetails> getGroupMembers(String groupId, {int limit = 500}) =>
+      _guard('Reading group members', () {
+        final rows = _queryRows(
+          _dataUri,
+          projection: const ['contact_id'],
+          selection: 'mimetype = ? AND data1 = ?',
+          selectionArgs: [ContactMime.groupMembership, groupId],
+          limit: limit,
+        );
+        final ids = {
+          for (final r in rows)
+            if ((r['contact_id'] ?? '').isNotEmpty) r['contact_id']!,
+        }.toList();
+        if (ids.isEmpty) return <ContactDetails>[];
+        return _loadContacts(
+          selection: '_id IN (${List.filled(ids.length, '?').join(',')})',
+          args: ids,
+          limit: limit,
+        );
+      });
+
+  /// Puts the contact in a group. Returns false if the contact does not
+  /// exist; adding twice does nothing. Needs
+  /// `TelephonyPermission.writeContacts`.
+  bool addContactToGroup(String contactId, String groupId) =>
+      _guard('Adding contact to group', () {
+        final resolver = _context.contentResolver;
+        final rawId = _firstRawContactId(contactId);
+        if (resolver == null || rawId == null) return false;
+        if (getContactGroupIds(contactId).contains(groupId)) return true;
+        _insertData(resolver, rawId, {
+          'mimetype': ContactMime.groupMembership,
+          'data1': int.parse(groupId),
+        });
+        return true;
+      });
+
+  /// Takes the contact out of a group. Returns whether it was in the group.
+  /// Needs `TelephonyPermission.writeContacts`.
+  bool removeContactFromGroup(String contactId, String groupId) => _guard(
+    'Removing contact from group',
+    () =>
+        _delete(_dataUri, 'contact_id = ? AND mimetype = ? AND data1 = ?', [
+          contactId,
+          ContactMime.groupMembership,
+          groupId,
+        ]) >
+        0,
+  );
+
+  String? _firstRawContactId(String contactId) => _queryRows(
+    _rawContactsUri,
+    projection: const ['_id'],
+    selection: 'contact_id = ? AND deleted = 0',
+    selectionArgs: [contactId],
+    sortOrder: '_id ASC',
+    limit: 1,
+  ).firstOrNull?['_id'];
+
+  int _updateRows(
+    String uri,
+    android.ContentValues values,
+    String where,
+    List<String> args,
+  ) {
+    final resolver = _context.contentResolver;
+    if (resolver == null) return 0;
+    return resolver.update$1(
+      android.Uri.parse(uri.toJString()),
+      values,
+      where.toJString(),
+      JArray.of(JString.type, [for (final a in args) a.toJString()]),
+    );
+  }
+
+  /// Joins contacts into one (the same person saved in several accounts).
+  /// Returns the id of the merged contact, or null if fewer than two of the
+  /// ids exist. The data is kept; [splitContact] undoes it. Needs
+  /// `TelephonyPermission.writeContacts`.
+  String? mergeContacts(Iterable<String> ids) => _guard('Merging contacts', () {
+    final list = ids.where((id) => id.isNotEmpty).toSet().toList();
+    if (list.length < 2) return null;
+    final rows = _queryRows(
+      _rawContactsUri,
+      projection: const ['_id', 'contact_id'],
+      selection:
+          'deleted = 0 AND contact_id IN '
+          '(${List.filled(list.length, '?').join(',')})',
+      selectionArgs: list,
+      sortOrder: '_id ASC',
+      limit: 2000,
+    );
+    final raws = [for (final r in rows) r['_id'] ?? ''];
+    if (raws.length < 2) return null;
+    for (final other in raws.skip(1)) {
+      _setAggregation(raws.first, other, 1); // TYPE_KEEP_TOGETHER
+    }
+    return _queryRows(
+      _rawContactsUri,
+      projection: const ['contact_id'],
+      selection: '_id = ?',
+      selectionArgs: [raws.first],
+      limit: 1,
+    ).firstOrNull?['contact_id'];
+  });
+
+  /// Splits a contact that was made from several saved contacts back into
+  /// separate contacts. Returns how many contacts it was split into (1 if it
+  /// was a single contact). Needs `TelephonyPermission.writeContacts`.
+  int splitContact(String id) => _guard('Splitting contact', () {
+    final rows = _queryRows(
+      _rawContactsUri,
+      projection: const ['_id'],
+      selection: 'deleted = 0 AND contact_id = ?',
+      selectionArgs: [id],
+      sortOrder: '_id ASC',
+      limit: 200,
+    );
+    final raws = [for (final r in rows) r['_id'] ?? ''];
+    for (var i = 0; i < raws.length; i++) {
+      for (var j = i + 1; j < raws.length; j++) {
+        _setAggregation(raws[i], raws[j], 2); // TYPE_KEEP_SEPARATE
+      }
+    }
+    return raws.isEmpty ? 1 : raws.length;
+  });
+
+  void _setAggregation(String rawA, String rawB, int type) {
+    final values = android.ContentValues()
+      ..put$5('type'.toJString(), type.toJInteger())
+      ..put$6('raw_contact_id1'.toJString(), int.parse(rawA).toJLong())
+      ..put$6('raw_contact_id2'.toJString(), int.parse(rawB).toJLong());
+    _context.contentResolver?.update$1(
+      android.Uri.parse(_aggregationUri.toJString()),
+      values,
+      null,
+      null,
+    );
+  }
+
+  /// Groups of contacts that look like the same person (same name, or a
+  /// shared phone number or email). Each group has two or more contacts; pass
+  /// their ids to [mergeContacts] or delete the extras. Reads at most
+  /// [limit] contacts. Needs `TelephonyPermission.readContacts`.
+  List<List<ContactDetails>> findDuplicateContacts({int limit = 3000}) =>
+      findDuplicateGroups(getContacts(limit: limit));
+
+  /// Writes contacts as vCard (.vcf) text, to share or save. Exports the
+  /// contacts with these [ids], or everyone when [ids] is null, up to
+  /// [limit]. Needs `TelephonyPermission.readContacts`.
+  String exportContactsAsVCard({Iterable<String>? ids, int limit = 3000}) {
+    final wanted = ids?.toSet();
+    final contacts = getContacts(limit: limit);
+    return exportVCard(
+      wanted == null ? contacts : contacts.where((c) => wanted.contains(c.id)),
+    );
+  }
+
+  /// Adds every contact found in the vCard [vcf] text and returns their new
+  /// ids. See [addContact] for [accountType] and [accountName]. Needs
+  /// `TelephonyPermission.writeContacts`.
+  List<String> importVCard(
+    String vcf, {
+    String? accountType,
+    String? accountName,
+  }) => [
+    for (final c in parseVCard(vcf))
+      addContact(c, accountType: accountType, accountName: accountName),
+  ];
+
+  static Timer? _debounced(Timer? old, void Function() fire) {
+    old?.cancel();
+    return Timer(const Duration(milliseconds: 400), fire);
+  }
+
+  /// A broadcast stream that fires (debounced) when anything at [uri] changes.
+  Stream<void> _changeStream(String uri) {
+    late final StreamController<void> controller;
+    android.ChangeListener? listener;
+    var token = -1;
+    Timer? timer;
+    controller = StreamController<void>.broadcast(
+      onListen: () {
+        final l = android.ChangeListener.implement(
+          android.$ChangeListener(
+            onChange: (_) =>
+                timer = _debounced(timer, () => controller.add(null)),
+            onChange$async: true,
+          ),
+        );
+        listener = l;
+        token = _guard(
+          'Watching changes',
+          () => android.ChangeMonitor.start(_context, uri.toJString(), l),
+        );
+      },
+      onCancel: () {
+        timer?.cancel();
+        if (token >= 0) android.ChangeMonitor.stop(_context, token);
+        token = -1;
+        final old = listener;
+        listener = null;
+        Future<void>.delayed(const Duration(seconds: 2), () => old?.release());
+      },
+    );
+    return controller.stream;
+  }
+
+  Stream<void>? _contactChanges;
+
+  /// Fires when the address book changes (a contact is added, edited or
+  /// deleted, here or in another app). Read the contacts again when it fires.
+  /// Needs `TelephonyPermission.readContacts`.
+  Stream<void> get contactChanges =>
+      _contactChanges ??= _changeStream('content://com.android.contacts');
+
+  Stream<void>? _callLogChanges;
+
+  /// Fires when the call log changes, for example after a call ends. Needs
+  /// `TelephonyPermission.readCallLog`.
+  Stream<void> get callLogChanges =>
+      _callLogChanges ??= _changeStream('content://call_log');
+
+  // ---------------------------------------------------------------------------
+  // Call log: add entries, statistics and groups
+  // ---------------------------------------------------------------------------
+
+  /// Adds an entry to the call log and returns its id. Useful for a calling
+  /// app that handles calls itself. [date] defaults to now. Needs
+  /// `TelephonyPermission.writeCallLog`.
+  String addCallLogEntry({
+    required String number,
+    required CallLogType type,
+    DateTime? date,
+    Duration duration = Duration.zero,
+    String? name,
+    int? subscriptionId,
+  }) => _guard('Adding call log entry', () {
+    if (type == CallLogType.unknown) {
+      throw ArgumentError.value(type, 'type', 'must be a known call type');
+    }
+    final resolver = _context.contentResolver;
+    if (resolver == null) return '';
+    final values = android.ContentValues()
+      ..put$8('number'.toJString(), number.toJString())
+      ..put$5('type'.toJString(), type.value.toJInteger())
+      ..put$6(
+        'date'.toJString(),
+        (date ?? DateTime.now()).millisecondsSinceEpoch.toJLong(),
+      )
+      ..put$6('duration'.toJString(), duration.inSeconds.toJLong())
+      ..put$5(
+        'new'.toJString(),
+        (type == CallLogType.missed ? 1 : 0).toJInteger(),
+      );
+    if (name != null && name.isNotEmpty) {
+      values.put$8('name'.toJString(), name.toJString());
+    }
+    if (subscriptionId != null) {
+      values.put$8(
+        'subscription_id'.toJString(),
+        '$subscriptionId'.toJString(),
+      );
+    }
+    final uri = resolver.insert(
+      android.Uri.parse('content://call_log/calls'.toJString()),
+      values,
+    );
+    return uri?.toString().split('/').last ?? '';
+  });
+
+  /// Call counts per number (total, incoming, outgoing, missed, rejected,
+  /// blocked, talk time, last call), most called first. Looks at the latest
+  /// [limit] entries in the optional [from]..[to] range. Needs
+  /// `TelephonyPermission.readCallLog`.
+  List<CallLogNumberStats> getCallLogStats({
+    DateTime? from,
+    DateTime? to,
+    int limit = 2000,
+  }) => callLogStats(searchCallLog(from: from, to: to, limit: limit));
+
+  /// The call log with consecutive calls to the same number joined into one
+  /// row, newest first. Needs `TelephonyPermission.readCallLog`.
+  List<CallLogGroup> getGroupedCallLog({int limit = 200}) =>
+      groupCallLog(searchCallLog(limit: limit));
+
+  // ---------------------------------------------------------------------------
+  // SMS: default app, conversations, changes, MMS
+  // ---------------------------------------------------------------------------
+
+  /// The package name of the default SMS app, or null.
+  String? get defaultSmsPackage => _guard('Reading default SMS app', () {
+    final value = android.SmsHelper.getDefaultPackage(_context);
+    final text = _str(value);
+    return text.isEmpty ? null : text;
+  });
+
+  /// Whether this app is the default SMS app. Android only lets that app
+  /// delete or change messages ([deleteSmsMessages], [markSmsRead]).
+  bool get isDefaultSmsApp => _guard('Checking SMS role', () {
+    if (_sdkInt >= 29) {
+      final roles = _service(
+        android.Context.ROLE_SERVICE,
+        android.RoleManager.type,
+      );
+      return roles.isRoleHeld('android.app.role.SMS'.toJString());
+    }
+    return defaultSmsPackage == _str(_context.packageName);
+  });
+
+  /// Asks the user to make this app the default SMS app. The result is not
+  /// returned; check [isDefaultSmsApp] again when the app resumes. Returns
+  /// false if there is no foreground activity or the role is not available.
+  ///
+  /// The app must also declare the SMS receivers Android requires of a
+  /// default SMS app (see the README), or the system does not offer it.
+  bool requestDefaultSmsApp() => _guard('Requesting SMS role', () {
+    if (_sdkInt >= 29) return _requestRole('android.app.role.SMS'.toJString());
+    return android.SmsHelper.requestDefaultLegacy(
+      _activity(),
+      defaultDialerRequestCode,
+    );
+  });
+
+  /// Conversations, newest first, built from the latest [messageLimit]
+  /// messages. Open one with `searchSms(threadId: thread.threadId)`. Needs
+  /// `TelephonyPermission.readSms`.
+  List<SmsThread> getSmsThreads({int messageLimit = 1000}) =>
+      groupSmsThreads(searchSms(limit: messageLimit));
+
+  /// Deletes SMS messages by [SmsMessage.id]. Returns how many were deleted.
+  /// Only the default SMS app can do this ([isDefaultSmsApp]); other apps get
+  /// 0. Needs `TelephonyPermission.readSms`.
+  int deleteSmsMessages(Iterable<String> ids) => _guard('Deleting SMS', () {
+    final list = ids.where((id) => id.isNotEmpty).toList();
+    var deleted = 0;
+    for (var i = 0; i < list.length; i += 200) {
+      final chunk = list.skip(i).take(200).toList();
+      deleted += _delete(
+        'content://sms',
+        '_id IN (${List.filled(chunk.length, '?').join(',')})',
+        chunk,
+      );
+    }
+    return deleted;
+  });
+
+  /// Deletes a whole conversation. Default SMS app only. Returns how many
+  /// messages were deleted.
+  int deleteSmsThread(String threadId) => _guard(
+    'Deleting conversation',
+    () => threadId.isEmpty
+        ? 0
+        : _delete('content://sms', 'thread_id = ?', [threadId]),
+  );
+
+  /// Marks messages as read. Default SMS app only. Returns how many changed.
+  int markSmsRead(Iterable<String> ids) => _guard('Marking SMS read', () {
+    final list = ids.where((id) => id.isNotEmpty).toList();
+    if (list.isEmpty) return 0;
+    final values = android.ContentValues()
+      ..put$5('read'.toJString(), 1.toJInteger())
+      ..put$5('seen'.toJString(), 1.toJInteger());
+    return _updateRows(
+      'content://sms',
+      values,
+      '_id IN (${List.filled(list.length, '?').join(',')})',
+      list,
+    );
+  });
+
+  /// Marks every unread message in a conversation as read. Default SMS app
+  /// only. Returns how many changed.
+  int markSmsThreadRead(String threadId) => _guard('Marking SMS read', () {
+    final values = android.ContentValues()
+      ..put$5('read'.toJString(), 1.toJInteger())
+      ..put$5('seen'.toJString(), 1.toJInteger());
+    return _updateRows('content://sms', values, 'thread_id = ? AND read = 0', [
+      threadId,
+    ]);
+  });
+
+  Stream<void>? _smsChanges;
+
+  /// Fires when messages are received, sent, changed or deleted. Needs
+  /// `TelephonyPermission.readSms`.
+  Stream<void> get smsChanges => _smsChanges ??= _changeStream('content://sms');
+
+  /// New received messages, as they arrive. Works for any app with
+  /// `READ_SMS`; it watches the inbox, so it needs no receiver in the
+  /// manifest and sees only messages that reach the inbox (the default SMS
+  /// app writes them).
+  ///
+  /// Each listener gets only messages that arrive after it starts listening.
+  Stream<SmsMessage> get incomingSms {
+    late final StreamController<SmsMessage> controller;
+    StreamSubscription<void>? subscription;
+    controller = StreamController<SmsMessage>.broadcast(
+      onListen: () {
+        var lastId = _guard(
+          'Reading inbox',
+          () =>
+              int.tryParse(
+                _queryRows(
+                      'content://sms/inbox',
+                      projection: const ['_id'],
+                      sortOrder: '_id DESC',
+                      limit: 1,
+                    ).firstOrNull?['_id'] ??
+                    '',
+              ) ??
+              0,
+        );
+        subscription = smsChanges.listen((_) {
+          try {
+            final fresh = searchSms(type: SmsType.inbox, limit: 50)
+                .where((m) => (int.tryParse(m.id) ?? 0) > lastId)
+                .toList()
+                .reversed;
+            for (final m in fresh) {
+              lastId = (int.tryParse(m.id) ?? 0) > lastId
+                  ? int.parse(m.id)
+                  : lastId;
+              controller.add(m);
+            }
+          } on TelephonyException catch (e) {
+            controller.addError(e);
+          }
+        });
+      },
+      onCancel: () => subscription?.cancel(),
+    );
+    return controller.stream;
+  }
+
+  /// Multimedia messages (MMS), newest first, with their text and
+  /// attachments. Read only: sending MMS needs the default SMS app and is
+  /// not supported. Pass [threadId] for one conversation. Needs
+  /// `TelephonyPermission.readSms`.
+  List<MmsMessage> getMmsMessages({String? threadId, int limit = 50}) =>
+      _guard('Reading MMS', () {
+        final rows = _queryRows(
+          'content://mms',
+          projection: const [
+            '_id',
+            'thread_id',
+            'date',
+            'sub',
+            'msg_box',
+            'read',
+          ],
+          selection: threadId == null ? null : 'thread_id = ?',
+          selectionArgs: [?threadId],
+          sortOrder: 'date DESC',
+          limit: limit,
+        );
+        return [
+          for (final row in rows)
+            () {
+              final id = row['_id'] ?? '';
+              final incoming = row['msg_box'] == '1';
+              final addrRows = _queryRows(
+                'content://mms/$id/addr',
+                projection: const ['address', 'type'],
+                limit: 50,
+              );
+              // 137 is the sender, 151 the recipients.
+              final wanted = incoming ? '137' : '151';
+              final addresses = [
+                for (final a in addrRows)
+                  if (a['type'] == wanted &&
+                      (a['address'] ?? '').isNotEmpty &&
+                      a['address'] != 'insert-address-token')
+                    a['address']!,
+              ];
+              final partRows = _queryRows(
+                'content://mms/part',
+                projection: const ['_id', 'ct', 'name', 'text'],
+                selection: 'mid = ?',
+                selectionArgs: [id],
+                limit: 50,
+              );
+              return MmsMessage(
+                id: id,
+                threadId: row['thread_id'] ?? '',
+                // MMS dates are in seconds.
+                date: DateTime.fromMillisecondsSinceEpoch(
+                  (int.tryParse(row['date'] ?? '') ?? 0) * 1000,
+                ),
+                subject: row['sub'] ?? '',
+                addresses: addresses,
+                isIncoming: incoming,
+                isRead: row['read'] == '1',
+                parts: [
+                  for (final p in partRows)
+                    if (p['ct'] != 'application/smil')
+                      MmsPart(
+                        id: p['_id'] ?? '',
+                        contentType: p['ct'] ?? '',
+                        name: p['name'] ?? '',
+                        text: p['text'] ?? '',
+                        uri: 'content://mms/part/${p['_id']}',
+                      ),
+                ],
+              );
+            }(),
+        ];
+      });
+
+  // ---------------------------------------------------------------------------
+  // Call forwarding and call waiting
+  // ---------------------------------------------------------------------------
+
+  /// Forwards calls to [number] when [condition] is met, using the standard
+  /// GSM code (for example `**21*number#`). Returns the carrier's reply.
+  /// Needs `TelephonyPermission.callPhone` and Android 8+, like [sendUssd].
+  Future<String> setCallForwarding(
+    CallForwardingCondition condition,
+    String number, {
+    int? subscriptionId,
+  }) => sendUssd(
+    forwardingUssd(condition, number: number),
+    subscriptionId: subscriptionId,
+  );
+
+  /// Turns off forwarding for [condition]. Returns the carrier's reply.
+  Future<String> cancelCallForwarding(
+    CallForwardingCondition condition, {
+    int? subscriptionId,
+  }) => sendUssd(
+    forwardingUssd(condition, enable: false),
+    subscriptionId: subscriptionId,
+  );
+
+  /// Asks the carrier whether forwarding for [condition] is on, and where to.
+  /// Returns the carrier's own wording, which is not standardized.
+  Future<String> queryCallForwarding(
+    CallForwardingCondition condition, {
+    int? subscriptionId,
+  }) => sendUssd(
+    forwardingUssd(condition, query: true),
+    subscriptionId: subscriptionId,
+  );
+
+  /// Turns call waiting on or off (`*43#` / `#43#`). Returns the carrier's
+  /// reply. Needs `TelephonyPermission.callPhone` and Android 8+.
+  Future<String> setCallWaiting(bool enabled, {int? subscriptionId}) =>
+      sendUssd(enabled ? '*43#' : '#43#', subscriptionId: subscriptionId);
+
+  /// Asks the carrier whether call waiting is on (`*#43#`). Returns the
+  /// carrier's own wording, which is not standardized. Needs
+  /// `TelephonyPermission.callPhone` and Android 8+.
+  Future<String> queryCallWaiting({int? subscriptionId}) =>
+      sendUssd('*#43#', subscriptionId: subscriptionId);
+
+  // ---------------------------------------------------------------------------
+  // Device and network: numbers, cells, data, eSIM
+  // ---------------------------------------------------------------------------
+
+  /// The phone numbers of the device's SIMs. A number is empty when the
+  /// carrier did not store it on the SIM. Needs
+  /// `TelephonyPermission.readPhoneNumbers` (and `readPhoneState`).
+  List<PhoneNumberInfo> getPhoneNumbers() =>
+      _guard('Reading phone numbers', () {
+        final lines = android.DeviceTools.getPhoneNumbers(_context);
+        if (lines == null) return const [];
+        return parsePhoneNumberLines([
+          for (var i = 0; i < lines.length; i++) _str(lines[i]),
+        ]);
+      });
+
+  /// Nearby cell towers with signal strength in dBm. Needs
+  /// `TelephonyPermission.accessFineLocation` and `readPhoneState`; Android
+  /// may return an empty list when location is off.
+  List<CellInfo> getCellInfo() => _guard(
+    'Reading cell info',
+    () =>
+        parseCellInfoJson(_str(android.DeviceTools.getCellInfoJson(_context))),
+  );
+
+  /// The serving cell's signal strength in dBm (about -50 is excellent, -110
+  /// is poor), or null if unknown. Android 10+, needs
+  /// `TelephonyPermission.readPhoneState`.
+  int? get signalDbm => _guard('Reading signal strength', () {
+    final value = android.DeviceTools.getSignalDbm(_context);
+    return value == -2147483648 ? null : value;
+  });
+
+  /// Whether mobile data is switched on. Android 8+, needs
+  /// `TelephonyPermission.readPhoneState`.
+  bool get isMobileDataEnabled => _guard(
+    'Reading mobile data setting',
+    () => android.DeviceTools.isDataEnabled(_context),
+  );
+
+  /// Whether the user allows mobile data while roaming. See also
+  /// [TelephonyKit.getNetworkInfo] for whether the device is roaming now.
+  bool get isDataRoamingAllowed => _guard(
+    'Reading data roaming setting',
+    () => android.DeviceTools.isDataRoamingEnabled(_context),
+  );
+
+  /// The mobile data connection state.
+  DataConnectionState get dataConnectionState => _guard(
+    'Reading data state',
+    () => DataConnectionState.fromValue(
+      android.DeviceTools.getDataState(_context),
+    ),
+  );
+
+  /// eSIM support and the active eSIM profiles. The EID is only filled for
+  /// apps with carrier privileges. Needs `TelephonyPermission.readPhoneState`
+  /// to list profiles.
+  EsimInfo getEsimInfo() => _guard('Reading eSIM info', () {
+    return EsimInfo(
+      isSupported: android.DeviceTools.isEsimSupported(_context),
+      eid: _str(android.DeviceTools.getEid(_context)),
+      profiles: [
+        for (final sim in getSimCards())
+          if (sim.isEmbedded) sim,
+      ],
+    );
+  });
 
   // ---------------------------------------------------------------------------
   // Missed call notification
@@ -1522,6 +2402,66 @@ class PhoneCall {
   /// false drops them. Returns false if the call is no longer tracked.
   bool continuePostDial(bool proceed) =>
       android.CallManager.continuePostDial(_id, proceed);
+
+  /// The video state bits (`VideoProfile.STATE_*`): 0 audio only, 1 sending
+  /// video, 2 receiving video, 3 both. -1 when the call is gone.
+  ///
+  /// The package reports video state and lets you answer with video, but it
+  /// does not render camera frames.
+  int get videoState => android.CallManager.getVideoState(_id);
+
+  /// Whether the call carries video in either direction.
+  bool get isVideo => videoState > 0;
+
+  /// Answers a ringing video call with two way video. Use [answer] to answer
+  /// with audio only.
+  bool answerWithVideo() => android.CallManager.answerWithVideoState(_id, 3);
+
+  /// The STIR/SHAKEN result for the caller's number (Android 11+). Show a
+  /// warning for [NumberVerification.failed]. [NumberVerification.unknown]
+  /// when the carrier or Android version does not report it.
+  NumberVerification get numberVerification => NumberVerification.fromValue(
+    android.CallManager.getNumberVerification(_id),
+  );
+
+  /// Whether the call goes over Wi-Fi (Wi-Fi calling).
+  bool get isWifiCall => android.CallManager.isWifiCall(_id);
+
+  /// Whether the call uses HD voice.
+  bool get isHdAudio => android.CallManager.isHighDefinitionAudio(_id);
+
+  /// Whether real-time text (RTT) is on for the call (Android 9+).
+  bool get isRttActive => android.CallManager.isRttActive(_id);
+
+  /// Asks the other side to start real-time text (Android 9+). Watch
+  /// [isRttActive] on the next call events.
+  bool requestRtt() => android.CallManager.requestRtt(_id);
+
+  /// Stops real-time text.
+  bool stopRtt() => android.CallManager.stopRtt(_id);
+
+  /// The id of an RTT request from the other side that is waiting for
+  /// [respondToRtt], or null. A call event is sent when one arrives.
+  int? get pendingRttRequestId {
+    final id = android.CallManager.getPendingRttRequest(_id);
+    return id < 0 ? null : id;
+  }
+
+  /// Accepts or declines the pending RTT request. Returns false if there is
+  /// none.
+  bool respondToRtt({required bool accept}) {
+    final id = pendingRttRequestId;
+    return id != null &&
+        android.CallManager.respondToRttRequest(_id, id, accept);
+  }
+
+  /// Sends typed [text] over RTT. Returns false if RTT is not active.
+  bool sendRttText(String text) =>
+      android.CallManager.writeRtt(_id, text.toJString());
+
+  /// Text the other side typed since the last read, or an empty string.
+  /// Never blocks; call it on a short timer while [isRttActive].
+  String readRttText() => TelephonyKit._str(android.CallManager.readRtt(_id));
 
   /// Answers a ringing call.
   bool answer() => android.CallManager.answer(_id);

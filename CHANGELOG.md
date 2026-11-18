@@ -1,3 +1,56 @@
+## Unreleased
+
+Contacts
+* Photos: `getContactPhoto`, `setContactPhoto`.
+* Groups: `getContactGroups`, `addContactGroup`, `renameContactGroup`,
+  `deleteContactGroup`, `getContactGroupIds`, `getGroupMembers`,
+  `addContactToGroup`, `removeContactFromGroup`; `getContactAccounts`.
+* Duplicates: `findDuplicateContacts`, `mergeContacts`, `splitContact`.
+* vCard: `exportContactsAsVCard`, `importVCard`, and the pure Dart
+  `exportVCard` and `parseVCard`.
+* New contact fields `ContactDetails.ims`, `relations` and `sipAddresses`
+  (`ContactIm`, `ContactRelation`), saved by `addContact` and `updateContact`.
+* System screens: `showContact`, `openContactEditor`, `openNewContactScreen`.
+* `contactChanges` stream.
+
+Call log
+* `CallLogEntry` gains `geocodedLocation`, `subscriptionId`, `features`
+  (`hasVideo`, `isWifi`, `isHd`, `isRtt`), `isRead` and `countryIso`.
+* `addCallLogEntry`, `getCallLogStats`, `getGroupedCallLog`, and the pure
+  Dart `callLogStats` and `groupCallLog`. `callLogChanges` stream.
+
+SMS
+* `getSmsThreads` (and `groupSmsThreads`), `getMmsMessages` (read only),
+  `incomingSms` and `smsChanges` streams.
+* Default SMS app: `isDefaultSmsApp`, `defaultSmsPackage`,
+  `requestDefaultSmsApp`; then `deleteSmsMessages`, `deleteSmsThread`,
+  `markSmsRead`, `markSmsThreadRead`. The package does not ship the receivers
+  a default SMS app needs; see the README.
+
+Calls
+* Video: `placeCall(video: true)`, `PhoneCall.videoState`, `isVideo`,
+  `answerWithVideo`. Frames are not rendered.
+* `PhoneCall.numberVerification` (STIR/SHAKEN, Android 11+),
+  `isWifiCall`, `isHdAudio`.
+* Real-time text: `isRttActive`, `requestRtt`, `stopRtt`,
+  `pendingRttRequestId`, `respondToRtt`, `sendRttText`, `readRttText`.
+* Call forwarding and call waiting through GSM codes: `setCallForwarding`,
+  `cancelCallForwarding`, `queryCallForwarding`, `setCallWaiting`,
+  `queryCallWaiting`.
+
+Device and network
+* `getPhoneNumbers`, `getCellInfo`, `signalDbm`, `isMobileDataEnabled`,
+  `isDataRoamingAllowed`, `dataConnectionState`, `getEsimInfo`.
+* New permission names `TelephonyPermission.accessFineLocation`.
+
+Other
+* Java helpers `ChangeMonitor`, `ContactTools`, `DeviceTools`, and more
+  `CallManager` and `SmsHelper` methods; bindings regenerated.
+* The example app has a "More tools" page and richer contact and in-call screens.
+* Android does not expose these to third-party apps, so they are not
+  included: reading whether Wi-Fi calling is enabled, a public call waiting
+  query, and sending MMS.
+
 ## 0.5.0
 
 * Full contact management: `getContacts` and `getContact` return

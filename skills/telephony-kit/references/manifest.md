@@ -17,6 +17,9 @@ for features the app uses.
 <uses-permission android:name="android.permission.READ_CONTACTS" />
 <!-- Add, edit, delete contacts -->
 <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+<!-- SIM phone numbers (getPhoneNumbers) and nearby cells (getCellInfo) -->
+<uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 <!-- Call notifications (dialer) -->
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
@@ -127,3 +130,21 @@ Android binds it when the app is the default dialer, or after
 
 The package's own manifest already declares `WAKE_LOCK` (proximity screen
 off) and the notification button receiver.
+
+## Default SMS app
+
+Only needed to delete or mark messages (`deleteSmsMessages`, `markSmsRead`,
+`requestDefaultSmsApp`). The package does **not** provide these components;
+the app must implement them in its own Kotlin/Java, or Android will not offer
+the SMS role:
+
+- a receiver for `android.provider.Telephony.SMS_DELIVER`, protected by
+  `android.permission.BROADCAST_SMS`;
+- a receiver for `android.provider.Telephony.WAP_PUSH_DELIVER` (mime type
+  `application/vnd.wap.mms-message`), protected by
+  `android.permission.BROADCAST_WAP_PUSH`;
+- an activity for `SEND` / `SENDTO` on `sms:`, `smsto:`, `mms:`, `mmsto:`;
+- a service for `RESPOND_VIA_MESSAGE`, protected by
+  `android.permission.SEND_RESPOND_VIA_MESSAGE`.
+
+Reading, sending and the `incomingSms` stream do not need the SMS role.

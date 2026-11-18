@@ -6734,6 +6734,460 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
     ).boolean;
   }
 
+  static final _id_getVideoState = _class.staticMethodId(
+    r'getVideoState',
+    r'(Ljava/lang/String;)I',
+  );
+
+  static final _getVideoState =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getVideoState(java.lang.String callId)`
+  ///
+  /// {@code VideoProfile.STATE_*} bits of the call (0 audio only, 1 TX, 2 RX, 3 both), or -1.
+  static core$_.int getVideoState(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getVideoState(
+      _$$classRef.pointer,
+      _id_getVideoState.pointer,
+      _$callId.pointer,
+    ).integer;
+  }
+
+  static final _id_answerWithVideoState = _class.staticMethodId(
+    r'answerWithVideoState',
+    r'(Ljava/lang/String;I)Z',
+  );
+
+  static final _answerWithVideoState =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public boolean answerWithVideoState(java.lang.String callId, int videoState)`
+  ///
+  /// Answers a ringing call with the given {@code VideoProfile.STATE_*} bits.
+  static core$_.bool answerWithVideoState(
+    jni$_.JString? callId,
+    core$_.int videoState,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _answerWithVideoState(
+      _$$classRef.pointer,
+      _id_answerWithVideoState.pointer,
+      _$callId.pointer,
+      videoState,
+    ).boolean;
+  }
+
+  static final _id_getNumberVerification = _class.staticMethodId(
+    r'getNumberVerification',
+    r'(Ljava/lang/String;)I',
+  );
+
+  static final _getNumberVerification =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getNumberVerification(java.lang.String callId)`
+  ///
+  /// STIR/SHAKEN result for the caller's number: 0 not verified, 1 passed, 2
+  ///failed, or -1 when unknown or before Android 11.
+  static core$_.int getNumberVerification(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getNumberVerification(
+      _$$classRef.pointer,
+      _id_getNumberVerification.pointer,
+      _$callId.pointer,
+    ).integer;
+  }
+
+  static final _id_isWifiCall = _class.staticMethodId(
+    r'isWifiCall',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _isWifiCall =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isWifiCall(java.lang.String callId)`
+  ///
+  /// True if the call is carried over Wi-Fi (Wi-Fi calling).
+  static core$_.bool isWifiCall(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _isWifiCall(
+      _$$classRef.pointer,
+      _id_isWifiCall.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_isHighDefinitionAudio = _class.staticMethodId(
+    r'isHighDefinitionAudio',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _isHighDefinitionAudio =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isHighDefinitionAudio(java.lang.String callId)`
+  ///
+  /// True if the call uses high definition audio (HD voice).
+  static core$_.bool isHighDefinitionAudio(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _isHighDefinitionAudio(
+      _$$classRef.pointer,
+      _id_isHighDefinitionAudio.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_isRttActive = _class.staticMethodId(
+    r'isRttActive',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _isRttActive =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isRttActive(java.lang.String callId)`
+  ///
+  /// True while real-time text (RTT) is active on the call. Android 9+.
+  static core$_.bool isRttActive(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _isRttActive(
+      _$$classRef.pointer,
+      _id_isRttActive.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_requestRtt = _class.staticMethodId(
+    r'requestRtt',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _requestRtt =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean requestRtt(java.lang.String callId)`
+  ///
+  /// Asks the other side to start real-time text. Android 9+.
+  static core$_.bool requestRtt(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _requestRtt(
+      _$$classRef.pointer,
+      _id_requestRtt.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_stopRtt = _class.staticMethodId(
+    r'stopRtt',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _stopRtt =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean stopRtt(java.lang.String callId)`
+  ///
+  /// Stops real-time text on the call. Android 9+.
+  static core$_.bool stopRtt(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _stopRtt(
+      _$$classRef.pointer,
+      _id_stopRtt.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
+  static final _id_getPendingRttRequest = _class.staticMethodId(
+    r'getPendingRttRequest',
+    r'(Ljava/lang/String;)I',
+  );
+
+  static final _getPendingRttRequest =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getPendingRttRequest(java.lang.String callId)`
+  ///
+  /// The id of an RTT request from the other side waiting for an answer, or -1.
+  static core$_.int getPendingRttRequest(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _getPendingRttRequest(
+      _$$classRef.pointer,
+      _id_getPendingRttRequest.pointer,
+      _$callId.pointer,
+    ).integer;
+  }
+
+  static final _id_respondToRttRequest = _class.staticMethodId(
+    r'respondToRttRequest',
+    r'(Ljava/lang/String;IZ)Z',
+  );
+
+  static final _respondToRttRequest =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Int32, jni$_.Int32)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public boolean respondToRttRequest(java.lang.String callId, int requestId, boolean accept)`
+  ///
+  /// Accepts or declines an RTT request that arrived on the call. Android 9+.
+  static core$_.bool respondToRttRequest(
+    jni$_.JString? callId,
+    core$_.int requestId,
+    core$_.bool accept,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _respondToRttRequest(
+      _$$classRef.pointer,
+      _id_respondToRttRequest.pointer,
+      _$callId.pointer,
+      requestId,
+      accept ? 1 : 0,
+    ).boolean;
+  }
+
+  static final _id_writeRtt = _class.staticMethodId(
+    r'writeRtt',
+    r'(Ljava/lang/String;Ljava/lang/String;)Z',
+  );
+
+  static final _writeRtt =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean writeRtt(java.lang.String callId, java.lang.String text)`
+  ///
+  /// Sends typed text over RTT. Returns false if RTT is not active.
+  static core$_.bool writeRtt(jni$_.JString? callId, jni$_.JString? text) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    final _$text = text?.reference ?? jni$_.jNullReference;
+    return _writeRtt(
+      _$$classRef.pointer,
+      _id_writeRtt.pointer,
+      _$callId.pointer,
+      _$text.pointer,
+    ).boolean;
+  }
+
+  static final _id_readRtt = _class.staticMethodId(
+    r'readRtt',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _readRtt =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String readRtt(java.lang.String callId)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Text received over RTT since the last read, or an empty string. Never blocks.
+  static jni$_.JString? readRtt(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _readRtt(
+      _$$classRef.pointer,
+      _id_readRtt.pointer,
+      _$callId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
   static final _id_isConference = _class.staticMethodId(
     r'isConference',
     r'(Ljava/lang/String;)Z',
@@ -7942,6 +8396,855 @@ final class $CallScreening$Type$ extends jni$_.JType<CallScreening> {
   String get signature => r'Ldev/telephonykit/telephony_kit/CallScreening;';
 }
 
+/// from: `dev.telephonykit.telephony_kit.ChangeListener`
+///
+/// Receives "something changed" notifications from ChangeMonitor.
+///
+///Implemented from Dart through jnigen. Callbacks arrive on the Android
+///main thread and must return quickly.
+extension type ChangeListener._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/ChangeListener',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<ChangeListener> type = $ChangeListener$Type$();
+
+  /// Maps a specific port to the implemented interface.
+  static final core$_.Map<core$_.int, $ChangeListener> _$impls = {};
+  static jni$_.JObjectPtr _$invoke(
+    core$_.int port,
+    jni$_.JObjectPtr descriptor,
+    jni$_.JObjectPtr args,
+  ) {
+    return _$invokeMethod(
+      port,
+      jni$_.MethodInvocation.fromAddresses(0, descriptor.address, args.address),
+    );
+  }
+
+  static final jni$_.Pointer<
+    jni$_.NativeFunction<
+      jni$_.JObjectPtr Function(jni$_.Int64, jni$_.JObjectPtr, jni$_.JObjectPtr)
+    >
+  >
+  _$invokePointer = jni$_.Pointer.fromFunction(_$invoke);
+
+  static jni$_.Pointer<jni$_.Void> _$invokeMethod(
+    core$_.int $p,
+    jni$_.MethodInvocation $i,
+  ) {
+    try {
+      final $d = $i.methodDescriptor.toDartString(releaseOriginal: true);
+      final $a = $i.args;
+      if ($d == r'onChange(Ljava/lang/String;)V') {
+        _$impls[$p]!.onChange(($a![0] as jni$_.JString?));
+        return jni$_.nullptr;
+      }
+    } catch (e) {
+      return jni$_.ProtectedJniExtensions.newDartException(e);
+    }
+    return jni$_.nullptr;
+  }
+
+  static void implementIn(
+    jni$_.JImplementer implementer,
+    $ChangeListener $impl,
+  ) {
+    late final jni$_.RawReceivePort $p;
+    $p = jni$_.RawReceivePort(($m) {
+      if ($m == null) {
+        _$impls.remove($p.sendPort.nativePort);
+        $p.close();
+        return;
+      }
+      final $i = jni$_.MethodInvocation.fromMessage($m);
+      final $r = _$invokeMethod($p.sendPort.nativePort, $i);
+      $i.args?.release();
+      jni$_.ProtectedJniExtensions.returnResult($i.result, $r);
+    });
+    implementer.add(
+      r'dev.telephonykit.telephony_kit.ChangeListener',
+      $p,
+      _$invokePointer,
+      [if ($impl.onChange$async) r'onChange(Ljava/lang/String;)V'],
+    );
+    final $a = $p.sendPort.nativePort;
+    _$impls[$a] = $impl;
+  }
+
+  factory ChangeListener.implement($ChangeListener $impl) {
+    final $i = jni$_.JImplementer();
+    implementIn($i, $impl);
+    return $i.implement<ChangeListener>();
+  }
+}
+
+extension ChangeListener$$Methods on ChangeListener {
+  static final _id_onChange = ChangeListener._class.instanceMethodId(
+    r'onChange',
+    r'(Ljava/lang/String;)V',
+  );
+
+  static final _onChange =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onChange(java.lang.String uri)`
+  ///
+  /// The content at {@code uri} changed.
+  void onChange(jni$_.JString? uri) {
+    final _$$selfRef = reference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    _onChange(_$$selfRef.pointer, _id_onChange.pointer, _$uri.pointer).check();
+  }
+}
+
+abstract base mixin class $ChangeListener {
+  factory $ChangeListener({
+    required void Function(jni$_.JString? uri) onChange,
+    core$_.bool onChange$async,
+  }) = _$ChangeListener;
+
+  void onChange(jni$_.JString? uri);
+  core$_.bool get onChange$async => false;
+}
+
+final class _$ChangeListener with $ChangeListener {
+  _$ChangeListener({
+    required void Function(jni$_.JString? uri) onChange,
+    this.onChange$async = false,
+  }) : _onChange = onChange;
+
+  final void Function(jni$_.JString? uri) _onChange;
+  final core$_.bool onChange$async;
+
+  void onChange(jni$_.JString? uri) {
+    return _onChange(uri);
+  }
+}
+
+final class $ChangeListener$Type$ extends jni$_.JType<ChangeListener> {
+  @jni$_.internal
+  const $ChangeListener$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/ChangeListener;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.ChangeMonitor`
+///
+/// Watches a content provider URI (contacts, call log, SMS) and reports
+///changes. ContentObserver is an abstract class, so it cannot be
+///implemented from Dart.
+extension type ChangeMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/ChangeMonitor',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<ChangeMonitor> type = $ChangeMonitor$Type$();
+  static final _id_start = _class.staticMethodId(
+    r'start',
+    r'(Landroid/content/Context;Ljava/lang/String;Ldev/telephonykit/telephony_kit/ChangeListener;)I',
+  );
+
+  static final _start =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `synchronized static public int start(android.content.Context context, java.lang.String uri, dev.telephonykit.telephony_kit.ChangeListener listener)`
+  ///
+  /// Starts watching {@code uri} (including everything below it). Returns a
+  ///token for \#stop. The caller needs read access to the provider.
+  static core$_.int start(
+    Context? context,
+    jni$_.JString? uri,
+    ChangeListener? listener,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    final _$listener = listener?.reference ?? jni$_.jNullReference;
+    return _start(
+      _$$classRef.pointer,
+      _id_start.pointer,
+      _$context.pointer,
+      _$uri.pointer,
+      _$listener.pointer,
+    ).integer;
+  }
+
+  static final _id_stop = _class.staticMethodId(
+    r'stop',
+    r'(Landroid/content/Context;I)V',
+  );
+
+  static final _stop =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `synchronized static public void stop(android.content.Context context, int token)`
+  ///
+  /// Stops the watch with this token. Unknown tokens are ignored.
+  static void stop(Context? context, core$_.int token) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _stop(
+      _$$classRef.pointer,
+      _id_stop.pointer,
+      _$context.pointer,
+      token,
+    ).check();
+  }
+}
+
+final class $ChangeMonitor$Type$ extends jni$_.JType<ChangeMonitor> {
+  @jni$_.internal
+  const $ChangeMonitor$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/ChangeMonitor;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.ContactTools`
+///
+/// Contact photos and the system contact screens.
+extension type ContactTools._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/ContactTools',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<ContactTools> type = $ContactTools$Type$();
+  static final _id_readPhoto = _class.staticMethodId(
+    r'readPhoto',
+    r'(Landroid/content/Context;Ljava/lang/String;Z)[B',
+  );
+
+  static final _readPhoto =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Int32,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public byte[] readPhoto(android.content.Context context, java.lang.String contactId, boolean full)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The contact's photo bytes (JPEG or PNG), or an empty array if it has
+  ///none. {@code full} reads the high resolution photo when there is one.
+  ///Needs READ_CONTACTS.
+  static jni$_.JByteArray? readPhoto(
+    Context? context,
+    jni$_.JString? contactId,
+    core$_.bool full,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$contactId = contactId?.reference ?? jni$_.jNullReference;
+    return _readPhoto(
+      _$$classRef.pointer,
+      _id_readPhoto.pointer,
+      _$context.pointer,
+      _$contactId.pointer,
+      full ? 1 : 0,
+    ).object<jni$_.JByteArray?>();
+  }
+
+  static final _id_writePhoto = _class.staticMethodId(
+    r'writePhoto',
+    r'(Landroid/content/Context;Ljava/lang/String;[B)Z',
+  );
+
+  static final _writePhoto =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean writePhoto(android.content.Context context, java.lang.String contactId, byte[] bytes)`
+  ///
+  /// Sets the contact's photo to {@code bytes} (an encoded image), or removes
+  ///it when {@code bytes} is empty. Returns false if the contact does not
+  ///exist. Needs WRITE_CONTACTS.
+  static core$_.bool writePhoto(
+    Context? context,
+    jni$_.JString? contactId,
+    jni$_.JByteArray? bytes,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$contactId = contactId?.reference ?? jni$_.jNullReference;
+    final _$bytes = bytes?.reference ?? jni$_.jNullReference;
+    return _writePhoto(
+      _$$classRef.pointer,
+      _id_writePhoto.pointer,
+      _$context.pointer,
+      _$contactId.pointer,
+      _$bytes.pointer,
+    ).boolean;
+  }
+
+  static final _id_view = _class.staticMethodId(
+    r'view',
+    r'(Landroid/content/Context;Ljava/lang/String;)Z',
+  );
+
+  static final _view =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean view(android.content.Context context, java.lang.String contactId)`
+  ///
+  /// Opens the system screen that shows the contact. Returns false if it does not exist.
+  static core$_.bool view(Context? context, jni$_.JString? contactId) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$contactId = contactId?.reference ?? jni$_.jNullReference;
+    return _view(
+      _$$classRef.pointer,
+      _id_view.pointer,
+      _$context.pointer,
+      _$contactId.pointer,
+    ).boolean;
+  }
+
+  static final _id_edit = _class.staticMethodId(
+    r'edit',
+    r'(Landroid/content/Context;Ljava/lang/String;)Z',
+  );
+
+  static final _edit =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean edit(android.content.Context context, java.lang.String contactId)`
+  ///
+  /// Opens the system screen that edits the contact. Returns false if it does not exist.
+  static core$_.bool edit(Context? context, jni$_.JString? contactId) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$contactId = contactId?.reference ?? jni$_.jNullReference;
+    return _edit(
+      _$$classRef.pointer,
+      _id_edit.pointer,
+      _$context.pointer,
+      _$contactId.pointer,
+    ).boolean;
+  }
+
+  static final _id_insert = _class.staticMethodId(
+    r'insert',
+    r'(Landroid/content/Context;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V',
+  );
+
+  static final _insert =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void insert(android.content.Context context, java.lang.String name, java.lang.String phone, java.lang.String email)`
+  ///
+  /// Opens the system "new contact" screen, filled with whatever of {@code
+  ///name}, {@code phone} and {@code email} is not empty. The user saves it
+  ///there, so no permission is needed.
+  static void insert(
+    Context? context,
+    jni$_.JString? name,
+    jni$_.JString? phone,
+    jni$_.JString? email,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$name = name?.reference ?? jni$_.jNullReference;
+    final _$phone = phone?.reference ?? jni$_.jNullReference;
+    final _$email = email?.reference ?? jni$_.jNullReference;
+    _insert(
+      _$$classRef.pointer,
+      _id_insert.pointer,
+      _$context.pointer,
+      _$name.pointer,
+      _$phone.pointer,
+      _$email.pointer,
+    ).check();
+  }
+}
+
+final class $ContactTools$Type$ extends jni$_.JType<ContactTools> {
+  @jni$_.internal
+  const $ContactTools$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/ContactTools;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.DeviceTools`
+///
+/// Phone numbers, cell info, mobile data and eSIM state.
+extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/DeviceTools',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<DeviceTools> type = $DeviceTools$Type$();
+  static final _id_getPhoneNumbers = _class.staticMethodId(
+    r'getPhoneNumbers',
+    r'(Landroid/content/Context;)[Ljava/lang/String;',
+  );
+
+  static final _getPhoneNumbers =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] getPhoneNumbers(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The device's own phone numbers, one {@code subscriptionId<TAB>slot<TAB>number}
+  ///line per active SIM. Numbers are often empty because the carrier did not
+  ///store them. Needs READ_PHONE_NUMBERS (or READ_PHONE_STATE before Android 13).
+  static jni$_.JArray<jni$_.JString?>? getPhoneNumbers(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getPhoneNumbers(
+      _$$classRef.pointer,
+      _id_getPhoneNumbers.pointer,
+      _$context.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+
+  static final _id_getCellInfoJson = _class.staticMethodId(
+    r'getCellInfoJson',
+    r'(Landroid/content/Context;)Ljava/lang/String;',
+  );
+
+  static final _getCellInfoJson =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getCellInfoJson(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Nearby cells as a JSON array. Each item has {@code type} (lte, nr, gsm,
+  ///wcdma, cdma), {@code registered}, {@code dbm}, {@code level} and {@code
+  ///cellId} (-1 if unknown). Needs ACCESS_FINE_LOCATION.
+  static jni$_.JString? getCellInfoJson(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getCellInfoJson(
+      _$$classRef.pointer,
+      _id_getCellInfoJson.pointer,
+      _$context.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getSignalDbm = _class.staticMethodId(
+    r'getSignalDbm',
+    r'(Landroid/content/Context;)I',
+  );
+
+  static final _getSignalDbm =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getSignalDbm(android.content.Context context)`
+  ///
+  /// The signal strength of the serving cell in dBm, or Integer\#MIN_VALUE
+  ///if unknown. Needs Android 10+ and READ_PHONE_STATE.
+  static core$_.int getSignalDbm(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getSignalDbm(
+      _$$classRef.pointer,
+      _id_getSignalDbm.pointer,
+      _$context.pointer,
+    ).integer;
+  }
+
+  static final _id_isDataEnabled = _class.staticMethodId(
+    r'isDataEnabled',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isDataEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isDataEnabled(android.content.Context context)`
+  ///
+  /// Whether mobile data is switched on. Needs Android 8+ and READ_PHONE_STATE.
+  static core$_.bool isDataEnabled(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isDataEnabled(
+      _$$classRef.pointer,
+      _id_isDataEnabled.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+
+  static final _id_isDataRoamingEnabled = _class.staticMethodId(
+    r'isDataRoamingEnabled',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isDataRoamingEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isDataRoamingEnabled(android.content.Context context)`
+  ///
+  /// Whether the user allows mobile data while roaming.
+  static core$_.bool isDataRoamingEnabled(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isDataRoamingEnabled(
+      _$$classRef.pointer,
+      _id_isDataRoamingEnabled.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+
+  static final _id_getDataState = _class.staticMethodId(
+    r'getDataState',
+    r'(Landroid/content/Context;)I',
+  );
+
+  static final _getDataState =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public int getDataState(android.content.Context context)`
+  ///
+  /// {@code TelephonyManager.DATA_*}: disconnected 0, connecting 1, connected 2, suspended 3.
+  static core$_.int getDataState(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getDataState(
+      _$$classRef.pointer,
+      _id_getDataState.pointer,
+      _$context.pointer,
+    ).integer;
+  }
+
+  static final _id_isEsimSupported = _class.staticMethodId(
+    r'isEsimSupported',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isEsimSupported =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isEsimSupported(android.content.Context context)`
+  ///
+  /// Whether the device supports eSIM (Android 9+).
+  static core$_.bool isEsimSupported(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isEsimSupported(
+      _$$classRef.pointer,
+      _id_isEsimSupported.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+
+  static final _id_getEid = _class.staticMethodId(
+    r'getEid',
+    r'(Landroid/content/Context;)Ljava/lang/String;',
+  );
+
+  static final _getEid =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getEid(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The eSIM chip id, or an empty string (needs carrier privileges, so usually empty).
+  static jni$_.JString? getEid(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getEid(
+      _$$classRef.pointer,
+      _id_getEid.pointer,
+      _$context.pointer,
+    ).object<jni$_.JString?>();
+  }
+}
+
+final class $DeviceTools$Type$ extends jni$_.JType<DeviceTools> {
+  @jni$_.internal
+  const $DeviceTools$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/DeviceTools;';
+}
+
 /// from: `dev.telephonykit.telephony_kit.DialIntents`
 ///
 /// Reads the number from a dial intent ({@code ACTION_DIAL} or {@code
@@ -7993,6 +9296,46 @@ extension type DialIntents._(jni$_.JObject _$this) implements jni$_.JObject {
       _id_takeNumber.pointer,
       _$activity.pointer,
     ).object<jni$_.JString?>();
+  }
+
+  static final _id_callExtras = _class.staticMethodId(
+    r'callExtras',
+    r'(Landroid/telecom/PhoneAccountHandle;I)Landroid/os/Bundle;',
+  );
+
+  static final _callExtras =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public android.os.Bundle callExtras(android.telecom.PhoneAccountHandle handle, int videoState)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Extras for {@code TelecomManager.placeCall}: the SIM to use (or null) and
+  ///the starting video state ({@code VideoProfile.STATE_*}; 0 for audio).
+  static Bundle? callExtras(PhoneAccountHandle? handle, core$_.int videoState) {
+    final _$$classRef = _class.reference;
+    final _$handle = handle?.reference ?? jni$_.jNullReference;
+    return _callExtras(
+      _$$classRef.pointer,
+      _id_callExtras.pointer,
+      _$handle.pointer,
+      videoState,
+    ).object<Bundle?>();
   }
 }
 
@@ -9115,6 +10458,86 @@ extension type SmsHelper._(jni$_.JObject _$this) implements jni$_.JObject {
       subscriptionId,
       _$listener.pointer,
     ).check();
+  }
+
+  static final _id_getDefaultPackage = _class.staticMethodId(
+    r'getDefaultPackage',
+    r'(Landroid/content/Context;)Ljava/lang/String;',
+  );
+
+  static final _getDefaultPackage =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String getDefaultPackage(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The package name of the default SMS app, or an empty string.
+  static jni$_.JString? getDefaultPackage(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getDefaultPackage(
+      _$$classRef.pointer,
+      _id_getDefaultPackage.pointer,
+      _$context.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_requestDefaultLegacy = _class.staticMethodId(
+    r'requestDefaultLegacy',
+    r'(Landroid/app/Activity;I)Z',
+  );
+
+  static final _requestDefaultLegacy =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public boolean requestDefaultLegacy(android.app.Activity activity, int requestCode)`
+  ///
+  /// Shows the system prompt that makes this app the default SMS app. Use it
+  ///before Android 10; from Android 10 the SMS role is requested instead.
+  ///Returns false if there is no activity.
+  static core$_.bool requestDefaultLegacy(
+    Activity? activity,
+    core$_.int requestCode,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$activity = activity?.reference ?? jni$_.jNullReference;
+    return _requestDefaultLegacy(
+      _$$classRef.pointer,
+      _id_requestDefaultLegacy.pointer,
+      _$activity.pointer,
+      requestCode,
+    ).boolean;
   }
 }
 

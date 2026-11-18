@@ -54,6 +54,8 @@ public final class CallManager {
           return size() > 20;
         }
       };
+  /** RTT requests from the other side that the user has not answered yet. */
+  private static final Map<String, Integer> rttRequests = new LinkedHashMap<>();
   private static PowerManager.WakeLock proximityLock;
 
   // ---------------------------------------------------------------------------
@@ -437,6 +439,124 @@ public final class CallManager {
   }
 
   // ---------------------------------------------------------------------------
+  // Video, verification, Wi-Fi and RTT
+  // ---------------------------------------------------------------------------
+
+  /** {@code VideoProfile.STATE_*} bits of the call (0 audio only, 1 TX, 2 RX, 3 both), or -1. */
+  public static int getVideoState(String callId) {
+    Call call = find(callId);
+    return call == null || call.getDetails() == null ? -1 : call.getDetails().getVideoState();
+  }
+
+  /** Answers a ringing call with the given {@code VideoProfile.STATE_*} bits. */
+  public static boolean answerWithVideoState(String callId, int videoState) {
+    Call call = find(callId);
+    if (call == null) return false;
+    call.answer(videoState);
+    return true;
+  }
+
+  /**
+   * STIR/SHAKEN result for the caller's number: 0 not verified, 1 passed, 2
+   * failed, or -1 when unknown or before Android 11.
+   */
+  public static int getNumberVerification(String callId) {
+    if (Build.VERSION.SDK_INT < 30) return -1;
+    Call call = find(callId);
+    if (call == null || call.getDetails() == null) return -1;
+    return call.getDetails().getCallerNumberVerificationStatus();
+  }
+
+  /** True if the call is carried over Wi-Fi (Wi-Fi calling). */
+  public static boolean isWifiCall(String callId) {
+    Call call = find(callId);
+    return call != null
+        && call.getDetails() != null
+        && call.getDetails().hasProperty(Call.Details.PROPERTY_WIFI);
+  }
+
+  /** True if the call uses high definition audio (HD voice). */
+  public static boolean isHighDefinitionAudio(String callId) {
+    Call call = find(callId);
+    return call != null
+        && call.getDetails() != null
+        && call.getDetails().hasProperty(Call.Details.PROPERTY_HIGH_DEF_AUDIO);
+  }
+
+  /** True while real-time text (RTT) is active on the call. Android 9+. */
+  public static boolean isRttActive(String callId) {
+    if (Build.VERSION.SDK_INT < 28) return false;
+    Call call = find(callId);
+    return call != null && call.isRttActive();
+  }
+
+  /** Asks the other side to start real-time text. Android 9+. */
+  public static boolean requestRtt(String callId) {
+    if (Build.VERSION.SDK_INT < 28) return false;
+    Call call = find(callId);
+    if (call == null) return false;
+    call.sendRttRequest();
+    return true;
+  }
+
+  /** Stops real-time text on the call. Android 9+. */
+  public static boolean stopRtt(String callId) {
+    if (Build.VERSION.SDK_INT < 28) return false;
+    Call call = find(callId);
+    if (call == null) return false;
+    call.stopRtt();
+    return true;
+  }
+
+  /** The id of an RTT request from the other side waiting for an answer, or -1. */
+  public static int getPendingRttRequest(String callId) {
+    synchronized (lock) {
+      Integer id = rttRequests.get(callId);
+      return id == null ? -1 : id;
+    }
+  }
+
+  /** Accepts or declines an RTT request that arrived on the call. Android 9+. */
+  public static boolean respondToRttRequest(String callId, int requestId, boolean accept) {
+    if (Build.VERSION.SDK_INT < 28) return false;
+    Call call = find(callId);
+    if (call == null) return false;
+    call.respondToRttRequest(requestId, accept);
+    synchronized (lock) {
+      rttRequests.remove(callId);
+    }
+    return true;
+  }
+
+  /** Sends typed text over RTT. Returns false if RTT is not active. */
+  public static boolean writeRtt(String callId, String text) {
+    if (Build.VERSION.SDK_INT < 28) return false;
+    Call call = find(callId);
+    Call.RttCall rtt = call == null ? null : call.getRttCall();
+    if (rtt == null) return false;
+    try {
+      rtt.write(text);
+      return true;
+    } catch (java.io.IOException e) {
+      return false;
+    }
+  }
+
+  /** Text received over RTT since the last read, or an empty string. Never blocks. */
+  public static String readRtt(String callId) {
+    if (Build.VERSION.SDK_INT < 28) return "";
+    Call call = find(callId);
+    Call.RttCall rtt = call == null ? null : call.getRttCall();
+    if (rtt == null) return "";
+    try {
+      String text = rtt.readImmediately();
+      return text == null ? "" : text;
+    } catch (java.io.IOException e) {
+      return "";
+    }
+  }
+
+  // ---------------------------------------------------------------------------
   // Conference and multi-call
   // ---------------------------------------------------------------------------
 
@@ -682,6 +802,29 @@ public final class CallManager {
 
           @Override
           public void onConferenceableCallsChanged(Call c, List<Call> conferenceable) {
+            conferenceChanged(id);
+          }
+
+          // RTT, video and details changes also do not change the state, so
+          // they are reported as a state event for the UI to re-read.
+          @Override
+          public void onRttRequest(Call c, int requestId) {
+            synchronized (lock) {
+              rttRequests.put(id, requestId);
+            }
+            conferenceChanged(id);
+          }
+
+          @Override
+          public void onRttStatusChanged(Call c, boolean enabled, Call.RttCall rttCall) {
+            synchronized (lock) {
+              rttRequests.remove(id);
+            }
+            conferenceChanged(id);
+          }
+
+          @Override
+          public void onDetailsChanged(Call c, Call.Details details) {
             conferenceChanged(id);
           }
         };

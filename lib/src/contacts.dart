@@ -15,6 +15,10 @@ abstract final class ContactMime {
   static const note = 'vnd.android.cursor.item/note';
   static const website = 'vnd.android.cursor.item/website';
   static const event = 'vnd.android.cursor.item/contact_event';
+  static const im = 'vnd.android.cursor.item/im';
+  static const relation = 'vnd.android.cursor.item/relation';
+  static const sip = 'vnd.android.cursor.item/sip_address';
+  static const groupMembership = 'vnd.android.cursor.item/group_membership';
 
   /// Every kind that `updateContact` replaces. Photos, groups, IM and other
   /// kinds are left alone.
@@ -28,6 +32,9 @@ abstract final class ContactMime {
     note,
     website,
     event,
+    im,
+    relation,
+    sip,
   ];
 }
 
@@ -70,6 +77,43 @@ String addressTypeLabel(int type, String? customLabel) =>
   return (type: 0, label: text);
 }
 
+const _imProtocols = {
+  0: 'AIM',
+  1: 'Windows Live',
+  2: 'Yahoo',
+  3: 'Skype',
+  4: 'QQ',
+  5: 'Google Talk',
+  6: 'ICQ',
+  7: 'Jabber',
+  8: 'NetMeeting',
+};
+
+const _relationTypes = {
+  1: 'Assistant',
+  2: 'Brother',
+  3: 'Child',
+  4: 'Domestic partner',
+  5: 'Father',
+  6: 'Friend',
+  7: 'Manager',
+  8: 'Mother',
+  9: 'Parent',
+  10: 'Partner',
+  11: 'Referred by',
+  12: 'Relative',
+  13: 'Sister',
+  14: 'Spouse',
+};
+
+/// The service name for `CommonDataKinds.Im.PROTOCOL`.
+String imProtocolLabel(int protocol, String? customLabel) =>
+    _imProtocols[protocol] ?? customLabel ?? '';
+
+/// The label for `CommonDataKinds.Relation.TYPE`.
+String relationTypeLabel(int type, String? customLabel) =>
+    _relationTypes[type] ?? customLabel ?? '';
+
 String _s(Map<String, String?> row, String key) => row[key] ?? '';
 
 /// Builds a [ContactDetails] from a `contacts` row and the `data` rows of the
@@ -86,6 +130,9 @@ ContactDetails buildContactDetails(
   final emails = <ContactEmail>[];
   final addresses = <ContactAddress>[];
   final websites = <String>[];
+  final ims = <ContactIm>[];
+  final relations = <ContactRelation>[];
+  final sips = <String>[];
   final seenPhones = <String>{};
 
   for (final row in data) {
@@ -136,6 +183,29 @@ ContactDetails buildContactDetails(
         note = _s(row, 'data1');
       case ContactMime.website:
         if (_s(row, 'data1').isNotEmpty) websites.add(_s(row, 'data1'));
+      case ContactMime.im:
+        if (_s(row, 'data1').isNotEmpty) {
+          ims.add(
+            ContactIm(
+              address: _s(row, 'data1'),
+              protocol: imProtocolLabel(
+                int.tryParse(_s(row, 'data5')) ?? -1,
+                row['data6'],
+              ),
+            ),
+          );
+        }
+      case ContactMime.relation:
+        if (_s(row, 'data1').isNotEmpty) {
+          relations.add(
+            ContactRelation(
+              name: _s(row, 'data1'),
+              label: relationTypeLabel(type, row['data3']),
+            ),
+          );
+        }
+      case ContactMime.sip:
+        if (_s(row, 'data1').isNotEmpty) sips.add(_s(row, 'data1'));
       case ContactMime.event:
         // Event.TYPE_BIRTHDAY is 3.
         if (type == 3 && _s(row, 'data1').isNotEmpty) {
@@ -161,6 +231,9 @@ ContactDetails buildContactDetails(
     emails: List.unmodifiable(emails),
     addresses: List.unmodifiable(addresses),
     websites: List.unmodifiable(websites),
+    ims: List.unmodifiable(ims),
+    relations: List.unmodifiable(relations),
+    sipAddresses: List.unmodifiable(sips),
     note: note,
     birthday: birthday,
     photoUri: contact['photo_uri'] ?? contact['photo_thumb_uri'],
@@ -261,6 +334,37 @@ List<Map<String, Object>> contactDataRows(ContactDetails contact) {
   for (final site in contact.websites) {
     if (site.trim().isEmpty) continue;
     rows.add({'mimetype': ContactMime.website, 'data1': site.trim()});
+  }
+  for (final im in contact.ims) {
+    final address = im.address.trim();
+    if (address.isEmpty) continue;
+    final label = im.protocol.trim();
+    var protocol = -1;
+    for (final e in _imProtocols.entries) {
+      if (e.value.toLowerCase() == label.toLowerCase()) protocol = e.key;
+    }
+    rows.add({
+      'mimetype': ContactMime.im,
+      'data1': address,
+      'data2': 3, // Im.TYPE_OTHER
+      'data5': protocol,
+      if (protocol == -1 && label.isNotEmpty) 'data6': label,
+    });
+  }
+  for (final relation in contact.relations) {
+    final name = relation.name.trim();
+    if (name.isEmpty) continue;
+    final t = typeFromLabel(relation.label, _relationTypes, 12);
+    rows.add({
+      'mimetype': ContactMime.relation,
+      'data1': name,
+      'data2': t.type,
+      if (t.label != null) 'data3': t.label!,
+    });
+  }
+  for (final sip in contact.sipAddresses) {
+    if (sip.trim().isEmpty) continue;
+    rows.add({'mimetype': ContactMime.sip, 'data1': sip.trim()});
   }
   final birthday = contact.birthday?.trim() ?? '';
   if (birthday.isNotEmpty) {
