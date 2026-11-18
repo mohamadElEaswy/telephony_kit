@@ -57,7 +57,7 @@ throw.
 
 ```yaml
 dependencies:
-  telephony_kit: ^0.5.0
+  telephony_kit: ^0.6.0
 ```
 
 Minimum Android version is API 24 (Android 7.0).
