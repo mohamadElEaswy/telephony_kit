@@ -126,14 +126,18 @@ class _ContactsPageState extends State<ContactsPage> {
     // Otherwise the search field gets focus back on return and the
     // keyboard pops up over the list.
     FocusScope.of(context).unfocus();
+    // Edits made on the contact screen are applied to this row on return,
+    // so their change events must not mark the list as changed.
+    _ignoreChangesUntil = DateTime(9999);
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ContactDetailsPage(contactId: id),
       ),
     );
+    // Late events from those edits can still arrive for a moment.
+    _ignoreChangesUntil = DateTime.now().add(const Duration(seconds: 2));
     if (!mounted) return;
     // Update just this row so the list keeps its place.
-    _ignoreChangesUntil = DateTime.now().add(const Duration(seconds: 2));
     final i = _contacts.indexWhere((c) => c.id == id);
     if (i < 0) return;
     final fresh = _telephony.getContact(id);
