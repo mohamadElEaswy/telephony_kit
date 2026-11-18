@@ -376,3 +376,13 @@ List<Map<String, Object>> contactDataRows(ContactDetails contact) {
   }
   return rows;
 }
+
+/// Returns [contacts] in the order of [ids], skipping ids that have no
+/// contact (for example one deleted after the id list was built).
+List<ContactDetails> orderContactsByIds(
+  List<String> ids,
+  Iterable<ContactDetails> contacts,
+) {
+  final byId = {for (final c in contacts) c.id: c};
+  return [for (final id in ids) ?byId[id]];
+}

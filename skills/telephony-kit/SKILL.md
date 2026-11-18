@@ -54,6 +54,7 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Change call log | `deleteCallLogEntries(ids)`, `deleteCallLogForNumber`, `markMissedCallsRead()` |
 | Contacts (pick / caller name) | `searchContacts(query)`, `lookupNumber(number)` |
 | Contact details | `getContacts(query:, limit:)`, `getContact(id)` return every field (`ContactDetails`) |
+| Contact list screen (paging) | `getContactsPage(query:, offset:, pageSize:)` returns `ContactPage` (`contacts`, `totalCount`, `nextOffset`, `hasMore`) |
 | Add / edit / delete contacts | `addContact(details)`, `updateContact(details)` (read, `copyWith`, save), `deleteContact(id)`, `deleteContacts(ids)`, `setContactStarred(id, bool)` (WRITE_CONTACTS) |
 | Contact photos, groups, accounts | `getContactPhoto/setContactPhoto`, `getContactGroups`, `addContactGroup`, `addContactToGroup`, `getContactAccounts` |
 | Duplicates, merge, vCard | `findDuplicateContacts()`, `mergeContacts(ids)`, `splitContact(id)`, `exportContactsAsVCard()`, `importVCard(text)` |
@@ -101,6 +102,14 @@ call no longer exists instead of throwing.
 
 **Searches** run synchronously on the UI isolate. Always pass a `limit`, and
 debounce search-as-you-type.
+
+**Contact list screens page.** Never list all contacts with
+`getContacts(limit: 5000)` or call it from `build`. Use `getContactsPage`
+with `pageSize: 50`: load offset 0 in `initState` or after a debounced search,
+and load `page.nextOffset` from a `ListView.builder` item near the end while
+`page.hasMore`. Offset 0 refreshes the id list; restart from 0 on a new
+search, pull to refresh, or a `contactChanges` event. See the example app's
+`contacts_page.dart`.
 
 **Caller name.** `PhoneCall.displayName` can be empty; fall back to
 `lookupNumber(call.number)?.displayName`, then the number. Cache the result per

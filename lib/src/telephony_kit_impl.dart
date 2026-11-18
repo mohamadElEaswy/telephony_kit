@@ -603,6 +603,67 @@ class TelephonyKit {
     );
   });
 
+  /// Loads one page of contacts with all their details, for lists that
+  /// scroll through every contact without freezing the UI or holding them
+  /// all in memory.
+  ///
+  /// The first call for a [query] (offset 0) counts the matching contacts
+  /// natively and keeps only their ids. Each call then loads the details of
+  /// [pageSize] contacts starting at [offset], so a page of 50 takes a few
+  /// milliseconds even with thousands of contacts. Pass the previous page's
+  /// [ContactPage.nextOffset] to get the next one, while
+  /// [ContactPage.hasMore] is true.
+  ///
+  /// The id list stays the same while you scroll, so pages never skip or
+  /// repeat a contact. It is rebuilt when [refresh] is true, which by
+  /// default is when [offset] is 0. Pull to refresh, a new search, or an
+  /// event on [contactChanges] should start again from offset 0.
+  ///
+  /// [query] matches like [getContacts]: the name, an email address, or a
+  /// phone number in any format, and an empty query lists every contact.
+  /// [pageSize] is clamped to 1..500. Needs `TelephonyPermission.readContacts`.
+  ContactPage getContactsPage({
+    String query = '',
+    int offset = 0,
+    int pageSize = 50,
+    bool? refresh,
+  }) => _guard('Reading contacts', () {
+    if (offset < 0) {
+      throw ArgumentError.value(offset, 'offset', 'must not be negative');
+    }
+    final size = pageSize.clamp(1, 500);
+    final jQuery = query.trim().toJString();
+    final total = android.ContactPager.prepare(
+      _context,
+      jQuery,
+      refresh ?? offset == 0,
+    );
+    final array = android.ContactPager.page(_context, jQuery, offset, size);
+    jQuery.release();
+    final ids = CallScreeningSettings._list(array);
+    array?.release();
+    final contacts = ids.isEmpty
+        ? const <ContactDetails>[]
+        : orderContactsByIds(
+            ids,
+            _loadContacts(
+              selection: '_id IN (${List.filled(ids.length, '?').join(',')})',
+              args: ids,
+              limit: ids.length,
+            ),
+          );
+    return ContactPage(
+      contacts: contacts,
+      offset: offset,
+      nextOffset: offset + ids.length,
+      totalCount: total,
+    );
+  });
+
+  /// Forgets the contact lists that [getContactsPage] keeps between pages.
+  /// The next page 0 rebuilds them anyway, so you rarely need this.
+  void clearContactPages() => android.ContactPager.clear();
+
   /// Reads contacts and their data with two queries per 200 contacts.
   List<ContactDetails> _loadContacts({
     String? selection,

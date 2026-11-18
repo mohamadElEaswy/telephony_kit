@@ -53,6 +53,11 @@ parameters, and deliver callbacks through small Java **interfaces**
 `method$async: true`. Everything else (framework services, content providers,
 roles, intents) is called from Dart through the generated bindings.
 
+One more case is allowed: a bulk scan whose result Dart only needs in
+summary (for example `ContactPager`, which collects thousands of contact ids
+natively). Reading each cell through JNI is slow, so do the scan in Java and
+return a small result such as an id slice.
+
 Classes only Android talks to are excluded from bindings in the `_systemOnly`
 set in `tool/jnigen.dart`.
 

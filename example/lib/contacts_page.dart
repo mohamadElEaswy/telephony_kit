@@ -1,10 +1,13 @@
+import 'dart:async';
+
 import 'package:material_ui/material_ui.dart';
 import 'package:telephony_kit/telephony_kit.dart';
 
 final _telephony = TelephonyKit.instance;
 
-/// Contacts tab: search, open a contact to see everything saved on it, add,
-/// edit, favorite and delete.
+/// Contacts tab: every contact in a list that loads 50 at a time as you
+/// scroll, a search that waits for you to stop typing, and add, edit,
+/// favorite and delete.
 class ContactsPage extends StatefulWidget {
   const ContactsPage({super.key});
 
@@ -13,69 +16,217 @@ class ContactsPage extends StatefulWidget {
 }
 
 class _ContactsPageState extends State<ContactsPage> {
+  static const _pageSize = 50;
+
+  final _scroll = ScrollController();
+  final _contacts = <ContactDetails>[];
   String _query = '';
+  int _nextOffset = 0;
+  int _total = 0;
+  bool _hasMore = false;
+  bool _loading = false;
+  bool _loadScheduled = false;
+  bool _stale = false;
+  String? _error;
+  Timer? _debounce;
+  StreamSubscription<void>? _changes;
+  DateTime _ignoreChangesUntil = DateTime(0);
+
+  bool get _canRead =>
+      _telephony.hasPermission(TelephonyPermission.readContacts);
+
+  @override
+  void initState() {
+    super.initState();
+    if (!_canRead) return;
+    _reload();
+    _changes = _telephony.contactChanges.listen((_) => _onContactsChanged());
+  }
+
+  @override
+  void dispose() {
+    _debounce?.cancel();
+    _changes?.cancel();
+    _scroll.dispose();
+    super.dispose();
+  }
 
   void _toast(String text) =>
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(text)));
 
-  Future<void> _open(ContactDetails contact) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => ContactDetailsPage(contactId: contact.id),
-      ),
-    );
+  /// Starts the list again from the top: counts the matches and loads the
+  /// first page.
+  void _reload() {
+    _contacts.clear();
+    _nextOffset = 0;
+    _total = 0;
+    _hasMore = true;
+    _stale = false;
+    _error = null;
+    if (_scroll.hasClients) _scroll.jumpTo(0);
+    _loadMore();
+  }
+
+  /// Loads the next page. Each page is small, so this takes a few
+  /// milliseconds even with thousands of contacts.
+  void _loadMore() {
+    if (_loading || !_hasMore) return;
+    _loading = true;
+    try {
+      final page = _telephony.getContactsPage(
+        query: _query,
+        offset: _nextOffset,
+        pageSize: _pageSize,
+      );
+      _contacts.addAll(page.contacts);
+      _nextOffset = page.nextOffset;
+      _total = page.totalCount;
+      _hasMore = page.hasMore;
+    } on TelephonyException catch (e) {
+      _error = e.message;
+      _hasMore = false;
+    } finally {
+      _loading = false;
+    }
     if (mounted) setState(() {});
   }
 
+  /// Asks for the next page after this frame, when the list nears its end.
+  void _scheduleLoadMore() {
+    if (_loadScheduled || _loading || !_hasMore) return;
+    _loadScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadScheduled = false;
+      if (mounted) _loadMore();
+    });
+  }
+
+  void _onSearch(String text) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 300), () {
+      if (!mounted || text.trim() == _query.trim()) return;
+      _query = text;
+      _reload();
+    });
+  }
+
+  void _onContactsChanged() {
+    if (!mounted || DateTime.now().isBefore(_ignoreChangesUntil)) return;
+    // Near the top a silent reload is invisible. Further down it would make
+    // the list jump, so offer a refresh instead.
+    if (!_scroll.hasClients || _scroll.offset < 200) {
+      _reload();
+    } else {
+      setState(() => _stale = true);
+    }
+  }
+
+  Future<void> _open(int index) async {
+    final id = _contacts[index].id;
+    // Otherwise the search field gets focus back on return and the
+    // keyboard pops up over the list.
+    FocusScope.of(context).unfocus();
+    // Edits made on the contact screen are applied to this row on return,
+    // so their change events must not mark the list as changed.
+    _ignoreChangesUntil = DateTime(9999);
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ContactDetailsPage(contactId: id),
+      ),
+    );
+    // Late events from those edits can still arrive for a moment.
+    _ignoreChangesUntil = DateTime.now().add(const Duration(seconds: 2));
+    if (!mounted) return;
+    // Update just this row so the list keeps its place.
+    final i = _contacts.indexWhere((c) => c.id == id);
+    if (i < 0) return;
+    final fresh = _telephony.getContact(id);
+    setState(() {
+      if (fresh == null) {
+        _contacts.removeAt(i);
+        _total = _total > 0 ? _total - 1 : 0;
+      } else {
+        _contacts[i] = fresh;
+      }
+    });
+  }
+
   Future<void> _add() async {
+    FocusScope.of(context).unfocus();
     final id = await Navigator.of(
       context,
     ).push<String>(MaterialPageRoute(builder: (_) => const ContactEditPage()));
     if (id != null && mounted) {
       _toast('Contact added');
-      setState(() {});
+      _reload();
     }
+  }
+
+  Widget _tile(int i) {
+    final c = _contacts[i];
+    final name = c.displayName.isNotEmpty
+        ? c.displayName
+        : (c.phones.isNotEmpty && c.phones.first.number.isNotEmpty
+              ? c.phones.first.number
+              : '(no name)');
+    return ListTile(
+      leading: CircleAvatar(child: Text(String.fromCharCode(name.runes.first))),
+      title: Row(
+        children: [
+          Flexible(child: Text(name, overflow: TextOverflow.ellipsis)),
+          if (c.isStarred)
+            const Icon(Icons.star, size: 16, color: Colors.amber),
+        ],
+      ),
+      subtitle: Text(
+        c.phones.isNotEmpty
+            ? '${c.phones.first}'
+            : (c.emails.isNotEmpty ? '${c.emails.first}' : ''),
+        overflow: TextOverflow.ellipsis,
+      ),
+      onTap: () => _open(i),
+    );
+  }
+
+  Widget _list() {
+    if (_error != null && _contacts.isEmpty) {
+      return Center(child: Text(_error!));
+    }
+    if (_contacts.isEmpty) {
+      return Center(
+        child: _hasMore
+            ? const CircularProgressIndicator()
+            : const Text('No contacts found.'),
+      );
+    }
+    // One extra row at the end shows a spinner while more pages remain.
+    final count = _contacts.length + (_hasMore ? 1 : 0);
+    return RefreshIndicator(
+      onRefresh: () async => _reload(),
+      child: ListView.builder(
+        controller: _scroll,
+        physics: const AlwaysScrollableScrollPhysics(),
+        itemCount: count,
+        itemBuilder: (context, i) {
+          if (i >= _contacts.length - 15) _scheduleLoadMore();
+          if (i >= _contacts.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          return _tile(i);
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_telephony.hasPermission(TelephonyPermission.readContacts)) {
+    if (!_canRead) {
       return const Center(
         child: Text('Grant the contacts permission to see contacts.'),
       );
-    }
-    Widget list;
-    try {
-      final contacts = _telephony.getContacts(query: _query, limit: 300);
-      list = contacts.isEmpty
-          ? const Center(child: Text('No contacts found.'))
-          : ListView.builder(
-              itemCount: contacts.length,
-              itemBuilder: (context, i) {
-                final c = contacts[i];
-                final name = c.displayName.isEmpty
-                    ? (c.phones.isEmpty ? '(no name)' : c.phones.first.number)
-                    : c.displayName;
-                return ListTile(
-                  leading: CircleAvatar(child: Text(name[0])),
-                  title: Row(
-                    children: [
-                      Flexible(child: Text(name)),
-                      if (c.isStarred)
-                        const Icon(Icons.star, size: 16, color: Colors.amber),
-                    ],
-                  ),
-                  subtitle: Text(
-                    c.phones.isNotEmpty
-                        ? '${c.phones.first}'
-                        : (c.emails.isNotEmpty ? '${c.emails.first}' : ''),
-                  ),
-                  onTap: () => _open(c),
-                );
-              },
-            );
-    } on TelephonyException catch (e) {
-      list = Center(child: Text(e.message));
     }
     return Scaffold(
       floatingActionButton:
@@ -89,14 +240,33 @@ class _ContactsPageState extends State<ContactsPage> {
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
             child: SearchBar(
               hintText: 'Search by name, number or email',
               leading: const Icon(Icons.search),
-              onChanged: (q) => setState(() => _query = q),
+              onChanged: _onSearch,
             ),
           ),
-          Expanded(child: list),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(24, 4, 8, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _total == 1 ? '1 contact' : '$_total contacts',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                ),
+                if (_stale)
+                  TextButton.icon(
+                    onPressed: _reload,
+                    icon: const Icon(Icons.refresh, size: 18),
+                    label: const Text('Contacts changed'),
+                  ),
+              ],
+            ),
+          ),
+          Expanded(child: _list()),
         ],
       ),
     );

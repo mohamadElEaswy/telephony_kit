@@ -1,3 +1,17 @@
+## 0.7.0
+
+* Contact paging: `getContactsPage(query:, offset:, pageSize:)` returns a
+  `ContactPage` with `contacts`, `totalCount`, `nextOffset` and `hasMore`.
+  The matching ids are collected natively once per search (new
+  `ContactPager` Java helper), and each page loads only its own contacts, so
+  lists of thousands of contacts scroll smoothly and use little memory.
+  Search matches the name, an email or a phone number in any format, with no
+  cap on the number of matches. `clearContactPages()` drops the cached ids.
+* Example: the Contacts tab is now an infinite-scroll list that loads 50
+  contacts at a time, shows the total, debounces the search, supports pull to
+  refresh and keeps its place after editing a contact. Before, it showed only
+  the first 300 contacts and re-queried on every keystroke.
+
 ## 0.6.0
 
 Contacts

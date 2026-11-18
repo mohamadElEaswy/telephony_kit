@@ -79,6 +79,8 @@ simulatedRinging, unknown`; `isLive`.
 | `List<Contact> searchContacts(String query, {int limit = 100})` | READ_CONTACTS; empty query lists all |
 | `Contact? lookupNumber(String number)` | READ_CONTACTS |
 | `List<ContactDetails> getContacts({String query = '', int limit = 100})` | READ_CONTACTS; includes contacts without numbers; query matches name, email or number |
+| `ContactPage getContactsPage({String query = '', int offset = 0, int pageSize = 50, bool? refresh})` | READ_CONTACTS; for long lists. `ContactPage.contacts`, `totalCount`, `nextOffset`, `hasMore`; offset 0 rebuilds the id list (or pass `refresh`); `pageSize` 1..500 |
+| `void clearContactPages()` | drops the cached id lists |
 | `ContactDetails? getContact(String id)` | READ_CONTACTS |
 | `String addContact(ContactDetails, {String? accountType, String? accountName})` | WRITE_CONTACTS; returns the new id |
 | `bool updateContact(ContactDetails)` | WRITE_CONTACTS; needs `id`; false if the contact is gone |
@@ -105,7 +107,8 @@ simulatedRinging, unknown`; `isLive`.
 (`ContactAddress(address, label)`), `websites`, `note`, `birthday`
 (`yyyy-MM-dd` or `--MM-dd`), `ims` (`ContactIm(address, protocol)`), `relations`
 (`ContactRelation(name, label)`), `sipAddresses`, `photoUri`, `isStarred`, and
-`copyWith(...)`.
+`copyWith(...)`. `ContactPage`: `contacts`, `offset`, `nextOffset`,
+`totalCount`, `hasMore`.
 All fields are optional, so `ContactDetails(displayName: 'Sara')` is valid.
 
 ## Blocking
