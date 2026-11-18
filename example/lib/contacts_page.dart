@@ -123,6 +123,9 @@ class _ContactsPageState extends State<ContactsPage> {
 
   Future<void> _open(int index) async {
     final id = _contacts[index].id;
+    // Otherwise the search field gets focus back on return and the
+    // keyboard pops up over the list.
+    FocusScope.of(context).unfocus();
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
         builder: (_) => ContactDetailsPage(contactId: id),
@@ -145,6 +148,7 @@ class _ContactsPageState extends State<ContactsPage> {
   }
 
   Future<void> _add() async {
+    FocusScope.of(context).unfocus();
     final id = await Navigator.of(
       context,
     ).push<String>(MaterialPageRoute(builder: (_) => const ContactEditPage()));
