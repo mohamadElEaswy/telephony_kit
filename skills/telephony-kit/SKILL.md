@@ -1,6 +1,6 @@
 ---
 name: telephony-kit
-description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android.
+description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android, call details and per-contact call history, formatting call times and durations, or a floating call bubble over other apps.
 ---
 
 # Using telephony_kit in a Flutter app
@@ -61,6 +61,11 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | System contact screens | `showContact(id)`, `openContactEditor(id)`, `openNewContactScreen(name:, phone:)` (no permission) |
 | React to data changes | `contactChanges`, `callLogChanges`, `smsChanges`, `incomingSms` streams (re-query when they fire) |
 | Call log extras | `getCallLogStats()`, `getGroupedCallLog()`, `addCallLogEntry(...)`; entries have `geocodedLocation`, `hasVideo`, `isWifi`, `isHd` |
+| Call details screen | `getCallLogEntry(id)` (every field: `formattedNumber`, `numberLabel`, `postDialDigits`, `presentation`, `blockReason`...) |
+| Call history of a number / contact | `getCallHistory(number)`, `getContactCallHistory(contactId)` return `CallHistory` (`entries`, `total`, `missed`, `totalDuration`, `lastCall`, `entriesFor(number)`) |
+| Show times and durations | `telephony.timeFormatter` (`CallTimeFormatter`: `relative`, `day`, `dateTime`, `full`, `duration`, `durationWords`), `groupByDay(...)`, `timeZone`, `uses24HourFormat` |
+| Open the call screen from the notification | `CallScreenRequested` event, `takeCallScreenRequest()` on start and resume |
+| Floating call bubble | `callBubble.enabled`, `.hasPermission`, `.requestPermission()`, `.labels` (needs `SYSTEM_ALERT_WINDOW`) |
 | SMS threads, MMS, delete | `getSmsThreads()`, `getMmsMessages()` (read only), `isDefaultSmsApp`, `deleteSmsMessages`, `markSmsThreadRead` |
 | Video, verification, RTT | `placeCall(video: true)`, `PhoneCall.isVideo/answerWithVideo`, `numberVerification`, `isWifiCall`, `isHdAudio`, `requestRtt/sendRttText/readRttText` |
 | Forwarding, call waiting | `setCallForwarding(CallForwardingCondition.x, number)`, `cancelCallForwarding`, `queryCallForwarding`, `setCallWaiting(bool)` (USSD) |
@@ -93,12 +98,34 @@ for `CallState.selectPhoneAccount`, a "Send remaining digits?" prompt on
 `PostDialWait`, and `disconnectCause.displayText` briefly when a call ends
 with `isFailure`. An exhaustive `switch` over `CallEvent` must cover
 `CallAdded`, `CallStateChanged`, `CallDisconnected`, `CallRemoved`,
-`PostDialWait` and `AudioStateChanged`.
+`PostDialWait`, `AudioStateChanged` and `CallScreenRequested`.
 
 **Errors.** Android failures (missing permission, no role) throw
 `TelephonyException`. Check `hasPermission(TelephonyPermission.x)` first and
 catch around each call. Control methods on `PhoneCall` return `false` when the
 call no longer exists instead of throwing.
+
+**Call log rows and details.** List screens use `searchCallLog` (no
+`details`, it is faster) with `timeFormatter.relative(entry.date)` and
+`groupByDay` headers. A details screen reads `getCallLogEntry(entry.id)`
+and the history: `lookupNumber(number)` and then
+`getContactCallHistory(contact.id)` for a saved contact (all their
+numbers), otherwise `getCallHistory(number)`. Show `entry.displayName` and
+`entry.displayNumber`, not raw `name`/`number`. Never format dates with
+`toString()`; times from the call log are already local, so do not add or
+subtract offsets yourself.
+
+**Opening the call screen.** Answering or tapping the call notification
+brings the app to the front by itself. If the in-call UI is the root
+widget (shown whenever `calls` has a live call), pop pushed routes on
+`CallScreenRequested`. If it is a route, push it on `CallScreenRequested`
+and when `takeCallScreenRequest()` is not null at startup and resume.
+
+**Call bubble permission.** `SYSTEM_ALERT_WINDOW` has no runtime dialog and
+`permission_handler`'s request just opens Settings too. Explain why, call
+`callBubble.requestPermission()`, and in `didChangeAppLifecycleState(resumed)`
+set `callBubble.enabled = true` if `hasPermission` is now true. `enabled` is
+saved; do not set it on every start.
 
 **Searches** run synchronously on the UI isolate. Always pass a `limit`, and
 debounce search-as-you-type.
@@ -162,6 +189,9 @@ Set them once from settings UI; do not rewrite them on every app start.
   role; fall back to `screening.blockNumber`.
 - Silencing calls needs Android 10+, USSD needs Android 8+, Bluetooth device
   lists need Android 9+ and `BLUETOOTH_CONNECT` for names on Android 12+.
+- The call bubble shows only while no activity of the app is visible,
+  and not over the lock screen. Some phones (Xiaomi, Realme, Huawei) also
+  have their own floating window switch.
 - Emulators cannot test call waiting, Bluetooth, USSD replies, voicemail or
   dual SIM. Use `adb emu gsm call <number>` and `adb emu sms send <number> <text>`
   for the rest.

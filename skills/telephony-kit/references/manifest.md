@@ -23,6 +23,8 @@ for features the app uses.
 <!-- Call notifications (dialer) -->
 <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+<!-- Floating call bubble (callBubble); the user allows it in Settings -->
+<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 <!-- Bluetooth device names during calls (Android 12+) -->
 <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
 <!-- SMS (restricted on Google Play) -->

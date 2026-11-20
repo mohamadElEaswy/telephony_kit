@@ -3,9 +3,15 @@
 library;
 
 export 'src/analysis.dart'
-    show callLogStats, findDuplicateGroups, groupCallLog, groupSmsThreads;
+    show
+        callLogEntryFromRow,
+        callLogStats,
+        findDuplicateGroups,
+        groupCallLog,
+        groupSmsThreads;
+export 'src/formatting.dart' show CallTimeFormatter, CallTimeLabels, groupByDay;
 export 'src/models.dart';
 export 'src/permissions.dart';
 export 'src/telephony_kit_impl.dart'
-    show CallScreeningSettings, PhoneCall, TelephonyKit;
+    show CallBubbleSettings, CallScreeningSettings, PhoneCall, TelephonyKit;
 export 'src/vcard.dart' show exportVCard, parseVCard;

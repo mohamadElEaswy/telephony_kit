@@ -5,6 +5,7 @@
 import 'dart:convert';
 
 import 'models.dart';
+import 'search.dart' show phoneTypeLabel;
 
 /// The number reduced to digits (and a leading plus) for comparing numbers.
 String normalizedNumber(String number) =>
@@ -21,6 +22,46 @@ bool sameNumberDigits(String a, String b) {
   final ys = y.replaceFirst(RegExp('^0+'), '');
   if (xs.length < 7 || ys.length < 7) return false;
   return xs.endsWith(ys) || ys.endsWith(xs);
+}
+
+/// Builds a [CallLogEntry] from a call log provider row (column name to
+/// text). Missing detail columns keep their defaults.
+CallLogEntry callLogEntryFromRow(Map<String, String?> row) {
+  int? number(String column) => int.tryParse(row[column] ?? '');
+  String text(String column) => row[column] ?? '';
+  final labelType = number('numbertype');
+  final modified = number('last_modified');
+  return CallLogEntry(
+    id: text('_id'),
+    isNew: row['new'] == '1' && row['type'] == '3',
+    number: text('number'),
+    name: text('name'),
+    type: CallLogType.fromValue(number('type') ?? -1),
+    // Android stores UTC milliseconds; this is the same moment in the
+    // device's local time zone.
+    date: DateTime.fromMillisecondsSinceEpoch(number('date') ?? 0),
+    duration: Duration(seconds: number('duration') ?? 0),
+    geocodedLocation: text('geocoded_location'),
+    subscriptionId: number('subscription_id'),
+    features: number('features') ?? 0,
+    isRead: row['is_read'] != '0',
+    countryIso: text('countryiso'),
+    formattedNumber: text('formatted_number'),
+    numberLabel: labelType == null
+        ? ''
+        : phoneTypeLabel(labelType, row['numberlabel']),
+    postDialDigits: text('post_dial_digits'),
+    viaNumber: text('via_number'),
+    presentation: NumberPresentation.fromValue(number('presentation') ?? 1),
+    lookupUri: row['lookup_uri'],
+    voicemailUri: row['voicemail_uri'],
+    transcription: text('transcription'),
+    blockReason: number('block_reason') ?? 0,
+    screeningAppName: text('call_screening_app_name'),
+    lastModified: modified == null || modified <= 0
+        ? null
+        : DateTime.fromMillisecondsSinceEpoch(modified),
+  );
 }
 
 /// Counts calls per number. Returns the numbers with the most calls first.

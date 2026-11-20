@@ -13,6 +13,7 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 | `String? get defaultDialerPackage` | |
 | `bool get isCallScreeningRoleHeld` / `bool requestCallScreeningRole()` | Android 10+ |
 | `String? takeDialNumber()` | Number from a `tel:` intent that opened the app, once |
+| `String? takeCallScreenRequest()` | Call id ('' = current call) the user asked to see from the notification or bubble, once |
 
 `TelephonyPermission`: `callPhone`, `readPhoneState`, `readCallLog`,
 `writeCallLog`, `answerPhoneCalls`, `readContacts`, `writeContacts`, `sendSms`,
@@ -34,7 +35,7 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 
 | Member | Notes |
 | --- | --- |
-| `Stream<CallEvent> get callEvents` | `CallAdded`, `CallStateChanged`, `CallDisconnected(callId, cause)`, `CallRemoved`, `PostDialWait(callId, remaining)`, `AudioStateChanged` (sealed) |
+| `Stream<CallEvent> get callEvents` | `CallAdded`, `CallStateChanged`, `CallDisconnected(callId, cause)`, `CallRemoved`, `PostDialWait(callId, remaining)`, `AudioStateChanged`, `CallScreenRequested(callId)` (sealed) |
 | `List<PhoneCall> get calls` / `PhoneCall call(String id)` | |
 | `set showCallNotifications(bool)` / `set launchAppOnIncomingCall(bool)` | Both default true |
 | `bool get isMuted`, `bool setMuted(bool)`, `bool setSpeakerOn(bool)` | |
@@ -45,6 +46,7 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 | `bool missedCallNotificationsEnabled` (get/set), `void clearMissedCallNotification()` | Needs the missed call receiver |
 | `List<String> quickReplies` | Default reject-with-message texts, settable |
 | `bool get isInCallServiceBound` | |
+| `CallBubbleSettings get callBubble` | `enabled` (get/set, saved), `hasPermission`, `requestPermission()` (opens Settings, false if granted), `isShowing`, `hide()`, `labels = CallBubbleLabels(...)`; needs SYSTEM_ALERT_WINDOW |
 
 `PhoneCall`: `id`, `state` (`CallState`), `number`, `displayName`,
 `isIncoming`, `connectedAt`, `answer()`, `reject({String? message})`,
@@ -73,7 +75,10 @@ simulatedRinging, unknown`; `isLive`.
 
 | Member | Notes |
 | --- | --- |
-| `List<CallLogEntry> searchCallLog({String? query, Set<CallLogType>? types, DateTime? from, DateTime? to, int limit = 100})` | READ_CALL_LOG |
+| `List<CallLogEntry> searchCallLog({String? query, Set<CallLogType>? types, DateTime? from, DateTime? to, int limit = 100, bool details = false})` | READ_CALL_LOG; `details` reads the detail fields |
+| `CallLogEntry? getCallLogEntry(String id)` | READ_CALL_LOG; with details |
+| `CallHistory getCallHistory(String number, {int limit = 500})` | READ_CALL_LOG; same number in any format |
+| `CallHistory getContactCallHistory(String contactId, {int limit = 500})` | READ_CALL_LOG + READ_CONTACTS; all the contact's numbers |
 | `List<CallLogEntry> getCallLog({int limit = 100})` | |
 | `int deleteCallLogEntries(Iterable<String> ids)`, `int deleteCallLogForNumber(String)`, `int markMissedCallsRead()` | WRITE_CALL_LOG |
 | `List<Contact> searchContacts(String query, {int limit = 100})` | READ_CONTACTS; empty query lists all |
@@ -99,7 +104,15 @@ simulatedRinging, unknown`; `isLive`.
 
 `CallLogEntry`: `id`, `number`, `name`, `type` (`CallLogType`), `date`,
 `duration`, `isNew`, `geocodedLocation`, `subscriptionId`, `features`,
-`hasVideo`, `isWifi`, `isHd`, `isRtt`, `isRead`, `countryIso`. `Contact`: `id`, `displayName`, `phones`
+`hasVideo`, `isWifi`, `isHd`, `isRtt`, `isRead`, `countryIso`; details:
+`formattedNumber`, `numberLabel`, `postDialDigits`, `viaNumber`,
+`presentation` (`NumberPresentation.allowed/restricted/unknown/payphone/
+unavailable`), `lookupUri`, `voicemailUri`, `transcription`, `blockReason`,
+`screeningAppName`, `lastModified`; getters `displayName`, `displayNumber`,
+`endTime`, `wasConnected`. `CallHistory`: `numbers`, `entries` (newest
+first), `name`, `contactId`, `total`, `incoming`, `outgoing`, `missed`,
+`rejected`, `blocked`, `totalDuration`, `longestCall`, `lastCall`,
+`firstCall`, `entriesFor(number)`, `CallHistory.from(entries, numbers)`. `Contact`: `id`, `displayName`, `phones`
 (`ContactPhone(number, label)`), `photoUri`, `isStarred`. `ContactDetails`:
 `id`, `lookupKey`, `displayName`, `givenName`, `middleName`, `familyName`,
 `namePrefix`, `nameSuffix`, `nickname`, `company`, `department`, `jobTitle`,
@@ -110,6 +123,23 @@ simulatedRinging, unknown`; `isLive`.
 `copyWith(...)`. `ContactPage`: `contacts`, `offset`, `nextOffset`,
 `totalCount`, `hasMore`.
 All fields are optional, so `ContactDetails(displayName: 'Sara')` is valid.
+
+## Dates, times and time zones
+
+| Member | Notes |
+| --- | --- |
+| `DeviceTimeZone get timeZone` | `id` (IANA), `name`, `shortName`, `offset`, `standardOffset`, `usesDaylightTime`, `inDaylightTime` |
+| `bool get uses24HourFormat` | The phone's 12/24-hour setting |
+| `CallTimeFormatter get timeFormatter` | A formatter following that setting |
+
+`CallTimeFormatter({use24HourFormat = true, labels = const CallTimeLabels(), Duration? utcOffset})`:
+`time(t, {seconds})`, `date(t, {now, withYear, long})`, `day(t)` (Today /
+Yesterday / weekday / date), `relative(t, {ago})`, `dateTime(t)`,
+`full(t, {timeZone})`, `offsetLabel(t)` (`GMT+02:00`), `duration(d)`
+(`2:05`), `durationWords(d)` (`2 min 5 s`), `wallClock(t)`, `offsetAt(t)`.
+`CallTimeLabels` holds every word for translation.
+`groupByDay(items, dateOf, {formatter})` returns `MapEntry(firstTime, items)`
+per calendar day.
 
 ## Blocking
 
