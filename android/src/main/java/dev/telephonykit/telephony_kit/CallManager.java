@@ -748,6 +748,7 @@ public final class CallManager {
       service = inCallService;
       appContext = inCallService.getApplicationContext();
     }
+    CallBubble.trackAppVisibility(inCallService.getApplicationContext());
   }
 
   static void detachService(InCallService inCallService) {
@@ -758,6 +759,7 @@ public final class CallManager {
     }
     PowerManager.WakeLock proximity = proximityLock;
     if (proximity != null && proximity.isHeld()) proximity.release();
+    CallBubble.hide();
   }
 
   @SuppressWarnings("deprecation")
@@ -894,6 +896,8 @@ public final class CallManager {
     lastMuted = state.isMuted();
     lastRoute = state.getRoute();
     updateProximity();
+    Context ctx = appContext;
+    if (ctx != null) CallBubble.update(ctx);
     CallEventListener l = currentListener();
     if (l != null) l.onAudioStateChanged(lastMuted, lastRoute);
   }
@@ -929,6 +933,7 @@ public final class CallManager {
     updateProximity();
     Context ctx = appContext;
     if (ctx == null) return;
+    CallBubble.update(ctx);
     if (!showNotifications) {
       CallNotifications.cancel(ctx);
       return;
@@ -1018,13 +1023,66 @@ public final class CallManager {
   }
 
   static void launchApp(Context context) {
-    Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+    Intent intent = launchIntent(context, null);
     if (intent == null) return;
-    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
     try {
       context.startActivity(intent);
     } catch (RuntimeException ignored) {
       // Background activity starts can be blocked; the call still rings.
+    }
+  }
+
+  /**
+   * The app's launch intent, brought to the front if already open. With a
+   * {@code callId}, it carries {@link #EXTRA_SHOW_CALL} so the app knows to
+   * show the call screen.
+   */
+  static Intent launchIntent(Context context, String callId) {
+    Intent intent = context.getPackageManager().getLaunchIntentForPackage(context.getPackageName());
+    if (intent == null) return null;
+    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+    if (callId != null) intent.putExtra(EXTRA_SHOW_CALL, callId);
+    return intent;
+  }
+
+  /** Extra on the launch intent: the id of the call to show. */
+  public static final String EXTRA_SHOW_CALL = "dev.telephonykit.telephony_kit.SHOW_CALL";
+
+  private static String pendingCallScreen;
+
+  /**
+   * Opens the app on the call screen: records the request for {@link
+   * #takeCallScreenRequest}, tells the Dart listener, and brings the app to
+   * the front. Called by the notification and the call bubble.
+   */
+  static void requestCallScreen(Context context, String callId) {
+    String id = callId == null ? "" : callId;
+    synchronized (lock) {
+      pendingCallScreen = id;
+    }
+    CallBubble.hide();
+    Intent intent = launchIntent(context, id);
+    if (intent != null) {
+      try {
+        context.startActivity(intent);
+      } catch (RuntimeException ignored) {
+        // Background activity start blocked.
+      }
+    }
+    CallEventListener l = currentListener();
+    if (l != null) l.onShowCallScreen(id);
+  }
+
+  /**
+   * The call the user asked to see from a notification or the call bubble
+   * since the last call, or null. An empty string means "the current call".
+   * Clears the request, so each one is handled once.
+   */
+  public static String takeCallScreenRequest() {
+    synchronized (lock) {
+      String id = pendingCallScreen;
+      pendingCallScreen = null;
+      return id;
     }
   }
 

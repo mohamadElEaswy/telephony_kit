@@ -34,6 +34,9 @@ USSD codes and send SMS.
 | Call log and call log search | `READ_CALL_LOG` |
 | Delete call log entries, mark missed calls seen, add entries | `WRITE_CALL_LOG` |
 | Call log statistics and grouped rows, location, SIM and Wi-Fi/video/HD flags | `READ_CALL_LOG` |
+| Full details of one call, the call history of a number or of a contact (all their numbers) | `READ_CALL_LOG` (+ `READ_CONTACTS` for contacts) |
+| Call time and duration formatting, device time zone and 12/24-hour setting | nothing |
+| Floating call bubble with call controls while the app is in the background | `SYSTEM_ALERT_WINDOW`, granted by the user in Settings |
 | Contact search, caller lookup by number, every detail of a contact, paging through thousands of contacts | `READ_CONTACTS` |
 | Add, edit, delete contacts and favorites, photos, groups, merge and split, vCard import and export, contact accounts | `WRITE_CONTACTS` |
 | Watch for contact, call log and SMS changes | the matching read permission |
@@ -57,7 +60,7 @@ throw.
 
 ```yaml
 dependencies:
-  telephony_kit: ^0.6.0
+  telephony_kit: ^0.8.0
 ```
 
 Minimum Android version is API 24 (Android 7.0).
@@ -345,6 +348,72 @@ with `telephony.showCallNotifications = false` if you build your own. When a
 call starts ringing the service also tries to open your launcher activity;
 turn that off with `telephony.launchAppOnIncomingCall = false`.
 
+### Opening the call screen from the notification
+
+Answer on the notification answers the call **and** opens your app, and so
+does tapping the notification body. (Since Android 12 a notification button
+may not open an app from a broadcast receiver, so the package uses a small
+invisible activity, declared in its own manifest, that answers and then
+brings your launcher activity to the front.)
+
+Your app then needs to show the call. If your call screen is a route,
+listen for the request:
+
+```dart
+telephony.callEvents.listen((event) {
+  if (event is CallScreenRequested) openCallScreen(event.callId); // '' = current call
+});
+
+// The tap can also start the app, before you listen. Check at startup and
+// on resume (like takeDialNumber):
+final callId = telephony.takeCallScreenRequest();
+if (callId != null) openCallScreen(callId);
+```
+
+To show the call over the lock screen, give your activity
+`android:showWhenLocked="true"` and `android:turnScreenOn="true"`, and keep
+`android:launchMode="singleTop"` so the existing screen is reused.
+
+### Floating call bubble
+
+When the user leaves your app during a call (home button, another app), a
+small round bubble can float over other apps. Tapping it opens a panel with
+**Mute**, **Speaker**, **End** and **Open** (back to your call screen);
+while a call rings it shows **Answer** and **Decline**. The bubble can be
+dragged, snaps to the nearest edge, remembers its place, and hides when your
+app comes back or the call ends.
+
+It needs the "display over other apps" permission. Declare it:
+
+```xml
+<uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+```
+
+Android has no permission dialog for it: the user switches it on in
+Settings. A typical flow:
+
+```dart
+final bubble = telephony.callBubble;
+
+Future<void> enableBubble() async {
+  if (bubble.hasPermission) {
+    bubble.enabled = true;
+    return;
+  }
+  // Explain first, then send the user to Settings > Display over other apps.
+  bubble.requestPermission();
+  // In didChangeAppLifecycleState(resumed):
+  //   if (bubble.hasPermission) bubble.enabled = true;
+}
+
+bubble.labels = const CallBubbleLabels(mute: 'كتم', end: 'إنهاء'); // translate
+```
+
+`enabled` is saved on the device, so the bubble also works when Flutter is
+not running. Some phones (Xiaomi, Realme/ColorOS, Huawei) add their own
+"floating window" switch; if the bubble does not appear after granting the
+permission, check that one too. Android Go devices do not allow overlays.
+
 ### Choosing the SIM (dual SIM)
 
 When the phone has no default SIM for calls, an outgoing call waits in
@@ -587,6 +656,62 @@ telephony.contactChanges.listen((_) => reload());
 vCard text. Merging and splitting use Android's aggregation rules, so a
 contact that Android re-merges on its own may need `splitContact` again.
 
+## Call details and call history
+
+```dart
+// One call with every detail: formatted number and its label, post dial
+// digits, presentation (hidden caller), voicemail, block reason, screening app.
+final entry = telephony.getCallLogEntry(id);
+
+// Every call with a number, in any format (0100 123 4567 = +20 100 123 4567).
+final history = telephony.getCallHistory('+201001234567');
+
+// Every call with a contact, across all of their numbers.
+final sara = telephony.getContactCallHistory(contactId);
+print('${sara.total} calls, ${sara.missed} missed, '
+    'talk time ${sara.totalDuration}, last ${sara.lastCall?.date}');
+sara.entriesFor('+201001234567');   // calls with one of the numbers
+
+// Long lists stay fast without details; add them when you need them.
+telephony.searchCallLog(query: 'sara', details: true);
+```
+
+`CallLogEntry` also has `displayName`, `displayNumber`, `endTime` and
+`wasConnected`. `CallHistory.from(entries, numbers)` builds a history from
+entries you already have.
+
+## Dates, times and time zones
+
+Call log times are stored by Android as UTC instants. telephony_kit returns
+them as local `DateTime`s, so a call shows the right local time after the
+user travels or the clocks change. `CallTimeFormatter` formats them the way
+phone apps do, with no extra dependency:
+
+```dart
+final f = telephony.timeFormatter;   // follows the phone's 12/24h setting
+
+f.relative(entry.date);              // 14:05 · Yesterday · Monday · 12 Nov
+f.relative(entry.date, ago: true);   // Just now · 5 min ago · ...
+f.day(entry.date);                   // Today · Yesterday · Monday · 12 Nov 2025
+f.dateTime(entry.date);              // Today, 14:05
+f.full(entry.date);                  // Wednesday, 12 November 2025, 14:05:09 GMT+02:00
+f.duration(entry.duration);          // 2:05 (live call timers too)
+f.durationWords(entry.duration);     // 2 min 5 s
+
+// Section headers for a list, split at local midnight.
+for (final day in groupByDay(entries, (e) => e.date, formatter: f)) {
+  print('${f.day(day.key)}: ${day.value.length} calls');
+}
+
+final zone = telephony.timeZone;      // Africa/Cairo, Eastern European Time, +02:00
+telephony.uses24HourFormat;           // the phone setting
+```
+
+For other languages pass `CallTimeLabels` (month and weekday names, Today,
+Yesterday, units). `CallTimeFormatter(utcOffset: ...)` shows times at a
+fixed offset instead of the device zone, which also makes tests
+deterministic.
+
 ## Call log extras
 
 ```dart
@@ -700,8 +825,10 @@ is off.
 ## Example
 
 [`example/`](example) is a small dialer with a keypad (with SIM choice), recent
-calls with search and a missed filter, contacts with search, device details, and an in-call screen with answer, reject, hang up,
-mute, speaker and hold.
+calls grouped by day with search and a missed filter, a call details screen
+with the full history of the number or contact, contacts with search and
+recent calls, device details (time zone, call bubble switch), and an in-call
+screen with answer, reject, hang up, mute, speaker and hold.
 
 ```sh
 cd example
@@ -722,6 +849,8 @@ jnigen bindings (lib/src/bindings.g.dart)
         CallManager ◄── TelephonyKitInCallService (bound by the system)
         CallScreening ◄── TelephonyKitCallScreeningService (bound by the system)
         CallNotifications, CallActionReceiver (notification buttons)
+        CallActionActivity (answer and open the app from a notification)
+        CallBubble (floating call controls over other apps)
         NetworkMonitor, UssdHelper, SmsHelper
         CallEventListener, ScreeningListener, NetworkEventListener,
         ResultListener (implemented in Dart)
@@ -730,7 +859,8 @@ jnigen bindings (lib/src/bindings.g.dart)
 Android only talks to services, receivers and abstract callback classes that
 are real Java subclasses, which cannot be generated from Dart. Those are the
 only Java code: the in-call and screening services, the notification button
-receiver, and small helpers for callbacks Android only offers as abstract
+receiver and its invisible activity, the floating call bubble (a window that
+must work while Flutter is not running), and small helpers for callbacks Android only offers as abstract
 classes (USSD, telephony callbacks, SMS results). jnigen generates Dart
 bindings for the helpers, and Dart implements the listener interfaces
 directly. Everything else calls the Android framework from Dart.

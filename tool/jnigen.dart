@@ -107,6 +107,21 @@ const _androidAllowList = <String, Set<String>>{
   'android.telecom.PhoneAccountHandle': {'getId'},
   'android.os.Bundle': {'<init>', 'putParcelable'},
   'android.os.Parcelable': <String>{},
+  'android.provider.Settings': {
+    'canDrawOverlays',
+    'ACTION_MANAGE_OVERLAY_PERMISSION',
+  },
+  'android.text.format.DateFormat': {'is24HourFormat'},
+  'java.util.TimeZone': {
+    'getDefault',
+    'getID',
+    'getDisplayName',
+    'getOffset',
+    'getRawOffset',
+    'useDaylightTime',
+    'SHORT',
+    'LONG',
+  },
 };
 
 const _ownPackage = 'dev.telephonykit.telephony_kit.';
@@ -117,6 +132,7 @@ const _systemOnly = {
   '${_ownPackage}TelephonyKitCallScreeningService',
   '${_ownPackage}CallActionReceiver',
   '${_ownPackage}TelephonyKitMissedCallReceiver',
+  '${_ownPackage}CallActionActivity',
 };
 
 final class _AllowListVisitor extends Visitor {
@@ -200,6 +216,9 @@ void main() async {
         'android.provider.CallLog',
         'android.content.ContentValues',
         'android.provider.BlockedNumberContract',
+        'android.provider.Settings',
+        'android.text.format.DateFormat',
+        'java.util.TimeZone',
       ],
       sourcePath: [packageRoot.resolve('android/src/main/java/')],
       androidSdk: AndroidSdk(versions: [36, 35], sdkRoot: _sdkRoot()),

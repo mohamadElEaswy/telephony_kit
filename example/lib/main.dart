@@ -6,6 +6,7 @@ import 'package:telephony_kit/telephony_kit.dart';
 
 import 'blocking_page.dart';
 import 'call_extras.dart';
+import 'call_history_page.dart';
 import 'contacts_page.dart';
 import 'in_call_controls.dart';
 import 'messages_page.dart';
@@ -60,8 +61,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _requestPermissions();
     _refresh();
     _takeDialNumber();
+    _takeCallScreenRequest();
+    _setUpCallBubble();
     _subscription = telephony.callEvents.listen((event) {
       if (event is PostDialWait && mounted) _askPostDial(event);
+      // Answered from the notification, or Open tapped on the bubble.
+      if (event is CallScreenRequested) _showCallScreen();
       if (event is CallDisconnected && event.cause.isFailure && mounted) {
         // For example "Busy" or "Call failed".
         ScaffoldMessenger.of(
@@ -94,6 +99,26 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     telephony.call(event.callId).continuePostDial(send ?? false);
   }
 
+  /// The in-call screen replaces this page's body whenever a call is live,
+  /// so showing it means closing whatever is pushed on top.
+  void _showCallScreen() {
+    if (!mounted) return;
+    Navigator.of(context).popUntil((route) => route.isFirst);
+    _refresh();
+  }
+
+  /// The app was opened (or brought back) from the call notification or the
+  /// call bubble.
+  void _takeCallScreenRequest() {
+    if (telephony.takeCallScreenRequest() != null) _showCallScreen();
+  }
+
+  /// The floating call bubble is switched on in the Device tab. Its
+  /// labels are English by default; pass translations here.
+  void _setUpCallBubble() {
+    telephony.callBubble.labels = const CallBubbleLabels();
+  }
+
   /// Shows the number of a dial intent (a tapped tel: link) on the keypad.
   void _takeDialNumber() {
     String? number;
@@ -120,6 +145,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) {
       _refresh();
       _takeDialNumber();
+      _takeCallScreenRequest();
     }
   }
 
@@ -441,11 +467,23 @@ class _RecentsPageState extends State<RecentsPage> {
         types: _missedOnly ? {CallLogType.missed} : null,
         limit: 200,
       );
+      final times = callTimes;
+      final days = groupByDay(entries, (e) => e.date, formatter: times);
       list = entries.isEmpty
           ? const _Message('No calls found.')
-          : ListView.builder(
-              itemCount: entries.length,
-              itemBuilder: (context, i) => _tile(entries[i]),
+          : ListView(
+              children: [
+                for (final day in days) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(
+                      times.day(day.key),
+                      style: Theme.of(context).textTheme.titleSmall,
+                    ),
+                  ),
+                  for (final entry in day.value) _tile(entry, times),
+                ],
+              ],
             );
     } on TelephonyException catch (e) {
       list = _Message(e.message);
@@ -532,30 +570,36 @@ class _RecentsPageState extends State<RecentsPage> {
     }
   }
 
-  Widget _tile(CallLogEntry entry) => ListTile(
+  Widget _tile(CallLogEntry entry, CallTimeFormatter times) => ListTile(
+    onTap: () async {
+      await Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => CallDetailsPage(entryId: entry.id, fallback: entry),
+        ),
+      );
+      if (mounted) setState(() {});
+    },
     onLongPress: () => _menu(entry),
-    leading: Icon(_iconFor(entry.type), color: _colorFor(entry.type)),
+    leading: Icon(
+      callTypeIcon(entry.type),
+      color: callTypeColor(context, entry.type),
+    ),
     title: Text(
-      entry.name.isEmpty ? entry.number : entry.name,
+      entry.displayName.isEmpty ? 'Unknown' : entry.displayName,
       style: entry.isNew ? const TextStyle(fontWeight: FontWeight.bold) : null,
     ),
-    subtitle: Text('${entry.date.toLocal()}'.split('.').first),
+    subtitle: Text(
+      [
+        times.relative(entry.date, ago: true),
+        if (entry.wasConnected) times.duration(entry.duration),
+        if (entry.geocodedLocation.isNotEmpty) entry.geocodedLocation,
+      ].join(' · '),
+    ),
     trailing: IconButton(
       icon: const Icon(Icons.call),
       onPressed: () => telephony.openDialer(entry.number),
     ),
   );
-
-  IconData _iconFor(CallLogType type) => switch (type) {
-    CallLogType.incoming => Icons.call_received,
-    CallLogType.outgoing => Icons.call_made,
-    CallLogType.missed => Icons.call_missed,
-    CallLogType.rejected || CallLogType.blocked => Icons.block,
-    _ => Icons.call,
-  };
-
-  Color? _colorFor(CallLogType type) =>
-      type == CallLogType.missed ? Colors.red : null;
 }
 
 // -----------------------------------------------------------------------------
@@ -612,6 +656,7 @@ class DevicePage extends StatelessWidget {
         _row('Roaming', info.isRoaming ? 'Yes' : 'No'),
         _row('Voice capable', info.isVoiceCapable ? 'Yes' : 'No'),
         _row('SIM slots', '${info.slotCount}'),
+        _row('Time zone', _timeZone()),
         _row('Default dialer', telephony.defaultDialerPackage ?? '-'),
         StatefulBuilder(
           builder: (context, setState) => SwitchListTile(
@@ -622,6 +667,7 @@ class DevicePage extends StatelessWidget {
                 setState(() => telephony.missedCallNotificationsEnabled = v),
           ),
         ),
+        const CallBubbleTile(),
         StatefulBuilder(
           builder: (context, setState) => SwitchListTile(
             title: const Text('Screen off near ear'),
@@ -645,6 +691,16 @@ class DevicePage extends StatelessWidget {
           ),
       ],
     );
+  }
+
+  String _timeZone() {
+    try {
+      final zone = telephony.timeZone;
+      final format = telephony.uses24HourFormat ? '24h' : '12h';
+      return '${zone.id} · ${callTimes.offsetLabel(DateTime.now())} · $format';
+    } on TelephonyException {
+      return '';
+    }
   }
 
   Widget _row(String label, String value) => ListTile(
@@ -695,10 +751,7 @@ class _InCallScreenState extends State<InCallScreen> {
   String _elapsed() {
     final start = widget.call.connectedAt;
     if (start == null) return '';
-    final d = DateTime.now().difference(start);
-    final m = d.inMinutes.toString().padLeft(2, '0');
-    final s = (d.inSeconds % 60).toString().padLeft(2, '0');
-    return '$m:$s';
+    return callTimes.duration(DateTime.now().difference(start));
   }
 
   @override
@@ -924,6 +977,94 @@ class _SimPickerState extends State<_SimPicker> {
           onChanged: (v) => setState(() => _remember = v ?? false),
         ),
       ],
+    );
+  }
+}
+
+/// Turns the floating call bubble on and off, and walks the user through
+/// the "display over other apps" permission.
+class CallBubbleTile extends StatefulWidget {
+  const CallBubbleTile({super.key});
+
+  @override
+  State<CallBubbleTile> createState() => _CallBubbleTileState();
+}
+
+class _CallBubbleTileState extends State<CallBubbleTile>
+    with WidgetsBindingObserver {
+  /// Set while the user is in Settings, to finish turning on when they
+  /// come back with the permission.
+  bool _waitingForPermission = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed || !_waitingForPermission) return;
+    _waitingForPermission = false;
+    final bubble = telephony.callBubble;
+    if (bubble.hasPermission) bubble.enabled = true;
+    setState(() {});
+  }
+
+  Future<void> _toggle(bool on) async {
+    final bubble = telephony.callBubble;
+    if (!on) {
+      setState(() => bubble.enabled = false);
+      return;
+    }
+    if (bubble.hasPermission) {
+      setState(() => bubble.enabled = true);
+      return;
+    }
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Allow display over other apps'),
+        content: const Text(
+          'The call bubble floats over other apps during a call. '
+          'Android asks you to allow this in Settings: turn on '
+          '"Allow display over other apps", then come back.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Not now'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Open Settings'),
+          ),
+        ],
+      ),
+    );
+    if (go != true) return;
+    _waitingForPermission = bubble.requestPermission();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bubble = telephony.callBubble;
+    final allowed = bubble.hasPermission;
+    return SwitchListTile(
+      title: const Text('Floating call bubble'),
+      subtitle: Text(
+        allowed
+            ? 'Shows call controls over other apps during a call'
+            : 'Needs permission to display over other apps',
+      ),
+      value: bubble.enabled && allowed,
+      onChanged: _toggle,
     );
   }
 }

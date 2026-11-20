@@ -40,6 +40,23 @@ final class CallNotifications {
         context, 0, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
   }
 
+  /**
+   * Opens {@link CallActionActivity}, which can bring the app to the front
+   * (a broadcast receiver may not since Android 12). Used for Answer and for
+   * tapping the notification.
+   */
+  static PendingIntent callScreenIntent(Context context, String action, String callId, int code) {
+    Intent intent = new Intent(context, CallActionActivity.class);
+    intent.setAction(action);
+    intent.putExtra(CallActionReceiver.EXTRA_CALL_ID, callId);
+    intent.addFlags(
+        Intent.FLAG_ACTIVITY_NEW_TASK
+            | Intent.FLAG_ACTIVITY_NO_ANIMATION
+            | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+    return PendingIntent.getActivity(
+        context, code, intent, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
+  }
+
   private static PendingIntent actionIntent(Context context, String action, String callId, int code) {
     Intent intent = new Intent(context, CallActionReceiver.class);
     intent.setAction(action);
@@ -59,8 +76,13 @@ final class CallNotifications {
     NotificationManager nm = context.getSystemService(NotificationManager.class);
     if (nm == null) return;
     ensureChannels(context, nm);
-    PendingIntent content = launchIntent(context);
-    PendingIntent answer = actionIntent(context, CallActionReceiver.ACTION_ANSWER, callId, 1);
+    // The full screen intent opens the app directly (it may run on the lock
+    // screen); tapping the notification and Answer go through
+    // CallActionActivity so the app opens on the call screen.
+    PendingIntent fullScreen = launchIntent(context);
+    PendingIntent content =
+        callScreenIntent(context, CallActionActivity.ACTION_SHOW_CALL, callId, 4);
+    PendingIntent answer = callScreenIntent(context, CallActionActivity.ACTION_ANSWER, callId, 1);
     PendingIntent decline = actionIntent(context, CallActionReceiver.ACTION_DECLINE, callId, 2);
 
     Notification.Builder b =
@@ -71,7 +93,7 @@ final class CallNotifications {
             .setCategory(Notification.CATEGORY_CALL)
             .setOngoing(true)
             .setContentIntent(content)
-            .setFullScreenIntent(content, true);
+            .setFullScreenIntent(fullScreen, true);
     if (Build.VERSION.SDK_INT >= 31) {
       Person person = new Person.Builder().setName(caller).setImportant(true).build();
       b.setStyle(Notification.CallStyle.forIncomingCall(person, decline, answer));
@@ -97,7 +119,8 @@ final class CallNotifications {
             .setCategory(Notification.CATEGORY_CALL)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setContentIntent(launchIntent(context))
+            .setContentIntent(
+                callScreenIntent(context, CallActionActivity.ACTION_SHOW_CALL, callId, 5))
             .addAction(
                 new Notification.Action.Builder(android.R.drawable.sym_call_missed, "Hang up", hangUp)
                     .build());

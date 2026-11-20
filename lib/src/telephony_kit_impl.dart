@@ -8,6 +8,7 @@ import 'package:jni_flutter/jni_flutter.dart' as jni_flutter;
 import 'analysis.dart';
 import 'bindings.g.dart' as android;
 import 'contacts.dart';
+import 'formatting.dart';
 import 'models.dart';
 import 'search.dart';
 import 'vcard.dart';
@@ -340,6 +341,9 @@ class TelephonyKit {
   ///   numbers saved with a country code (so `0100 123` finds `+20100123...`).
   /// - [types] keeps only these kinds of calls, for example only missed.
   /// - [from] and [to] limit the call start time.
+  /// - [details] also reads the formatted number, number label, post dial
+  ///   digits, presentation, voicemail and block fields of [CallLogEntry].
+  ///   Leave it off for long lists; it reads more columns per row.
   ///
   /// Filtering runs in Android's call log provider, so only matching rows
   /// cross into Dart. Needs `TelephonyPermission.readCallLog`.
@@ -349,6 +353,7 @@ class TelephonyKit {
     DateTime? from,
     DateTime? to,
     int limit = 100,
+    bool details = false,
   }) => _guard('Searching call log', () {
     final where = <String>[];
     final args = <String>[];
@@ -378,48 +383,196 @@ class TelephonyKit {
       where.add('date <= ?');
       args.add('${to.millisecondsSinceEpoch}');
     }
+    return _queryCallLog(
+      where.isEmpty ? null : where.join(' AND '),
+      args,
+      limit: limit,
+      details: details,
+    );
+  });
 
+  /// One call log entry with all its details, or null if there is no entry
+  /// with [id] ([CallLogEntry.id]). Needs `TelephonyPermission.readCallLog`.
+  CallLogEntry? getCallLogEntry(String id) => _guard(
+    'Reading call log entry',
+    () => id.isEmpty
+        ? null
+        : _queryCallLog('_id = ?', [id], limit: 1, details: true).firstOrNull,
+  );
+
+  /// Every call with [number], newest first, with all details, as a
+  /// [CallHistory] that also counts the calls and the talk time.
+  ///
+  /// Formatting is ignored and a leading 0 matches the same number with a
+  /// country code, so `0100 123 4567` and `+20 100 123 4567` share a
+  /// history. Needs `TelephonyPermission.readCallLog`.
+  CallHistory getCallHistory(String number, {int limit = 500}) =>
+      _guard('Reading call history', () => _history([number], limit: limit));
+
+  /// Every call with any phone number of the contact with [contactId]
+  /// ([Contact.id] or [ContactDetails.id]), newest first, with all details.
+  /// Returns an empty history when the contact has no numbers.
+  ///
+  /// Needs `TelephonyPermission.readCallLog` and `readContacts`.
+  CallHistory getContactCallHistory(String contactId, {int limit = 500}) =>
+      _guard('Reading contact call history', () {
+        final contact = getContact(contactId);
+        final numbers = [
+          for (final phone in contact?.phones ?? const <ContactPhone>[])
+            phone.number,
+        ];
+        if (numbers.isEmpty) {
+          return CallHistory(
+            numbers: const [],
+            entries: const [],
+            name: contact?.displayName ?? '',
+            contactId: contactId,
+          );
+        }
+        return _history(
+          numbers,
+          limit: limit,
+          name: contact?.displayName ?? '',
+          contactId: contactId,
+        );
+      });
+
+  CallHistory _history(
+    List<String> numbers, {
+    required int limit,
+    String name = '',
+    String? contactId,
+  }) {
+    final options = <String>[];
+    final args = <String>[];
+    for (final number in numbers) {
+      final patterns = numberSearchPatterns(number);
+      if (patterns.isEmpty) {
+        // A hidden or text "number": match it exactly.
+        options.add('number = ?');
+        args.add(number);
+      }
+      for (final digits in patterns) {
+        options.add('number LIKE ?');
+        args.add('%$digits%');
+      }
+    }
+    if (options.isEmpty) {
+      return CallHistory(numbers: numbers, entries: const [], name: name);
+    }
+    final rows = _queryCallLog(
+      options.join(' OR '),
+      args,
+      limit: limit,
+      details: true,
+    );
+    // LIKE also finds longer numbers that contain these digits; keep only
+    // the same numbers.
+    return CallHistory.from(rows, numbers, name: name, contactId: contactId);
+  }
+
+  static const _callLogColumns = [
+    '_id',
+    'number',
+    'name',
+    'type',
+    'date',
+    'duration',
+    'new',
+    'geocoded_location',
+    'subscription_id',
+    'features',
+    'is_read',
+    'countryiso',
+  ];
+
+  static const _callLogDetailColumns = [
+    'formatted_number',
+    'numbertype',
+    'numberlabel',
+    'post_dial_digits',
+    'via_number',
+    'presentation',
+    'lookup_uri',
+    'voicemail_uri',
+    'transcription',
+    'last_modified',
+  ];
+
+  List<CallLogEntry> _queryCallLog(
+    String? selection,
+    List<String> args, {
+    required int limit,
+    required bool details,
+  }) {
     final rows = _queryRows(
       'content://call_log/calls',
-      projection: const [
-        '_id',
-        'number',
-        'name',
-        'type',
-        'date',
-        'duration',
-        'new',
-        'geocoded_location',
-        'subscription_id',
-        'features',
-        'is_read',
-        'countryiso',
+      projection: [
+        ..._callLogColumns,
+        if (details) ..._callLogDetailColumns,
+        if (details && _sdkInt >= 29) ...[
+          'block_reason',
+          'call_screening_app_name',
+        ],
       ],
-      selection: where.isEmpty ? null : where.join(' AND '),
+      selection: selection,
       selectionArgs: args,
       sortOrder: 'date DESC',
       limit: limit,
     );
-    return [
-      for (final row in rows)
-        CallLogEntry(
-          id: row['_id'] ?? '',
-          isNew: row['new'] == '1' && row['type'] == '3',
-          number: row['number'] ?? '',
-          name: row['name'] ?? '',
-          type: CallLogType.fromValue(int.tryParse(row['type'] ?? '') ?? -1),
-          date: DateTime.fromMillisecondsSinceEpoch(
-            int.tryParse(row['date'] ?? '') ?? 0,
-          ),
-          duration: Duration(seconds: int.tryParse(row['duration'] ?? '') ?? 0),
-          geocodedLocation: row['geocoded_location'] ?? '',
-          subscriptionId: int.tryParse(row['subscription_id'] ?? ''),
-          features: int.tryParse(row['features'] ?? '') ?? 0,
-          isRead: row['is_read'] != '0',
-          countryIso: row['countryiso'] ?? '',
-        ),
-    ];
+    return [for (final row in rows) callLogEntryFromRow(row)];
+  }
+
+  // ---------------------------------------------------------------------------
+  // Date, time and time zone
+  // ---------------------------------------------------------------------------
+
+  /// The device's time zone: its id (such as `Africa/Cairo`), names, and
+  /// current and standard offsets from UTC.
+  ///
+  /// Dart's `DateTime` already converts call times to local time; use this
+  /// to show the zone by name or id, for example on a call details screen.
+  DeviceTimeZone get timeZone => _guard('Reading time zone', () {
+    final zone = android.TimeZone.default$;
+    if (zone == null) {
+      final now = DateTime.now();
+      return DeviceTimeZone(
+        id: now.timeZoneName,
+        name: now.timeZoneName,
+        shortName: now.timeZoneName,
+        offset: now.timeZoneOffset,
+        standardOffset: now.timeZoneOffset,
+        usesDaylightTime: false,
+      );
+    }
+    try {
+      final offset = zone.getOffset$1(DateTime.now().millisecondsSinceEpoch);
+      final standard = zone.rawOffset;
+      final daylight = offset != standard;
+      return DeviceTimeZone(
+        id: _str(zone.iD),
+        name: _str(zone.getDisplayName(daylight, android.TimeZone.LONG)),
+        shortName: _str(zone.getDisplayName(daylight, android.TimeZone.SHORT)),
+        offset: Duration(milliseconds: offset),
+        standardOffset: Duration(milliseconds: standard),
+        usesDaylightTime: zone.useDaylightTime(),
+      );
+    } finally {
+      zone.release();
+    }
   });
+
+  /// Whether the user chose 24-hour time in the phone settings (or the
+  /// locale uses it by default).
+  bool get uses24HourFormat => _guard(
+    'Reading time format',
+    () => android.DateFormat.is24HourFormat(_context),
+  );
+
+  /// A [CallTimeFormatter] that follows the phone's 12/24-hour setting.
+  /// Read it again after the app resumes, as the setting may have changed.
+  CallTimeFormatter get timeFormatter =>
+      CallTimeFormatter(use24HourFormat: uses24HourFormat);
 
   // ---------------------------------------------------------------------------
   // Contacts
@@ -2286,6 +2439,9 @@ class TelephonyKit {
               ),
             ),
             onAudioStateChanged$async: true,
+            onShowCallScreen: (id) =>
+                controller.add(CallScreenRequested(_str(id))),
+            onShowCallScreen$async: true,
           ),
         );
         _listener = listener;
@@ -2303,6 +2459,24 @@ class TelephonyKit {
 
   /// Whether the system is currently bound to the in-call service.
   bool get isInCallServiceBound => android.CallManager.isServiceBound;
+
+  /// The call the user asked to see since the last check, or null. Each
+  /// request is returned once.
+  ///
+  /// Set when the user answers from the call notification, taps the
+  /// notification, or taps Open on the [callBubble]. The package then brings
+  /// the app to the front; check this when the app starts and resumes, and
+  /// show the call screen. An empty string means the current call. While
+  /// Flutter runs, [callEvents] also sends [CallScreenRequested].
+  String? takeCallScreenRequest() {
+    final id = android.CallManager.takeCallScreenRequest();
+    if (id == null) return null;
+    return id.toDartString(releaseOriginal: true);
+  }
+
+  /// The floating call bubble shown over other apps during a call while
+  /// this app is in the background.
+  late final CallBubbleSettings callBubble = CallBubbleSettings._(this);
 
   /// Whether the app's launcher activity is opened when a call starts
   /// ringing. Defaults to true.
@@ -2642,6 +2816,78 @@ class PhoneCall {
 
   @override
   String toString() => 'PhoneCall($id)';
+}
+
+/// Settings of the floating call bubble. Read and change them through
+/// `TelephonyKit.instance.callBubble`.
+///
+/// When [enabled], a small round button appears over other apps while a call
+/// is live and no screen of this app is visible. Tapping it opens a panel
+/// with mute, speaker and hang up (answer and decline while ringing) and an
+/// Open button back to the call screen. The user can drag it; it snaps to
+/// the nearest screen edge and remembers its place. It hides when the app
+/// comes back or the call ends.
+///
+/// Needs the "display over other apps" permission: declare
+/// `android.permission.SYSTEM_ALERT_WINDOW` in the app manifest and send
+/// the user to Settings with [requestPermission]. Without it nothing is
+/// shown. The setting is saved, so the bubble also works when Flutter is not
+/// running.
+class CallBubbleSettings {
+  CallBubbleSettings._(this._kit);
+
+  final TelephonyKit _kit;
+
+  android.Context get _ctx => _kit._context;
+
+  /// Whether the bubble is shown when the app leaves the screen during a
+  /// call. Defaults to false.
+  bool get enabled => android.CallBubble.isEnabled(_ctx);
+  set enabled(bool value) => android.CallBubble.setEnabled(_ctx, value);
+
+  /// Whether the user allowed this app to display over other apps.
+  bool get hasPermission => _kit._guard(
+    'Checking overlay permission',
+    () => android.Settings.canDrawOverlays(_ctx),
+  );
+
+  /// Opens the system screen where the user allows this app to display
+  /// over other apps. Returns false when the permission is already granted.
+  ///
+  /// Android has no dialog for this permission: the user turns it on in
+  /// Settings and comes back. Check [hasPermission] when the app resumes.
+  bool requestPermission() => _kit._guard('Opening overlay settings', () {
+    if (hasPermission) return false;
+    final uri = android.Uri.parse(
+      'package:${TelephonyKit._str(_ctx.packageName)}'.toJString(),
+    );
+    final intent = android.Intent.new$4(
+      android.Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
+      uri,
+    );
+    intent.addFlags(android.Intent.FLAG_ACTIVITY_NEW_TASK);
+    _ctx.startActivity(intent);
+    return true;
+  });
+
+  /// Whether the bubble is on screen now.
+  bool get isShowing => android.CallBubble.isShowing;
+
+  /// Removes the bubble until the next call change or the next time the
+  /// app leaves the screen.
+  void hide() => android.CallBubble.hide();
+
+  /// Replaces the button labels, for example with translations. Not saved:
+  /// set them each time the app starts.
+  set labels(CallBubbleLabels value) => android.CallBubble.setLabels(
+    value.answer.toJString(),
+    value.decline.toJString(),
+    value.mute.toJString(),
+    value.unmute.toJString(),
+    value.speaker.toJString(),
+    value.end.toJString(),
+    value.open.toJString(),
+  );
 }
 
 /// Rules used by the call screening service. Read and change them through

@@ -36,4 +36,12 @@ public interface CallEventListener {
    * {@code android.telecom.CallAudioState.ROUTE_*}.
    */
   void onAudioStateChanged(boolean muted, int route);
+
+  /**
+   * The user asked to see the call screen: they answered from the
+   * notification, tapped the call notification, or tapped Open on the call
+   * bubble. {@code callId} is the call to show, or empty for the current
+   * call. The app is being brought to the front.
+   */
+  void onShowCallScreen(String callId);
 }

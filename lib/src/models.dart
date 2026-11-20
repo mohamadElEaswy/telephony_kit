@@ -1,6 +1,8 @@
 /// Data types returned by `TelephonyKit`.
 library;
 
+import 'analysis.dart' show normalizedNumber, sameNumberDigits;
+
 /// The state of a call, mirroring `android.telecom.Call.STATE_*`.
 enum CallState {
   newCall(0),
@@ -252,6 +254,17 @@ class CallLogEntry {
     this.features = 0,
     this.isRead = true,
     this.countryIso = '',
+    this.formattedNumber = '',
+    this.numberLabel = '',
+    this.postDialDigits = '',
+    this.viaNumber = '',
+    this.presentation = NumberPresentation.allowed,
+    this.lookupUri,
+    this.voicemailUri,
+    this.transcription = '',
+    this.blockReason = 0,
+    this.screeningAppName = '',
+    this.lastModified,
   });
 
   /// The row id, used by `TelephonyKit.deleteCallLogEntries`.
@@ -305,8 +318,240 @@ class CallLogEntry {
   /// The call used real-time text.
   bool get isRtt => features & 32 != 0;
 
+  // The fields below are filled by `TelephonyKit.getCallLogEntry`,
+  // `getCallHistory`, `getContactCallHistory`, and `searchCallLog` with
+  // `details: true`. Elsewhere they keep their defaults.
+
+  /// The number formatted for the user's country, such as
+  /// `+20 100 123 4567`, or an empty string. Prefer it over [number] for
+  /// display.
+  final String formattedNumber;
+
+  /// The contact's label for the number at the time of the call: Mobile,
+  /// Home, Work or a custom label. Empty when unknown.
+  final String numberLabel;
+
+  /// Digits dialed after the number, such as an extension after a pause.
+  final String postDialDigits;
+
+  /// The number the call came through, for calls forwarded by another
+  /// number. Empty when not known.
+  final String viaNumber;
+
+  /// Whether the caller's number was shown, hidden or unknown.
+  final NumberPresentation presentation;
+
+  /// The contact lookup URI cached with the call, or null.
+  final String? lookupUri;
+
+  /// For voicemail entries, the voicemail's content URI, or null.
+  final String? voicemailUri;
+
+  /// For voicemail entries, the text transcription, or an empty string.
+  final String transcription;
+
+  /// Why a blocked call was blocked (`CallLog.Calls.BLOCK_REASON_*`, Android
+  /// 10+), or 0.
+  final int blockReason;
+
+  /// The app that screened the call (Android 10+), or an empty string.
+  final String screeningAppName;
+
+  /// When the row last changed, or null.
+  final DateTime? lastModified;
+
+  /// The number to show: [formattedNumber] when known, else [number].
+  String get displayNumber =>
+      formattedNumber.isNotEmpty ? formattedNumber : number;
+
+  /// The name to show: the cached contact [name], else the [displayNumber],
+  /// or an empty string for a hidden number.
+  String get displayName => name.isNotEmpty ? name : displayNumber;
+
+  /// When the call ended: [date] plus [duration]. Equal to [date] for calls
+  /// that were never connected.
+  DateTime get endTime => date.add(duration);
+
+  /// Whether the call was connected (an incoming, outgoing or externally
+  /// answered call with talk time).
+  bool get wasConnected => duration > Duration.zero;
+
   @override
   String toString() => 'CallLogEntry($type, $number, $date, $duration)';
+}
+
+/// Whether a caller's number was shown, mirroring
+/// `CallLog.Calls.PRESENTATION_*`.
+enum NumberPresentation {
+  /// The number is known and shown.
+  allowed(1),
+
+  /// The caller hid their number.
+  restricted(2),
+
+  /// The network did not provide the number.
+  unknown(3),
+
+  /// A payphone.
+  payphone(4),
+
+  /// The number is not verified (Android 13+).
+  unavailable(5);
+
+  const NumberPresentation(this.value);
+
+  /// The raw Android value.
+  final int value;
+
+  /// Converts a raw `CallLog.Calls.NUMBER_PRESENTATION` value.
+  static NumberPresentation fromValue(int value) =>
+      NumberPresentation.values.firstWhere(
+        (p) => p.value == value,
+        orElse: () => NumberPresentation.allowed,
+      );
+}
+
+/// All calls with one person: every number of a contact, or one number.
+/// Returned by `TelephonyKit.getCallHistory` and
+/// `TelephonyKit.getContactCallHistory`, or built with [CallHistory.from].
+class CallHistory {
+  const CallHistory({
+    required this.numbers,
+    required this.entries,
+    this.name = '',
+    this.contactId,
+  });
+
+  /// Keeps the [entries] that match any of [numbers] (ignoring formatting,
+  /// and treating a leading 0 and a country code as the same number),
+  /// newest first.
+  factory CallHistory.from(
+    Iterable<CallLogEntry> entries,
+    List<String> numbers, {
+    String name = '',
+    String? contactId,
+  }) {
+    bool matches(String number) {
+      for (final n in numbers) {
+        if (_sameNumber(n, number)) return true;
+      }
+      return false;
+    }
+
+    final seen = <String>{};
+    final kept = [
+      for (final e in entries)
+        if (matches(e.number) && (e.id.isEmpty || seen.add(e.id))) e,
+    ]..sort((a, b) => b.date.compareTo(a.date));
+    var resolved = name;
+    if (resolved.isEmpty) {
+      for (final e in kept) {
+        if (e.name.isNotEmpty) {
+          resolved = e.name;
+          break;
+        }
+      }
+    }
+    return CallHistory(
+      numbers: numbers,
+      entries: kept,
+      name: resolved,
+      contactId: contactId,
+    );
+  }
+
+  /// The numbers looked up.
+  final List<String> numbers;
+
+  /// The calls, newest first.
+  final List<CallLogEntry> entries;
+
+  /// The contact's name, or the cached name from the call log, or empty.
+  final String name;
+
+  /// The contact id, when the history is for a contact.
+  final String? contactId;
+
+  int _count(CallLogType type) => entries.where((e) => e.type == type).length;
+
+  /// The number of calls.
+  int get total => entries.length;
+  int get incoming => _count(CallLogType.incoming);
+  int get outgoing => _count(CallLogType.outgoing);
+  int get missed => _count(CallLogType.missed);
+  int get rejected => _count(CallLogType.rejected);
+  int get blocked => _count(CallLogType.blocked);
+
+  /// Time spent talking over all calls.
+  Duration get totalDuration =>
+      entries.fold(Duration.zero, (sum, e) => sum + e.duration);
+
+  /// The longest call, or null when there are none with talk time.
+  CallLogEntry? get longestCall {
+    CallLogEntry? best;
+    for (final e in entries) {
+      if (e.duration > (best?.duration ?? Duration.zero)) best = e;
+    }
+    return best;
+  }
+
+  /// The newest call, or null when there are none.
+  CallLogEntry? get lastCall => entries.isEmpty ? null : entries.first;
+
+  /// The oldest call, or null when there are none.
+  CallLogEntry? get firstCall => entries.isEmpty ? null : entries.last;
+
+  /// The calls made with [number] only.
+  List<CallLogEntry> entriesFor(String number) => [
+    for (final e in entries)
+      if (_sameNumber(number, e.number)) e,
+  ];
+
+  @override
+  String toString() => 'CallHistory($numbers, $total calls)';
+}
+
+/// Same number ignoring formatting; numbers without digits (such as a
+/// hidden caller) only match exactly.
+bool _sameNumber(String a, String b) {
+  if (sameNumberDigits(a, b)) return true;
+  return normalizedNumber(a).isEmpty && a.isNotEmpty && a.trim() == b.trim();
+}
+
+/// The device's time zone, from `TelephonyKit.timeZone`.
+class DeviceTimeZone {
+  const DeviceTimeZone({
+    required this.id,
+    required this.name,
+    required this.shortName,
+    required this.offset,
+    required this.standardOffset,
+    required this.usesDaylightTime,
+  });
+
+  /// The IANA id, such as `Africa/Cairo`.
+  final String id;
+
+  /// The long name right now, such as `Eastern European Summer Time`.
+  final String name;
+
+  /// The short name right now, such as `EEST` or `GMT+03:00`.
+  final String shortName;
+
+  /// The offset from UTC right now, including daylight saving.
+  final Duration offset;
+
+  /// The offset from UTC without daylight saving.
+  final Duration standardOffset;
+
+  /// Whether the zone has daylight saving at some time of year.
+  final bool usesDaylightTime;
+
+  /// Whether daylight saving is in effect right now.
+  bool get inDaylightTime => offset != standardOffset;
+
+  @override
+  String toString() => 'DeviceTimeZone($id, $offset)';
 }
 
 /// Something that happened to a call or to call audio.
@@ -366,6 +611,20 @@ final class PostDialWait extends CallEvent {
 
   /// The digits still to send, which may contain more `,` or `;`.
   final String remaining;
+}
+
+/// The user asked to see the call screen: they answered from the call
+/// notification, tapped the notification, or tapped Open on the call bubble.
+/// The app is being brought to the front; show the call with [callId] (or
+/// the current call when it is empty).
+///
+/// Only sent while Flutter is running. When the tap starts the app, read
+/// `TelephonyKit.takeCallScreenRequest()` at startup instead.
+final class CallScreenRequested extends CallEvent {
+  const CallScreenRequested(this.callId);
+
+  /// The call to show, or an empty string for the current call.
+  final String callId;
 }
 
 /// Mute or the audio route changed.
@@ -1436,4 +1695,28 @@ class EsimInfo {
 
   @override
   String toString() => 'EsimInfo(supported: $isSupported, ${profiles.length})';
+}
+
+/// Button labels of the floating call bubble. Set them with
+/// `TelephonyKit.callBubble.labels` to translate the bubble.
+class CallBubbleLabels {
+  const CallBubbleLabels({
+    this.answer = 'Answer',
+    this.decline = 'Decline',
+    this.mute = 'Mute',
+    this.unmute = 'Unmute',
+    this.speaker = 'Speaker',
+    this.end = 'End',
+    this.open = 'Open',
+  });
+
+  final String answer;
+  final String decline;
+  final String mute;
+  final String unmute;
+  final String speaker;
+  final String end;
+
+  /// Back to the app's call screen.
+  final String open;
 }

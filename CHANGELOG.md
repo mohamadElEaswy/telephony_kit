@@ -1,3 +1,51 @@
+## 0.8.0
+
+Call details and history
+* `getCallLogEntry(id)`: one call with every detail. New `CallLogEntry`
+  fields `formattedNumber`, `numberLabel`, `postDialDigits`, `viaNumber`,
+  `presentation` (`NumberPresentation`), `lookupUri`, `voicemailUri`,
+  `transcription`, `blockReason`, `screeningAppName`, `lastModified`, and
+  the getters `displayName`, `displayNumber`, `endTime`, `wasConnected`.
+* `getCallHistory(number)` and `getContactCallHistory(contactId)` return a
+  `CallHistory` with every call with that number (in any format) or with
+  all of a contact's numbers, plus counts, talk time, first, last and
+  longest call. `CallHistory.from` builds one from entries you have.
+* `searchCallLog(details: true)` reads the detail fields too.
+* Pure Dart `callLogEntryFromRow`.
+
+Dates, times and time zones
+* `CallTimeFormatter`: call times as phone apps show them (`14:05`,
+  `Yesterday`, `Monday`, `12 Nov`, `5 min ago`), full date with the UTC
+  offset, stopwatch and worded durations, 12/24-hour, fixed `utcOffset`,
+  and `CallTimeLabels` for translations. `groupByDay` for section headers.
+* `TelephonyKit.timeZone` (`DeviceTimeZone`: IANA id, names, current and
+  standard offset, daylight saving), `uses24HourFormat` and
+  `timeFormatter`.
+
+Call screen
+* Answering from the call notification now opens the app on the call
+  screen, also on Android 12+ where a notification button may not open an
+  app from a broadcast receiver. Tapping the incoming or ongoing call
+  notification does the same. New invisible `CallActionActivity` in the
+  library manifest (nothing to add to the app).
+* New `CallScreenRequested` call event and `takeCallScreenRequest()` so apps
+  with a call screen route can open it.
+
+Floating call bubble
+* `TelephonyKit.callBubble`: a draggable bubble over other apps while a
+  call is live and the app is in the background, with mute, speaker, end,
+  answer, decline and Open (back to the call screen). `enabled` (saved),
+  `hasPermission`, `requestPermission()` (opens the "display over other
+  apps" setting), `isShowing`, `hide()`, `labels` (`CallBubbleLabels`).
+  Needs `SYSTEM_ALERT_WINDOW` in the app manifest.
+
+Example
+* Recents grouped by day with relative times; tapping a call opens a
+  details screen with the full history of the number or contact. Contact
+  details show recent calls and link to the full history. The Device tab
+  shows the time zone and a call bubble switch with the permission flow.
+  The in-call screen opens when answering from the notification.
+
 ## 0.7.0
 
 * Contact paging: `getContactsPage(query:, offset:, pageSize:)` returns a

@@ -14,6 +14,9 @@
     <uses-permission android:name="android.permission.READ_SMS" />
     <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <!-- Floating call bubble (TelephonyKit.callBubble). The user grants it in
+         Settings > Display over other apps. -->
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
 
     <uses-feature android:name="android.hardware.telephony" android:required="false" />
 

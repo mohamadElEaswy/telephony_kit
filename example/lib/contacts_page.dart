@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:material_ui/material_ui.dart';
 import 'package:telephony_kit/telephony_kit.dart';
 
+import 'call_history_page.dart';
+
 final _telephony = TelephonyKit.instance;
 
 /// Contacts tab: every contact in a list that loads 50 at a time as you
@@ -284,6 +286,60 @@ class ContactDetailsPage extends StatefulWidget {
 }
 
 class _ContactDetailsPageState extends State<ContactDetailsPage> {
+  /// The last three calls with any of the contact's numbers, and a link to
+  /// the full history.
+  List<Widget> _recentCalls(ContactDetails contact) {
+    if (contact.phones.isEmpty ||
+        !_telephony.hasPermission(TelephonyPermission.readCallLog)) {
+      return const [];
+    }
+    final CallHistory history;
+    try {
+      history = _telephony.getContactCallHistory(contact.id, limit: 200);
+    } on TelephonyException {
+      return const [];
+    }
+    if (history.total == 0) return const [];
+    final times = callTimes;
+    return [
+      for (final e in history.entries.take(3))
+        ListTile(
+          dense: true,
+          leading: Icon(
+            callTypeIcon(e.type),
+            color: callTypeColor(context, e.type),
+          ),
+          title: Text(times.dateTime(e.date)),
+          subtitle: Text(
+            [
+              callTypeLabel(e.type),
+              if (e.wasConnected) times.durationWords(e.duration),
+            ].join(' · '),
+          ),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => CallDetailsPage(entryId: e.id, fallback: e),
+            ),
+          ),
+        ),
+      ListTile(
+        leading: const Icon(Icons.history),
+        title: Text('All ${history.total} calls'),
+        subtitle: Text(
+          'Talk time ${times.durationWords(history.totalDuration)}',
+        ),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => CallHistoryPage(
+              contactId: contact.id,
+              title: contact.displayName,
+            ),
+          ),
+        ),
+      ),
+    ];
+  }
+
   Future<void> _edit(ContactDetails contact) async {
     await Navigator.of(context).push(
       MaterialPageRoute<void>(
@@ -419,6 +475,7 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
                 onTap: () => _telephony.openDialer(p.number),
               ),
           ]),
+          section('Recent calls', _recentCalls(contact)),
           section('Email', [
             for (final e in contact.emails)
               ListTile(title: Text(e.address), subtitle: Text(e.label)),

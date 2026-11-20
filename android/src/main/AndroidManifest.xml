@@ -8,6 +8,18 @@
         <receiver
             android:name="dev.telephonykit.telephony_kit.CallActionReceiver"
             android:exported="false" />
+        <!-- Invisible: answers from the notification and opens the app on
+             the call screen (a receiver may not open activities since
+             Android 12). Not exported. -->
+        <activity
+            android:name="dev.telephonykit.telephony_kit.CallActionActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:taskAffinity=""
+            android:showWhenLocked="true"
+            android:turnScreenOn="true"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
     </application>
     <!-- Other permissions and the in-call and call screening services are
          declared by the app, not the library. See the README. -->

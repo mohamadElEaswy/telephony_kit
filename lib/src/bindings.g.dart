@@ -4767,6 +4767,762 @@ final class $BlockedNumberContract$Type$
   String get signature => r'Landroid/provider/BlockedNumberContract;';
 }
 
+/// from: `android.provider.Settings`
+extension type Settings._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(r'android/provider/Settings');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<Settings> type = $Settings$Type$();
+  static final _id_ACTION_MANAGE_OVERLAY_PERMISSION = _class.staticFieldId(
+    r'ACTION_MANAGE_OVERLAY_PERMISSION',
+    r'Ljava/lang/String;',
+  );
+
+  /// from: `static public final java.lang.String ACTION_MANAGE_OVERLAY_PERMISSION`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JString? get ACTION_MANAGE_OVERLAY_PERMISSION =>
+      _id_ACTION_MANAGE_OVERLAY_PERMISSION.getNullable(
+            _class,
+            jni$_.JString.type,
+          )
+          as jni$_.JString?;
+
+  static final _id_canDrawOverlays = _class.staticMethodId(
+    r'canDrawOverlays',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _canDrawOverlays =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean canDrawOverlays(android.content.Context context)`
+  static core$_.bool canDrawOverlays(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _canDrawOverlays(
+      _$$classRef.pointer,
+      _id_canDrawOverlays.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+}
+
+final class $Settings$Type$ extends jni$_.JType<Settings> {
+  @jni$_.internal
+  const $Settings$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/provider/Settings;';
+}
+
+/// from: `android.text.format.DateFormat`
+extension type DateFormat._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(r'android/text/format/DateFormat');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<DateFormat> type = $DateFormat$Type$();
+  static final _id_is24HourFormat = _class.staticMethodId(
+    r'is24HourFormat',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _is24HourFormat =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean is24HourFormat(android.content.Context context)`
+  static core$_.bool is24HourFormat(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _is24HourFormat(
+      _$$classRef.pointer,
+      _id_is24HourFormat.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+}
+
+final class $DateFormat$Type$ extends jni$_.JType<DateFormat> {
+  @jni$_.internal
+  const $DateFormat$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/text/format/DateFormat;';
+}
+
+/// from: `java.util.TimeZone`
+extension type TimeZone._(jni$_.JObject _$this)
+    implements jni$_.JObject, Cloneable, Serializable {
+  static final _class = jni$_.JClass.forName(r'java/util/TimeZone');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<TimeZone> type = $TimeZone$Type$();
+
+  /// from: `static public final int LONG`
+  static const LONG = 1;
+
+  /// from: `static public final int SHORT`
+  static const SHORT = 0;
+  static final _id_get$default$ = _class.staticMethodId(
+    r'getDefault',
+    r'()Ljava/util/TimeZone;',
+  );
+
+  static final _get$default$ =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public java.util.TimeZone getDefault()`
+  /// The returned object must be released after use, by calling the [release] method.
+  static TimeZone? get default$ {
+    final _$$classRef = _class.reference;
+    return _get$default$(
+      _$$classRef.pointer,
+      _id_get$default$.pointer,
+    ).object<TimeZone?>();
+  }
+}
+
+extension TimeZone$$Methods on TimeZone {
+  static final _id_get$displayName = TimeZone._class.instanceMethodId(
+    r'getDisplayName',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _get$displayName =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public final java.lang.String getDisplayName()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? get displayName {
+    final _$$selfRef = reference;
+    return _get$displayName(
+      _$$selfRef.pointer,
+      _id_get$displayName.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getDisplayName = TimeZone._class.instanceMethodId(
+    r'getDisplayName',
+    r'(ZI)Ljava/lang/String;',
+  );
+
+  static final _getDisplayName =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public final java.lang.String getDisplayName(boolean z, int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? getDisplayName(core$_.bool z, core$_.int i) {
+    final _$$selfRef = reference;
+    return _getDisplayName(
+      _$$selfRef.pointer,
+      _id_getDisplayName.pointer,
+      z ? 1 : 0,
+      i,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getDisplayName$1 = TimeZone._class.instanceMethodId(
+    r'getDisplayName',
+    r'(ZILjava/util/Locale;)Ljava/lang/String;',
+  );
+
+  static final _getDisplayName$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Int32, jni$_.Int32, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+              core$_.int,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public java.lang.String getDisplayName(boolean z, int i, java.util.Locale locale)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? getDisplayName$1(core$_.bool z, core$_.int i, Locale? locale) {
+    final _$$selfRef = reference;
+    final _$locale = locale?.reference ?? jni$_.jNullReference;
+    return _getDisplayName$1(
+      _$$selfRef.pointer,
+      _id_getDisplayName$1.pointer,
+      z ? 1 : 0,
+      i,
+      _$locale.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getDisplayName$2 = TimeZone._class.instanceMethodId(
+    r'getDisplayName',
+    r'(Ljava/util/Locale;)Ljava/lang/String;',
+  );
+
+  static final _getDisplayName$2 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public final java.lang.String getDisplayName(java.util.Locale locale)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? getDisplayName$2(Locale? locale) {
+    final _$$selfRef = reference;
+    final _$locale = locale?.reference ?? jni$_.jNullReference;
+    return _getDisplayName$2(
+      _$$selfRef.pointer,
+      _id_getDisplayName$2.pointer,
+      _$locale.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_get$iD = TimeZone._class.instanceMethodId(
+    r'getID',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _get$iD =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public java.lang.String getID()`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? get iD {
+    final _$$selfRef = reference;
+    return _get$iD(
+      _$$selfRef.pointer,
+      _id_get$iD.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_getOffset = TimeZone._class.instanceMethodId(
+    r'getOffset',
+    r'(IIIIII)I',
+  );
+
+  static final _getOffset =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Int32,
+                    jni$_.Int32,
+                    jni$_.Int32,
+                    jni$_.Int32,
+                    jni$_.Int32,
+                    jni$_.Int32,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+              core$_.int,
+              core$_.int,
+              core$_.int,
+              core$_.int,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public abstract int getOffset(int i, int i1, int i2, int i3, int i4, int i5)`
+  core$_.int getOffset(
+    core$_.int i,
+    core$_.int i1,
+    core$_.int i2,
+    core$_.int i3,
+    core$_.int i4,
+    core$_.int i5,
+  ) {
+    final _$$selfRef = reference;
+    return _getOffset(
+      _$$selfRef.pointer,
+      _id_getOffset.pointer,
+      i,
+      i1,
+      i2,
+      i3,
+      i4,
+      i5,
+    ).integer;
+  }
+
+  static final _id_getOffset$1 = TimeZone._class.instanceMethodId(
+    r'getOffset',
+    r'(J)I',
+  );
+
+  static final _getOffset$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int64,)>,
+              )
+            >
+          >('globalEnv_CallIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public int getOffset(long j)`
+  core$_.int getOffset$1(core$_.int j) {
+    final _$$selfRef = reference;
+    return _getOffset$1(_$$selfRef.pointer, _id_getOffset$1.pointer, j).integer;
+  }
+
+  static final _id_get$rawOffset = TimeZone._class.instanceMethodId(
+    r'getRawOffset',
+    r'()I',
+  );
+
+  static final _get$rawOffset =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallIntMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public abstract int getRawOffset()`
+  core$_.int get rawOffset {
+    final _$$selfRef = reference;
+    return _get$rawOffset(
+      _$$selfRef.pointer,
+      _id_get$rawOffset.pointer,
+    ).integer;
+  }
+
+  static final _id_useDaylightTime = TimeZone._class.instanceMethodId(
+    r'useDaylightTime',
+    r'()Z',
+  );
+
+  static final _useDaylightTime =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public abstract boolean useDaylightTime()`
+  core$_.bool useDaylightTime() {
+    final _$$selfRef = reference;
+    return _useDaylightTime(
+      _$$selfRef.pointer,
+      _id_useDaylightTime.pointer,
+    ).boolean;
+  }
+}
+
+final class $TimeZone$Type$ extends jni$_.JType<TimeZone> {
+  @jni$_.internal
+  const $TimeZone$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ljava/util/TimeZone;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.CallBubble`
+///
+/// A small floating button shown over other apps while a call is live and the
+/// app is in the background. Tapping it opens a panel with mute, speaker and
+/// hang up (answer and decline while ringing) and a button back to the call
+/// screen. It can be dragged and snaps to the nearest screen edge.
+///
+/// Needs the "display over other apps" permission ({@code
+/// SYSTEM_ALERT_WINDOW}, declared by the app and granted by the user in
+/// Settings). Without it the bubble is simply not shown.
+///
+/// The setting is saved, so the bubble also works when Flutter is not
+/// running. The process stays alive during a call because the system is bound
+/// to the in-call service.
+extension type CallBubble._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/CallBubble',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<CallBubble> type = $CallBubble$Type$();
+  static final _id_isEnabled = _class.staticMethodId(
+    r'isEnabled',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isEnabled(android.content.Context context)`
+  ///
+  /// Whether the bubble is shown when the app leaves the screen during a call.
+  static core$_.bool isEnabled(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isEnabled(
+      _$$classRef.pointer,
+      _id_isEnabled.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+
+  static final _id_setEnabled = _class.staticMethodId(
+    r'setEnabled',
+    r'(Landroid/content/Context;Z)V',
+  );
+
+  static final _setEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setEnabled(android.content.Context context, boolean enabled)`
+  ///
+  /// Turns the bubble on or off. Saved, so it also applies after a restart.
+  static void setEnabled(Context? context, core$_.bool enabled) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _setEnabled(
+      _$$classRef.pointer,
+      _id_setEnabled.pointer,
+      _$context.pointer,
+      enabled ? 1 : 0,
+    ).check();
+  }
+
+  static final _id_get$isShowing = _class.staticMethodId(r'isShowing', r'()Z');
+
+  static final _get$isShowing =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public boolean isShowing()`
+  ///
+  /// Whether the bubble is on screen now.
+  static core$_.bool get isShowing {
+    final _$$classRef = _class.reference;
+    return _get$isShowing(
+      _$$classRef.pointer,
+      _id_get$isShowing.pointer,
+    ).boolean;
+  }
+
+  static final _id_setLabels = _class.staticMethodId(
+    r'setLabels',
+    r'(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V',
+  );
+
+  static final _setLabels =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void setLabels(java.lang.String answer, java.lang.String decline, java.lang.String mute, java.lang.String unmute, java.lang.String speaker, java.lang.String end, java.lang.String open)`
+  ///
+  /// Replaces the button labels, for example with translations.
+  static void setLabels(
+    jni$_.JString? answer,
+    jni$_.JString? decline,
+    jni$_.JString? mute,
+    jni$_.JString? unmute,
+    jni$_.JString? speaker,
+    jni$_.JString? end,
+    jni$_.JString? open,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$answer = answer?.reference ?? jni$_.jNullReference;
+    final _$decline = decline?.reference ?? jni$_.jNullReference;
+    final _$mute = mute?.reference ?? jni$_.jNullReference;
+    final _$unmute = unmute?.reference ?? jni$_.jNullReference;
+    final _$speaker = speaker?.reference ?? jni$_.jNullReference;
+    final _$end = end?.reference ?? jni$_.jNullReference;
+    final _$open = open?.reference ?? jni$_.jNullReference;
+    _setLabels(
+      _$$classRef.pointer,
+      _id_setLabels.pointer,
+      _$answer.pointer,
+      _$decline.pointer,
+      _$mute.pointer,
+      _$unmute.pointer,
+      _$speaker.pointer,
+      _$end.pointer,
+      _$open.pointer,
+    ).check();
+  }
+
+  static final _id_get$isAppVisible = _class.staticMethodId(
+    r'isAppVisible',
+    r'()Z',
+  );
+
+  static final _get$isAppVisible =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public boolean isAppVisible()`
+  ///
+  /// Whether the app has an activity on screen, as tracked by the bubble.
+  static core$_.bool get isAppVisible {
+    final _$$classRef = _class.reference;
+    return _get$isAppVisible(
+      _$$classRef.pointer,
+      _id_get$isAppVisible.pointer,
+    ).boolean;
+  }
+
+  static final _id_hide = _class.staticMethodId(r'hide', r'()V');
+
+  static final _hide =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public void hide()`
+  ///
+  /// Removes the bubble if it is showing.
+  static void hide() {
+    final _$$classRef = _class.reference;
+    _hide(_$$classRef.pointer, _id_hide.pointer).check();
+  }
+}
+
+final class $CallBubble$Type$ extends jni$_.JType<CallBubble> {
+  @jni$_.internal
+  const $CallBubble$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/CallBubble;';
+}
+
 /// from: `dev.telephonykit.telephony_kit.CallEventListener`
 ///
 /// Receives call events from CallManager.
@@ -4848,6 +5604,10 @@ extension type CallEventListener._(jni$_.JObject _$this)
         );
         return jni$_.nullptr;
       }
+      if ($d == r'onShowCallScreen(Ljava/lang/String;)V') {
+        _$impls[$p]!.onShowCallScreen(($a![0] as jni$_.JString?));
+        return jni$_.nullptr;
+      }
     } catch (e) {
       return jni$_.ProtectedJniExtensions.newDartException(e);
     }
@@ -4884,6 +5644,8 @@ extension type CallEventListener._(jni$_.JObject _$this)
           r'onPostDialWait(Ljava/lang/String;Ljava/lang/String;)V',
         if ($impl.onCallRemoved$async) r'onCallRemoved(Ljava/lang/String;)V',
         if ($impl.onAudioStateChanged$async) r'onAudioStateChanged(ZI)V',
+        if ($impl.onShowCallScreen$async)
+          r'onShowCallScreen(Ljava/lang/String;)V',
       ],
     );
     final $a = $p.sendPort.nativePort;
@@ -5143,6 +5905,45 @@ extension CallEventListener$$Methods on CallEventListener {
       route,
     ).check();
   }
+
+  static final _id_onShowCallScreen = CallEventListener._class.instanceMethodId(
+    r'onShowCallScreen',
+    r'(Ljava/lang/String;)V',
+  );
+
+  static final _onShowCallScreen =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public abstract void onShowCallScreen(java.lang.String callId)`
+  ///
+  /// The user asked to see the call screen: they answered from the
+  /// notification, tapped the call notification, or tapped Open on the call
+  /// bubble. {@code callId} is the call to show, or empty for the current
+  /// call. The app is being brought to the front.
+  void onShowCallScreen(jni$_.JString? callId) {
+    final _$$selfRef = reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    _onShowCallScreen(
+      _$$selfRef.pointer,
+      _id_onShowCallScreen.pointer,
+      _$callId.pointer,
+    ).check();
+  }
 }
 
 abstract base mixin class $CallEventListener {
@@ -5168,6 +5969,8 @@ abstract base mixin class $CallEventListener {
     required void Function(core$_.bool muted, core$_.int route)
     onAudioStateChanged,
     core$_.bool onAudioStateChanged$async,
+    required void Function(jni$_.JString? callId) onShowCallScreen,
+    core$_.bool onShowCallScreen$async,
   }) = _$CallEventListener;
 
   void onCallAdded(jni$_.JString? callId);
@@ -5187,6 +5990,8 @@ abstract base mixin class $CallEventListener {
   core$_.bool get onCallRemoved$async => false;
   void onAudioStateChanged(core$_.bool muted, core$_.int route);
   core$_.bool get onAudioStateChanged$async => false;
+  void onShowCallScreen(jni$_.JString? callId);
+  core$_.bool get onShowCallScreen$async => false;
 }
 
 final class _$CallEventListener with $CallEventListener {
@@ -5212,12 +6017,15 @@ final class _$CallEventListener with $CallEventListener {
     required void Function(core$_.bool muted, core$_.int route)
     onAudioStateChanged,
     this.onAudioStateChanged$async = false,
+    required void Function(jni$_.JString? callId) onShowCallScreen,
+    this.onShowCallScreen$async = false,
   }) : _onCallAdded = onCallAdded,
        _onCallStateChanged = onCallStateChanged,
        _onCallDisconnected = onCallDisconnected,
        _onPostDialWait = onPostDialWait,
        _onCallRemoved = onCallRemoved,
-       _onAudioStateChanged = onAudioStateChanged;
+       _onAudioStateChanged = onAudioStateChanged,
+       _onShowCallScreen = onShowCallScreen;
 
   final void Function(jni$_.JString? callId) _onCallAdded;
   final core$_.bool onCallAdded$async;
@@ -5239,6 +6047,8 @@ final class _$CallEventListener with $CallEventListener {
   final core$_.bool onCallRemoved$async;
   final void Function(core$_.bool muted, core$_.int route) _onAudioStateChanged;
   final core$_.bool onAudioStateChanged$async;
+  final void Function(jni$_.JString? callId) _onShowCallScreen;
+  final core$_.bool onShowCallScreen$async;
 
   void onCallAdded(jni$_.JString? callId) {
     return _onCallAdded(callId);
@@ -5268,6 +6078,10 @@ final class _$CallEventListener with $CallEventListener {
   void onAudioStateChanged(core$_.bool muted, core$_.int route) {
     return _onAudioStateChanged(muted, route);
   }
+
+  void onShowCallScreen(jni$_.JString? callId) {
+    return _onShowCallScreen(callId);
+  }
 }
 
 final class $CallEventListener$Type$ extends jni$_.JType<CallEventListener> {
@@ -5290,6 +6104,19 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
 
   /// The type which includes information such as the signature of this class.
   static const jni$_.JType<CallManager> type = $CallManager$Type$();
+  static final _id_EXTRA_SHOW_CALL = _class.staticFieldId(
+    r'EXTRA_SHOW_CALL',
+    r'Ljava/lang/String;',
+  );
+
+  /// from: `static public final java.lang.String EXTRA_SHOW_CALL`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Extra on the launch intent: the id of the call to show.
+  static jni$_.JString? get EXTRA_SHOW_CALL =>
+      _id_EXTRA_SHOW_CALL.getNullable(_class, jni$_.JString.type)
+          as jni$_.JString?;
+
   static final _id_set$listener = _class.staticMethodId(
     r'setListener',
     r'(Ldev/telephonykit/telephony_kit/CallEventListener;)V',
@@ -7754,6 +8581,41 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
       _id_selectBluetoothDevice.pointer,
       _$address.pointer,
     ).boolean;
+  }
+
+  static final _id_takeCallScreenRequest = _class.staticMethodId(
+    r'takeCallScreenRequest',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _takeCallScreenRequest =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public java.lang.String takeCallScreenRequest()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The call the user asked to see from a notification or the call bubble
+  /// since the last call, or null. An empty string means "the current call".
+  /// Clears the request, so each one is handled once.
+  static jni$_.JString? takeCallScreenRequest() {
+    final _$$classRef = _class.reference;
+    return _takeCallScreenRequest(
+      _$$classRef.pointer,
+      _id_takeCallScreenRequest.pointer,
+    ).object<jni$_.JString?>();
   }
 }
 
@@ -11096,4 +11958,22 @@ final class $BaseColumns$Type$ extends jni$_.JType<BaseColumns> {
   @jni$_.internal
   @core$_.override
   String get signature => r'Landroid/provider/BaseColumns;';
+}
+
+/// from: `java.util.Locale`
+///
+/// WARNING: Locale is a stub. To generate bindings for this class, include
+/// java.util.Locale in your config's classes list.
+///
+extension type Locale._(jni$_.JObject _$this) implements jni$_.JObject {
+  static const jni$_.JType<Locale> type = $Locale$Type$();
+}
+
+final class $Locale$Type$ extends jni$_.JType<Locale> {
+  @jni$_.internal
+  const $Locale$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ljava/util/Locale;';
 }
