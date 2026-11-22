@@ -499,6 +499,26 @@ trigger it. The notification shows the count and last caller with a Call
 back button. `markMissedCallsRead()` and `clearMissedCallNotification()`
 clear it, and `missedCallNotificationsEnabled = false` turns it off.
 
+### Call waiting
+
+When a call rings while you are on another one, Android does not use a
+separate state: the new call is `CallState.ringing` and the first stays
+active (or on hold). `telephony.waitingCall` returns that ringing call.
+
+```dart
+final waiting = telephony.waitingCall;   // null without call waiting
+if (waiting != null) {
+  waiting.answer();              // Hold & answer: the current call is held
+  waiting.answerAndEndActive();  // End & answer
+  waiting.reject();              // Decline
+}
+// Later: telephony.swapCalls() or call.merge().
+```
+
+When the current call cannot be held, Android ends it on `answer()`. The
+call notification shows "Call waiting" with Answer, Decline and End &
+answer. Call waiting must be on at the carrier (`setCallWaiting(true)`).
+
 ### Several calls and conferences
 
 ```dart

@@ -805,6 +805,17 @@ class _InCallScreenState extends State<InCallScreen> {
     final call = widget.call;
     final state = call.state;
     final ringing = state == CallState.ringing;
+    // Call waiting: this call rings while another one is live.
+    final others = widget.allCalls
+        .where(
+          (c) =>
+              c.id != call.id &&
+              c.parent == null &&
+              c.state.isLive &&
+              c.state != CallState.ringing,
+        )
+        .toList();
+    final waiting = ringing && others.isNotEmpty;
     final name = call.isConference
         ? 'Conference (${call.children.length})'
         : call.displayName.isNotEmpty
@@ -823,6 +834,7 @@ class _InCallScreenState extends State<InCallScreen> {
             const SizedBox(height: 8),
             Text(switch (state) {
               CallState.active => _elapsed(),
+              CallState.ringing when waiting => 'Call waiting',
               CallState.ringing => 'Incoming call',
               CallState.dialing || CallState.connecting => 'Calling…',
               CallState.holding => 'On hold',
@@ -847,6 +859,14 @@ class _InCallScreenState extends State<InCallScreen> {
               padding: const EdgeInsets.only(top: 8),
               child: CallBadges(call: call),
             ),
+            if (waiting)
+              Padding(
+                padding: const EdgeInsets.only(top: 16),
+                child: Chip(
+                  avatar: const Icon(Icons.phone_in_talk, size: 18),
+                  label: Text('On a call with ${_callName(others.first)}'),
+                ),
+              ),
             const Spacer(),
             if (state == CallState.active || call.pendingRttRequestId != null)
               RttPanel(call: call, onChanged: widget.onChanged),
@@ -883,35 +903,44 @@ class _InCallScreenState extends State<InCallScreen> {
                 onPressed: () => _replyAndReject(call),
               ),
             const SizedBox(height: 48),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                if (ringing)
+            if (waiting)
+              _WaitingCallButtons(call: call, onChanged: widget.onChanged)
+            else
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  if (ringing)
+                    FloatingActionButton.large(
+                      heroTag: 'answer',
+                      backgroundColor: Colors.green,
+                      onPressed: () {
+                        call.answer();
+                        widget.onChanged();
+                      },
+                      child: const Icon(Icons.call, color: Colors.white),
+                    ),
                   FloatingActionButton.large(
-                    heroTag: 'answer',
-                    backgroundColor: Colors.green,
+                    heroTag: 'hangup',
+                    backgroundColor: Colors.red,
                     onPressed: () {
-                      call.answer();
+                      ringing ? call.reject() : call.hangUp();
                       widget.onChanged();
                     },
-                    child: const Icon(Icons.call, color: Colors.white),
+                    child: const Icon(Icons.call_end, color: Colors.white),
                   ),
-                FloatingActionButton.large(
-                  heroTag: 'hangup',
-                  backgroundColor: Colors.red,
-                  onPressed: () {
-                    ringing ? call.reject() : call.hangUp();
-                    widget.onChanged();
-                  },
-                  child: const Icon(Icons.call_end, color: Colors.white),
-                ),
-              ],
-            ),
+                ],
+              ),
             const SizedBox(height: 48),
           ],
         ),
       ),
     );
+  }
+
+  String _callName(PhoneCall c) {
+    if (c.isConference) return 'a conference';
+    if (c.displayName.isNotEmpty) return c.displayName;
+    return _contactName(c.number) ?? c.number;
   }
 
   /// Rejects the call and texts the caller a quick reply.
@@ -1132,5 +1161,50 @@ class _Message extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       child: Text(text, textAlign: TextAlign.center),
     ),
+  );
+}
+
+/// Decline, hold the current call and answer, or end it and answer.
+class _WaitingCallButtons extends StatelessWidget {
+  const _WaitingCallButtons({required this.call, required this.onChanged});
+
+  final PhoneCall call;
+  final VoidCallback onChanged;
+
+  Widget _button(
+    String label,
+    IconData icon,
+    Color color,
+    VoidCallback onPressed,
+  ) => Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      FloatingActionButton(
+        heroTag: label,
+        backgroundColor: color,
+        onPressed: () {
+          onPressed();
+          onChanged();
+        },
+        child: Icon(icon, color: Colors.white),
+      ),
+      const SizedBox(height: 8),
+      Text(label),
+    ],
+  );
+
+  @override
+  Widget build(BuildContext context) => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+      _button('Decline', Icons.call_end, Colors.red, call.reject),
+      _button('Hold & answer', Icons.phone_paused, Colors.green, call.answer),
+      _button(
+        'End & answer',
+        Icons.phone_forwarded,
+        Colors.orange,
+        call.answerAndEndActive,
+      ),
+    ],
   );
 }

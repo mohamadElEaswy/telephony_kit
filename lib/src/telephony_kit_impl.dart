@@ -3004,6 +3004,24 @@ class TelephonyKit {
   bool selectBluetoothDevice(String address) =>
       android.CallManager.selectBluetoothDevice(address.toJString());
 
+  /// The call ringing while another call is live (call waiting), or null.
+  ///
+  /// Android has no separate state for a waiting call: it is
+  /// [CallState.ringing] while another call is active, on hold or dialing.
+  /// Offer "Hold & answer" ([PhoneCall.answer]), "End & answer"
+  /// ([PhoneCall.answerAndEndActive]) and decline ([PhoneCall.reject]).
+  /// After answering, [swapCalls] and [PhoneCall.merge] switch between or
+  /// join the two calls. The call notification shows the same choices.
+  PhoneCall? get waitingCall {
+    final id = android.CallManager.waitingCallId;
+    if (id == null) return null;
+    return PhoneCall._(id.toDartString(releaseOriginal: true));
+  }
+
+  /// Whether a call is ringing while another call is live. See
+  /// [waitingCall].
+  bool get isCallWaiting => waitingCall != null;
+
   /// The calls tracked by the in-call service, oldest first.
   List<PhoneCall> get calls {
     final ids = android.CallManager.callIds;
@@ -3143,7 +3161,16 @@ class PhoneCall {
   String readRttText() => TelephonyKit._str(android.CallManager.readRtt(_id));
 
   /// Answers a ringing call.
+  ///
+  /// For a waiting call (see [TelephonyKit.waitingCall]) Android puts the
+  /// active call on hold first; when that call cannot be held, Android ends
+  /// it. Use [answerAndEndActive] to end the active call instead.
   bool answer() => android.CallManager.answer(_id);
+
+  /// Answers a waiting call and ends the active call first ("End &
+  /// answer"). Calls already on hold stay on hold. Returns false when the
+  /// call is no longer tracked.
+  bool answerAndEndActive() => android.CallManager.answerAndEndActive(_id);
 
   /// Rejects a ringing call.
   ///

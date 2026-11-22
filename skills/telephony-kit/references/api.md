@@ -39,6 +39,7 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 | Member | Notes |
 | --- | --- |
 | `Stream<CallEvent> get callEvents` | `CallAdded`, `CallStateChanged`, `CallDisconnected(callId, cause)`, `CallRemoved`, `PostDialWait(callId, remaining)`, `AudioStateChanged`, `CallScreenRequested(callId)` (sealed) |
+| `PhoneCall? get waitingCall` / `bool get isCallWaiting` | Call ringing while another is live; `PhoneCall.answer()` holds the other, `PhoneCall.answerAndEndActive()` ends it |
 | `List<PhoneCall> get calls` / `PhoneCall call(String id)` | |
 | `set showCallNotifications(bool)` / `set launchAppOnIncomingCall(bool)` | Both default true |
 | `bool get isMuted`, `bool setMuted(bool)`, `bool setSpeakerOn(bool)` | |

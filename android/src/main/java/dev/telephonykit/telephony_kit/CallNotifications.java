@@ -72,7 +72,7 @@ final class CallNotifications {
   }
 
   @SuppressWarnings("deprecation")
-  static void showIncoming(Context context, String callId, String caller) {
+  static void showIncoming(Context context, String callId, String caller, boolean waiting) {
     NotificationManager nm = context.getSystemService(NotificationManager.class);
     if (nm == null) return;
     ensureChannels(context, nm);
@@ -89,7 +89,7 @@ final class CallNotifications {
         builder(context, CHANNEL_INCOMING)
             .setSmallIcon(android.R.drawable.sym_call_incoming)
             .setContentTitle(caller)
-            .setContentText("Incoming call")
+            .setContentText(waiting ? "Call waiting: answering holds the current call" : "Incoming call")
             .setCategory(Notification.CATEGORY_CALL)
             .setOngoing(true)
             .setContentIntent(content)
@@ -101,6 +101,14 @@ final class CallNotifications {
       b.setPriority(Notification.PRIORITY_MAX);
       b.addAction(new Notification.Action.Builder(android.R.drawable.sym_call_missed, "Decline", decline).build());
       b.addAction(new Notification.Action.Builder(android.R.drawable.sym_action_call, "Answer", answer).build());
+    }
+    if (waiting) {
+      PendingIntent endAndAnswer =
+          callScreenIntent(context, CallActionActivity.ACTION_END_AND_ANSWER, callId, 6);
+      b.addAction(
+          new Notification.Action.Builder(
+                  android.R.drawable.sym_action_call, "End & answer", endAndAnswer)
+              .build());
     }
     notify(nm, b.build());
   }
