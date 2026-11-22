@@ -1982,8 +1982,12 @@ class TelephonyKit {
   /// returned; check [isDefaultSmsApp] again when the app resumes. Returns
   /// false if there is no foreground activity or the role is not available.
   ///
-  /// The app must also declare the SMS receivers Android requires of a
-  /// default SMS app (see the README), or the system does not offer it.
+  /// The app must also declare the components Android requires of a
+  /// default SMS app (the package's `TelephonyKitSmsDeliverReceiver`,
+  /// `TelephonyKitMmsReceiver`, `TelephonyKitRespondViaMessageService` and a
+  /// `SENDTO` intent filter; see the README), or the system does not offer
+  /// it. While it is the default, the package stores received and sent SMS
+  /// and shows new message notifications.
   bool requestDefaultSmsApp() => _guard('Requesting SMS role', () {
     if (_sdkInt >= 29) return _requestRole('android.app.role.SMS'.toJString());
     return android.SmsHelper.requestDefaultLegacy(
@@ -1991,6 +1995,49 @@ class TelephonyKit {
       defaultDialerRequestCode,
     );
   });
+
+  /// The SMS request the app was opened with since the last check, or null.
+  /// Each request is returned once; check on start and on resume.
+  ///
+  /// A default SMS app must handle "send a message to" links from other
+  /// apps (`SENDTO` with `sms:`/`smsto:`/`mms:`/`mmsto:`), and the package's
+  /// new message notifications open the app with the sender. Show a compose
+  /// screen for [SmsRequest.recipients], or the conversation when
+  /// [SmsRequest.fromNotification] is true.
+  SmsRequest? takeSmsRequest() => _guard('Reading SMS intent', () {
+    final parts = android.SmsIntents.takeRequest(_activity());
+    if (parts == null) return null;
+    final list = [for (var i = 0; i < parts.length; i++) _str(parts[i])];
+    parts.release();
+    return SmsRequest.fromParts(list);
+  });
+
+  /// Whether the package shows a notification for each new SMS while this
+  /// app is the default SMS app. Defaults to true and is saved on the
+  /// device. Turn it off to show your own from [incomingSms]. Needs
+  /// `TelephonyPermission.postNotifications` on Android 13+.
+  bool get smsNotificationsEnabled => _guard(
+    'Reading SMS notification setting',
+    () => android.SmsNotifications.isEnabled(_context),
+  );
+
+  set smsNotificationsEnabled(bool value) => _guard(
+    'Changing SMS notification setting',
+    () => android.SmsNotifications.setEnabled(_context, value),
+  );
+
+  /// Removes the new message notification for [address], for example when
+  /// its conversation is opened.
+  void clearSmsNotification(String address) => _guard(
+    'Clearing SMS notification',
+    () => android.SmsNotifications.cancel(_context, address.toJString()),
+  );
+
+  /// Removes every new message notification.
+  void clearSmsNotifications() => _guard(
+    'Clearing SMS notifications',
+    () => android.SmsNotifications.cancelAll(_context),
+  );
 
   /// Conversations, newest first, built from the latest [messageLimit]
   /// messages. Open one with `searchSms(threadId: thread.threadId)`. Needs
@@ -2641,6 +2688,10 @@ class TelephonyKit {
   ///
   /// Pass [subscriptionId] (from [getSimCards]) to choose the SIM. Needs
   /// `TelephonyPermission.sendSms`. Google Play restricts this permission.
+  ///
+  /// As the default SMS app, the message is also saved: in the outbox
+  /// while sending, then in the sent box, or as failed. Other apps' sent
+  /// messages are saved by Android.
   Future<int> sendSms(String to, String text, {int? subscriptionId}) {
     final completer = Completer<int>();
     late final android.ResultListener listener;

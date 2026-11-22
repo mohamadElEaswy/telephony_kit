@@ -1846,3 +1846,49 @@ class ContactCallSettings {
       'ContactCallSettings(ringtone: ${ringtoneUri ?? 'default'}, '
       'voicemail: $sendToVoicemail)';
 }
+
+/// What an SMS intent that opened the app asks for, from
+/// `TelephonyKit.takeSmsRequest`: another app's "send a message to" link
+/// (`sms:`, `smsto:`, `mms:` or `mmsto:`), or a tap on a new message
+/// notification.
+class SmsRequest {
+  const SmsRequest({
+    required this.recipients,
+    this.body = '',
+    this.fromNotification = false,
+  });
+
+  /// Builds a request from the `[recipients, body, fromNotification]` strings
+  /// the native helper returns. Recipients are separated by `;`.
+  factory SmsRequest.fromParts(List<String> parts) => SmsRequest(
+    recipients: [
+      for (final r in (parts.isEmpty ? '' : parts[0]).split(';'))
+        if (r.trim().isNotEmpty) _decode(r.trim()),
+    ],
+    body: parts.length > 1 ? parts[1] : '',
+    fromNotification: parts.length > 2 && parts[2] == '1',
+  );
+
+  static String _decode(String value) {
+    try {
+      return Uri.decodeComponent(value);
+    } on ArgumentError {
+      return value;
+    }
+  }
+
+  /// Numbers to write to. Empty for "new message" without a recipient.
+  final List<String> recipients;
+
+  /// Text to put in the message box, or empty.
+  final String body;
+
+  /// True when the user tapped a new message notification: open the
+  /// conversation with [recipients] instead of a compose screen.
+  final bool fromNotification;
+
+  @override
+  String toString() =>
+      'SmsRequest($recipients, ${body.length} chars, '
+      'notification: $fromNotification)';
+}

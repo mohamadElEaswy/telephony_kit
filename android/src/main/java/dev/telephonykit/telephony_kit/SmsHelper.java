@@ -17,10 +17,22 @@ public final class SmsHelper {
 
   private static final AtomicInteger counter = new AtomicInteger();
 
+  /** A listener that ignores the result. */
+  static final ResultListener IGNORE =
+      new ResultListener() {
+        @Override
+        public void onSuccess(String value) {}
+
+        @Override
+        public void onFailure(int code, String message) {}
+      };
+
   /**
    * Sends {@code text} to {@code destination}. Long messages are split into
    * parts. Pass a subscription id to pick the SIM, or -1 for the default.
-   * Needs SEND_SMS. The listener gets the number of parts on success.
+   * Needs SEND_SMS. The listener gets the number of parts on success. As
+   * the default SMS app, the message is also stored: in the outbox while
+   * sending, then in the sent box (or as failed).
    */
   @SuppressWarnings("deprecation")
   public static void send(
@@ -41,6 +53,10 @@ public final class SmsHelper {
       return;
     }
 
+    final android.net.Uri stored =
+        SmsStore.isDefaultSmsApp(app)
+            ? SmsStore.insertOutbox(app, destination, text, subscriptionId)
+            : null;
     final ArrayList<String> parts = sms.divideMessage(text);
     final int total = parts.size();
     final String action = app.getPackageName() + ".TELEPHONY_KIT_SMS_SENT_" + counter.incrementAndGet();
@@ -56,6 +72,7 @@ public final class SmsHelper {
             if (code != Activity.RESULT_OK) {
               done[0] = true;
               safeUnregister(app, this);
+              SmsStore.markSent(app, stored, false);
               listener.onFailure(code, "SMS was not sent");
               return;
             }
@@ -63,6 +80,7 @@ public final class SmsHelper {
             if (remaining[0] <= 0) {
               done[0] = true;
               safeUnregister(app, this);
+              SmsStore.markSent(app, stored, true);
               listener.onSuccess(String.valueOf(total));
             }
           }
@@ -90,10 +108,12 @@ public final class SmsHelper {
     } catch (SecurityException e) {
       done[0] = true;
       safeUnregister(app, receiver);
+      SmsStore.markSent(app, stored, false);
       listener.onFailure(-2, "SEND_SMS permission is missing");
     } catch (RuntimeException e) {
       done[0] = true;
       safeUnregister(app, receiver);
+      SmsStore.markSent(app, stored, false);
       listener.onFailure(-1, String.valueOf(e.getMessage()));
     }
   }
