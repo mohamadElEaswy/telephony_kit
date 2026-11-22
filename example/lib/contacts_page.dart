@@ -286,6 +286,71 @@ class ContactDetailsPage extends StatefulWidget {
 }
 
 class _ContactDetailsPageState extends State<ContactDetailsPage> {
+  /// The contact's ringtone and the send to voicemail switch.
+  List<Widget> _callSettings(ContactDetails contact, bool canWrite) {
+    final ContactCallSettings? settings;
+    try {
+      settings = _telephony.getContactCallSettings(contact.id);
+    } on TelephonyException {
+      return const [];
+    }
+    if (settings == null) return const [];
+    return [
+      ListTile(
+        leading: const Icon(Icons.music_note_outlined),
+        title: const Text('Ringtone'),
+        subtitle: Text(
+          settings.usesDefaultRingtone ? 'Default' : settings.ringtoneTitle,
+        ),
+        enabled: canWrite,
+        onTap: () => _pickRingtone(contact.id, settings!.ringtoneUri),
+      ),
+      SwitchListTile(
+        secondary: const Icon(Icons.voicemail),
+        title: const Text('Send calls to voicemail'),
+        subtitle: const Text('Calls from this contact will not ring'),
+        value: settings.sendToVoicemail,
+        onChanged: canWrite
+            ? (v) {
+                _telephony.setContactSendToVoicemail(contact.id, v);
+                setState(() {});
+              }
+            : null,
+      ),
+    ];
+  }
+
+  Future<void> _pickRingtone(String contactId, String? current) async {
+    final ringtones = _telephony.getRingtones();
+    final picked = await showDialog<String>(
+      context: context,
+      builder: (context) => SimpleDialog(
+        title: const Text('Ringtone'),
+        children: [
+          SimpleDialogOption(
+            onPressed: () => Navigator.pop(context, ''),
+            child: Text('Default${current == null ? '  ✓' : ''}'),
+          ),
+          for (final r in ringtones)
+            SimpleDialogOption(
+              onPressed: () {
+                _telephony.playRingtonePreview(r.uri);
+                Navigator.pop(context, r.uri);
+              },
+              child: Text('${r.title}${r.uri == current ? '  ✓' : ''}'),
+            ),
+        ],
+      ),
+    );
+    Future<void>.delayed(
+      const Duration(seconds: 3),
+      _telephony.stopRingtonePreview,
+    );
+    if (picked == null) return;
+    _telephony.setContactRingtone(contactId, picked.isEmpty ? null : picked);
+    if (mounted) setState(() {});
+  }
+
   /// The last three calls with any of the contact's numbers, and a link to
   /// the full history.
   List<Widget> _recentCalls(ContactDetails contact) {
@@ -536,6 +601,7 @@ class _ContactDetailsPageState extends State<ContactDetailsPage> {
               ),
             ),
           ]),
+          section('Calls from this contact', _callSettings(contact, canWrite)),
           section('System screens', [
             ListTile(
               title: const Text('Show in Contacts app'),

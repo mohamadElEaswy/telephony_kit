@@ -10,6 +10,8 @@ for features the app uses.
 <uses-permission android:name="android.permission.CALL_PHONE" />
 <!-- SIM list, phone accounts, voicemail number, call state events -->
 <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<!-- Answer / end calls without being the default dialer -->
+<uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
 <!-- Read / change the call log -->
 <uses-permission android:name="android.permission.READ_CALL_LOG" />
 <uses-permission android:name="android.permission.WRITE_CALL_LOG" />
@@ -36,7 +38,7 @@ for features the app uses.
 ```
 
 Runtime requests with `permission_handler`: `Permission.phone` covers
-CALL_PHONE, READ_PHONE_STATE and the call log; also request
+CALL_PHONE, READ_PHONE_STATE, ANSWER_PHONE_CALLS and the call log; also request
 `Permission.contacts` (covers READ and WRITE_CONTACTS), `Permission.notification`, `Permission.sms` and
 `Permission.bluetoothConnect` as needed.
 

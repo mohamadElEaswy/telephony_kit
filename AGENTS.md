@@ -47,7 +47,8 @@ Write Java only for what jnigen cannot express:
   (notification buttons that must open the app use an activity, because
   since Android 12 a receiver may not start one).
 - Abstract callback classes Android requires you to subclass
-  (`TelephonyCallback`, `UssdResponseCallback`, `Call.Callback`).
+  (`TelephonyCallback`, `UssdResponseCallback`, `Call.Callback`,
+  `SubscriptionManager.OnSubscriptionsChangedListener`).
 - Work that must run when Flutter is not running (screening rules, the
   `CallBubble` overlay window and its app visibility tracking).
 

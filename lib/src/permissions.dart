@@ -18,7 +18,8 @@ abstract final class TelephonyPermission {
   /// `TelephonyKit.markMissedCallsRead`.
   static const writeCallLog = 'android.permission.WRITE_CALL_LOG';
 
-  /// Needed by `TelephonyKit.endCall` on Android 9 and newer.
+  /// Needed by `TelephonyKit.answerRingingCall` (Android 8+) and
+  /// `TelephonyKit.endCurrentCall` (Android 9+).
   static const answerPhoneCalls = 'android.permission.ANSWER_PHONE_CALLS';
 
   /// Needed by `TelephonyKit.searchContacts`, `TelephonyKit.lookupNumber`,
