@@ -253,6 +253,21 @@ class _ToolsPageState extends State<ToolsPage> {
     });
   }
 
+  Future<void> _formatNumber() async {
+    final number = await _ask('Format number', 'Phone number');
+    if (number == null || number.trim().isEmpty) return;
+    await _run('Format number', () {
+      final country = _telephony.phoneNumberCountry(number);
+      return [
+        'Formatted: ${_telephony.formatPhoneNumber(number)}',
+        'E.164: ${_telephony.phoneNumberToE164(number) ?? 'not valid'}',
+        'Normalized: ${_telephony.normalizePhoneNumber(number)}',
+        'Country: ${country == null ? '-' : '${country.flag} ${country.isoCode} +${country.callingCode}'}',
+        'Device country: ${_telephony.defaultCountryIso}',
+      ].join('\n');
+    });
+  }
+
   @override
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(title: const Text('More tools')),
@@ -262,6 +277,42 @@ class _ToolsPageState extends State<ToolsPage> {
           _section('Live changes', [
             for (final line in _log) ListTile(dense: true, title: Text(line)),
           ]),
+        _section('Phone numbers', [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              keyboardType: TextInputType.phone,
+              inputFormatters: [PhoneNumberInputFormatter()],
+              decoration: InputDecoration(
+                labelText: 'Formatted as you type',
+                helperText: 'Country: ${_telephony.defaultCountryIso}',
+              ),
+            ),
+          ),
+          _tile(
+            'Format a number',
+            'National, international, E.164 and country',
+            _formatNumber,
+          ),
+          _tile(
+            'Compare two numbers',
+            'Same number written differently?',
+            () async {
+              final pair = await _ask(
+                'Compare',
+                'Two numbers, comma separated',
+              );
+              if (pair == null || !pair.contains(',')) return;
+              final parts = pair.split(',');
+              await _run(
+                'Compare',
+                () => _telephony.isSamePhoneNumber(parts[0], parts[1])
+                    ? 'Same number.'
+                    : 'Different numbers.',
+              );
+            },
+          ),
+        ]),
         _section('Contacts', [
           _tile(
             'Accounts',

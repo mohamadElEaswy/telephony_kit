@@ -49,11 +49,7 @@ void main() {
   }
 
   testWidgets('streams can start and stop', (tester) async {
-    for (final stream in [
-      t.contactChanges,
-      t.callLogChanges,
-      t.smsChanges,
-    ]) {
+    for (final stream in [t.contactChanges, t.callLogChanges, t.smsChanges]) {
       try {
         final sub = stream.listen((_) {});
         await Future<void>.delayed(const Duration(milliseconds: 200));

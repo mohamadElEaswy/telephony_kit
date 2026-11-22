@@ -325,6 +325,24 @@ class _KeypadPageState extends State<KeypadPage> {
     setState(() => _number = number);
   }
 
+  /// The number formatted as the system dialer shows it while typing.
+  String _formatted(String number) {
+    try {
+      return telephony.formatPhoneNumberAsYouType(number);
+    } on TelephonyException {
+      return number;
+    }
+  }
+
+  PhoneNumberCountry? _country(String number) {
+    if (number.length < 4) return null;
+    try {
+      return telephony.phoneNumberCountry(number);
+    } on TelephonyException {
+      return null;
+    }
+  }
+
   bool _isEmergency(String number) {
     if (number.length < 2) return false;
     try {
@@ -358,7 +376,14 @@ class _KeypadPageState extends State<KeypadPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(_number, style: Theme.of(context).textTheme.displaySmall),
+              Text(
+                _formatted(_number),
+                style: Theme.of(context).textTheme.displaySmall,
+              ),
+              if (_country(_number) case final country?)
+                Text(
+                  '${country.flag} ${country.isoCode} +${country.callingCode}',
+                ),
               if (_isEmergency(_number))
                 Text(
                   'Emergency number',
@@ -823,6 +848,12 @@ class _InCallScreenState extends State<InCallScreen> {
                   call.answerWithVideo();
                   widget.onChanged();
                 },
+              ),
+            if (ringing)
+              TextButton.icon(
+                icon: const Icon(Icons.notifications_off_outlined),
+                label: const Text('Silence'),
+                onPressed: telephony.silenceRinger,
               ),
             if (ringing)
               TextButton.icon(

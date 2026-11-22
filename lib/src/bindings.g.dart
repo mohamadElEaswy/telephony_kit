@@ -2436,6 +2436,33 @@ extension TelecomManager$$Methods on TelecomManager {
       _$bundle.pointer,
     ).check();
   }
+
+  static final _id_silenceRinger = TelecomManager._class.instanceMethodId(
+    r'silenceRinger',
+    r'()V',
+  );
+
+  static final _silenceRinger =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public void silenceRinger()`
+  void silenceRinger() {
+    final _$$selfRef = reference;
+    _silenceRinger(_$$selfRef.pointer, _id_silenceRinger.pointer).check();
+  }
 }
 
 final class $TelecomManager$Type$ extends jni$_.JType<TelecomManager> {
@@ -4881,6 +4908,699 @@ final class $DateFormat$Type$ extends jni$_.JType<DateFormat> {
   String get signature => r'Landroid/text/format/DateFormat;';
 }
 
+/// from: `android.telephony.PhoneNumberUtils`
+extension type PhoneNumberUtils._(jni$_.JObject _$this)
+    implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'android/telephony/PhoneNumberUtils',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<PhoneNumberUtils> type = $PhoneNumberUtils$Type$();
+  static final _id_areSamePhoneNumber = _class.staticMethodId(
+    r'areSamePhoneNumber',
+    r'(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Z',
+  );
+
+  static final _areSamePhoneNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean areSamePhoneNumber(java.lang.String string, java.lang.String string1, java.lang.String string2)`
+  static core$_.bool areSamePhoneNumber(
+    jni$_.JString? string,
+    jni$_.JString? string1,
+    jni$_.JString? string2,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$string1 = string1?.reference ?? jni$_.jNullReference;
+    final _$string2 = string2?.reference ?? jni$_.jNullReference;
+    return _areSamePhoneNumber(
+      _$$classRef.pointer,
+      _id_areSamePhoneNumber.pointer,
+      _$string.pointer,
+      _$string1.pointer,
+      _$string2.pointer,
+    ).boolean;
+  }
+
+  static final _id_formatNumber = _class.staticMethodId(
+    r'formatNumber',
+    r'(Landroid/text/Editable;I)V',
+  );
+
+  static final _formatNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void formatNumber(android.text.Editable editable, int i)`
+  @core$_.Deprecated('This Java method is deprecated.')
+  static void formatNumber(Editable? editable, core$_.int i) {
+    final _$$classRef = _class.reference;
+    final _$editable = editable?.reference ?? jni$_.jNullReference;
+    _formatNumber(
+      _$$classRef.pointer,
+      _id_formatNumber.pointer,
+      _$editable.pointer,
+      i,
+    ).check();
+  }
+
+  static final _id_formatNumber$1 = _class.staticMethodId(
+    r'formatNumber',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _formatNumber$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String formatNumber(java.lang.String string)`
+  /// The returned object must be released after use, by calling the [release] method.
+  @core$_.Deprecated('This Java method is deprecated.')
+  static jni$_.JString? formatNumber$1(jni$_.JString? string) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    return _formatNumber$1(
+      _$$classRef.pointer,
+      _id_formatNumber$1.pointer,
+      _$string.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_formatNumber$2 = _class.staticMethodId(
+    r'formatNumber',
+    r'(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _formatNumber$2 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String formatNumber(java.lang.String string, java.lang.String string1)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JString? formatNumber$2(
+    jni$_.JString? string,
+    jni$_.JString? string1,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$string1 = string1?.reference ?? jni$_.jNullReference;
+    return _formatNumber$2(
+      _$$classRef.pointer,
+      _id_formatNumber$2.pointer,
+      _$string.pointer,
+      _$string1.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_formatNumber$3 = _class.staticMethodId(
+    r'formatNumber',
+    r'(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _formatNumber$3 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                    jni$_.Pointer<jni$_.Void>,
+                  )
+                >,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String formatNumber(java.lang.String string, java.lang.String string1, java.lang.String string2)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JString? formatNumber$3(
+    jni$_.JString? string,
+    jni$_.JString? string1,
+    jni$_.JString? string2,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$string1 = string1?.reference ?? jni$_.jNullReference;
+    final _$string2 = string2?.reference ?? jni$_.jNullReference;
+    return _formatNumber$3(
+      _$$classRef.pointer,
+      _id_formatNumber$3.pointer,
+      _$string.pointer,
+      _$string1.pointer,
+      _$string2.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_formatNumberToE164 = _class.staticMethodId(
+    r'formatNumberToE164',
+    r'(Ljava/lang/String;Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _formatNumberToE164 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String formatNumberToE164(java.lang.String string, java.lang.String string1)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JString? formatNumberToE164(
+    jni$_.JString? string,
+    jni$_.JString? string1,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    final _$string1 = string1?.reference ?? jni$_.jNullReference;
+    return _formatNumberToE164(
+      _$$classRef.pointer,
+      _id_formatNumberToE164.pointer,
+      _$string.pointer,
+      _$string1.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_isGlobalPhoneNumber = _class.staticMethodId(
+    r'isGlobalPhoneNumber',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _isGlobalPhoneNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isGlobalPhoneNumber(java.lang.String string)`
+  static core$_.bool isGlobalPhoneNumber(jni$_.JString? string) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    return _isGlobalPhoneNumber(
+      _$$classRef.pointer,
+      _id_isGlobalPhoneNumber.pointer,
+      _$string.pointer,
+    ).boolean;
+  }
+
+  static final _id_normalizeNumber = _class.staticMethodId(
+    r'normalizeNumber',
+    r'(Ljava/lang/String;)Ljava/lang/String;',
+  );
+
+  static final _normalizeNumber =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String normalizeNumber(java.lang.String string)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static jni$_.JString? normalizeNumber(jni$_.JString? string) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    return _normalizeNumber(
+      _$$classRef.pointer,
+      _id_normalizeNumber.pointer,
+      _$string.pointer,
+    ).object<jni$_.JString?>();
+  }
+}
+
+final class $PhoneNumberUtils$Type$ extends jni$_.JType<PhoneNumberUtils> {
+  @jni$_.internal
+  const $PhoneNumberUtils$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/telephony/PhoneNumberUtils;';
+}
+
+/// from: `android.telephony.PhoneNumberFormattingTextWatcher`
+extension type PhoneNumberFormattingTextWatcher._(jni$_.JObject _$this)
+    implements jni$_.JObject, TextWatcher {
+  static final _class = jni$_.JClass.forName(
+    r'android/telephony/PhoneNumberFormattingTextWatcher',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<PhoneNumberFormattingTextWatcher> type =
+      $PhoneNumberFormattingTextWatcher$Type$();
+  static final _id_new$ = _class.constructorId(r'()V');
+
+  static final _new$ =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public void <init>()`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory PhoneNumberFormattingTextWatcher() {
+    final _$$classRef = _class.reference;
+    return _new$(
+      _$$classRef.pointer,
+      _id_new$.pointer,
+    ).object<PhoneNumberFormattingTextWatcher>();
+  }
+
+  static final _id_new$1 = _class.constructorId(r'(Ljava/lang/String;)V');
+
+  static final _new$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void <init>(java.lang.String string)`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory PhoneNumberFormattingTextWatcher.new$1(jni$_.JString? string) {
+    final _$$classRef = _class.reference;
+    final _$string = string?.reference ?? jni$_.jNullReference;
+    return _new$1(
+      _$$classRef.pointer,
+      _id_new$1.pointer,
+      _$string.pointer,
+    ).object<PhoneNumberFormattingTextWatcher>();
+  }
+}
+
+extension PhoneNumberFormattingTextWatcher$$Methods
+    on PhoneNumberFormattingTextWatcher {
+  static final _id_afterTextChanged = PhoneNumberFormattingTextWatcher._class
+      .instanceMethodId(r'afterTextChanged', r'(Landroid/text/Editable;)V');
+
+  static final _afterTextChanged =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void afterTextChanged(android.text.Editable editable)`
+  @core$_.Deprecated('This Java method is deprecated.')
+  void afterTextChanged(Editable? editable) {
+    final _$$selfRef = reference;
+    final _$editable = editable?.reference ?? jni$_.jNullReference;
+    _afterTextChanged(
+      _$$selfRef.pointer,
+      _id_afterTextChanged.pointer,
+      _$editable.pointer,
+    ).check();
+  }
+}
+
+final class $PhoneNumberFormattingTextWatcher$Type$
+    extends jni$_.JType<PhoneNumberFormattingTextWatcher> {
+  @jni$_.internal
+  const $PhoneNumberFormattingTextWatcher$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature =>
+      r'Landroid/telephony/PhoneNumberFormattingTextWatcher;';
+}
+
+/// from: `android.text.SpannableStringBuilder`
+extension type SpannableStringBuilder._(jni$_.JObject _$this)
+    implements
+        jni$_.JObject,
+        Appendable,
+        CharSequence,
+        Editable,
+        GetChars,
+        Spannable {
+  static final _class = jni$_.JClass.forName(
+    r'android/text/SpannableStringBuilder',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<SpannableStringBuilder> type =
+      $SpannableStringBuilder$Type$();
+  static final _id_new$ = _class.constructorId(r'()V');
+
+  static final _new$ =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public void <init>()`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory SpannableStringBuilder() {
+    final _$$classRef = _class.reference;
+    return _new$(
+      _$$classRef.pointer,
+      _id_new$.pointer,
+    ).object<SpannableStringBuilder>();
+  }
+
+  static final _id_new$1 = _class.constructorId(r'(Ljava/lang/CharSequence;)V');
+
+  static final _new$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void <init>(java.lang.CharSequence charSequence)`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory SpannableStringBuilder.new$1(CharSequence? charSequence) {
+    final _$$classRef = _class.reference;
+    final _$charSequence = charSequence?.reference ?? jni$_.jNullReference;
+    return _new$1(
+      _$$classRef.pointer,
+      _id_new$1.pointer,
+      _$charSequence.pointer,
+    ).object<SpannableStringBuilder>();
+  }
+
+  static final _id_new$2 = _class.constructorId(
+    r'(Ljava/lang/CharSequence;II)V',
+  );
+
+  static final _new$2 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Int32, jni$_.Int32)
+                >,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public void <init>(java.lang.CharSequence charSequence, int i, int i1)`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory SpannableStringBuilder.new$2(
+    CharSequence? charSequence,
+    core$_.int i,
+    core$_.int i1,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$charSequence = charSequence?.reference ?? jni$_.jNullReference;
+    return _new$2(
+      _$$classRef.pointer,
+      _id_new$2.pointer,
+      _$charSequence.pointer,
+      i,
+      i1,
+    ).object<SpannableStringBuilder>();
+  }
+}
+
+final class $SpannableStringBuilder$Type$
+    extends jni$_.JType<SpannableStringBuilder> {
+  @jni$_.internal
+  const $SpannableStringBuilder$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/text/SpannableStringBuilder;';
+}
+
+/// from: `android.text.Selection`
+extension type Selection._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(r'android/text/Selection');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<Selection> type = $Selection$Type$();
+  static final _id_setSelection = _class.staticMethodId(
+    r'setSelection',
+    r'(Landroid/text/Spannable;I)V',
+  );
+
+  static final _setSelection =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public final void setSelection(android.text.Spannable spannable, int i)`
+  static void setSelection(Spannable? spannable, core$_.int i) {
+    final _$$classRef = _class.reference;
+    final _$spannable = spannable?.reference ?? jni$_.jNullReference;
+    _setSelection(
+      _$$classRef.pointer,
+      _id_setSelection.pointer,
+      _$spannable.pointer,
+      i,
+    ).check();
+  }
+
+  static final _id_setSelection$1 = _class.staticMethodId(
+    r'setSelection',
+    r'(Landroid/text/Spannable;II)V',
+  );
+
+  static final _setSelection$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Int32, jni$_.Int32)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setSelection(android.text.Spannable spannable, int i, int i1)`
+  static void setSelection$1(
+    Spannable? spannable,
+    core$_.int i,
+    core$_.int i1,
+  ) {
+    final _$$classRef = _class.reference;
+    final _$spannable = spannable?.reference ?? jni$_.jNullReference;
+    _setSelection$1(
+      _$$classRef.pointer,
+      _id_setSelection$1.pointer,
+      _$spannable.pointer,
+      i,
+      i1,
+    ).check();
+  }
+}
+
+final class $Selection$Type$ extends jni$_.JType<Selection> {
+  @jni$_.internal
+  const $Selection$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/text/Selection;';
+}
+
 /// from: `java.util.TimeZone`
 extension type TimeZone._(jni$_.JObject _$this)
     implements jni$_.JObject, Cloneable, Serializable {
@@ -5262,17 +5982,17 @@ final class $TimeZone$Type$ extends jni$_.JType<TimeZone> {
 /// from: `dev.telephonykit.telephony_kit.CallBubble`
 ///
 /// A small floating button shown over other apps while a call is live and the
-/// app is in the background. Tapping it opens a panel with mute, speaker and
-/// hang up (answer and decline while ringing) and a button back to the call
-/// screen. It can be dragged and snaps to the nearest screen edge.
+///app is in the background. Tapping it opens a panel with mute, speaker and
+///hang up (answer and decline while ringing) and a button back to the call
+///screen. It can be dragged and snaps to the nearest screen edge.
 ///
-/// Needs the "display over other apps" permission ({@code
-/// SYSTEM_ALERT_WINDOW}, declared by the app and granted by the user in
-/// Settings). Without it the bubble is simply not shown.
+///Needs the "display over other apps" permission ({@code
+///SYSTEM_ALERT_WINDOW}, declared by the app and granted by the user in
+///Settings). Without it the bubble is simply not shown.
 ///
-/// The setting is saved, so the bubble also works when Flutter is not
-/// running. The process stays alive during a call because the system is bound
-/// to the in-call service.
+///The setting is saved, so the bubble also works when Flutter is not
+///running. The process stays alive during a call because the system is bound
+///to the in-call service.
 extension type CallBubble._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/CallBubble',
@@ -5527,8 +6247,8 @@ final class $CallBubble$Type$ extends jni$_.JType<CallBubble> {
 ///
 /// Receives call events from CallManager.
 ///
-/// Implemented from Dart through jnigen. All callbacks are delivered on the
-/// Android main thread and must return quickly.
+///Implemented from Dart through jnigen. All callbacks are delivered on the
+///Android main thread and must return quickly.
 extension type CallEventListener._(jni$_.JObject _$this)
     implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
@@ -5769,8 +6489,8 @@ extension CallEventListener$$Methods on CallEventListener {
   /// from: `public abstract void onCallDisconnected(java.lang.String callId, int code, java.lang.String label, java.lang.String reason)`
   ///
   /// A call ended. {@code code} is one of {@code android.telecom.DisconnectCause}
-  /// codes, {@code label} a short text for the user (may be empty) and {@code
-  /// reason} a technical reason for logs. Sent just before \#onCallRemoved.
+  ///codes, {@code label} a short text for the user (may be empty) and {@code
+  ///reason} a technical reason for logs. Sent just before \#onCallRemoved.
   void onCallDisconnected(
     jni$_.JString? callId,
     core$_.int code,
@@ -5820,8 +6540,8 @@ extension CallEventListener$$Methods on CallEventListener {
   /// from: `public abstract void onPostDialWait(java.lang.String callId, java.lang.String remaining)`
   ///
   /// The dialed number had a wait character (';'). Ask the user, then call
-  /// CallManager\#continuePostDial. {@code remaining} is the digits
-  /// still to send.
+  ///CallManager\#continuePostDial. {@code remaining} is the digits
+  ///still to send.
   void onPostDialWait(jni$_.JString? callId, jni$_.JString? remaining) {
     final _$$selfRef = reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -5895,7 +6615,7 @@ extension CallEventListener$$Methods on CallEventListener {
   /// from: `public abstract void onAudioStateChanged(boolean muted, int route)`
   ///
   /// The audio state changed. {@code route} is one of
-  /// {@code android.telecom.CallAudioState.ROUTE_*}.
+  ///{@code android.telecom.CallAudioState.ROUTE_*}.
   void onAudioStateChanged(core$_.bool muted, core$_.int route) {
     final _$$selfRef = reference;
     _onAudioStateChanged(
@@ -5932,9 +6652,9 @@ extension CallEventListener$$Methods on CallEventListener {
   /// from: `public abstract void onShowCallScreen(java.lang.String callId)`
   ///
   /// The user asked to see the call screen: they answered from the
-  /// notification, tapped the call notification, or tapped Open on the call
-  /// bubble. {@code callId} is the call to show, or empty for the current
-  /// call. The app is being brought to the front.
+  ///notification, tapped the call notification, or tapped Open on the call
+  ///bubble. {@code callId} is the call to show, or empty for the current
+  ///call. The app is being brought to the front.
   void onShowCallScreen(jni$_.JString? callId) {
     final _$$selfRef = reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -6096,7 +6816,7 @@ final class $CallEventListener$Type$ extends jni$_.JType<CallEventListener> {
 /// from: `dev.telephonykit.telephony_kit.CallManager`
 ///
 /// Tracks calls reported by TelephonyKitInCallService and exposes
-/// simple, id based controls that are easy to call from Dart through jnigen.
+///simple, id based controls that are easy to call from Dart through jnigen.
 extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/CallManager',
@@ -6214,8 +6934,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void setShowCallNotifications(boolean enabled)`
   ///
   /// Whether incoming and ongoing call notifications are shown (default true).
-  /// The incoming notification has answer and decline buttons and opens the
-  /// app full screen on the lock screen.
+  ///The incoming notification has answer and decline buttons and opens the
+  ///app full screen on the lock screen.
   static set showCallNotifications(core$_.bool enabled) {
     final _$$classRef = _class.reference;
     _set$showCallNotifications(
@@ -6251,8 +6971,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void setProximitySensorEnabled(boolean enabled)`
   ///
   /// Whether the screen turns off when the phone is near the ear during a
-  /// call (default true). Only applies to calls that are active or dialing
-  /// with audio on the earpiece or a wired headset.
+  ///call (default true). Only applies to calls that are active or dialing
+  ///with audio on the earpiece or a wired headset.
   static set proximitySensorEnabled(core$_.bool enabled) {
     final _$$classRef = _class.reference;
     _set$proximitySensorEnabled(
@@ -6730,7 +7450,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean rejectWithMessage(java.lang.String callId, java.lang.String message)`
   ///
   /// Rejects a ringing call and sends {@code message} to the caller as a text
-  /// message. Telecom sends it; the app needs no SMS permission.
+  ///message. Telecom sends it; the app needs no SMS permission.
   static core$_.bool rejectWithMessage(
     jni$_.JString? callId,
     jni$_.JString? message,
@@ -6773,7 +7493,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The quick reply texts Telecom offers for a ringing call (the user's
-  /// "respond via message" settings), or an empty array if not loaded yet.
+  ///"respond via message" settings), or an empty array if not loaded yet.
   static jni$_.JArray<jni$_.JString?>? getCannedTextResponses(
     jni$_.JString? callId,
   ) {
@@ -7065,7 +7785,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Digits waiting to be sent after a wait character (';') in the dialed
-  /// number, or "" when the call is not waiting.
+  ///number, or "" when the call is not waiting.
   static jni$_.JString? getPostDialRemaining(jni$_.JString? callId) {
     final _$$classRef = _class.reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -7103,7 +7823,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean continuePostDial(java.lang.String callId, boolean proceed)`
   ///
   /// Answers a post-dial wait: {@code proceed} true sends the remaining
-  /// digits, false drops them. Returns false if the call is unknown.
+  ///digits, false drops them. Returns false if the call is unknown.
   static core$_.bool continuePostDial(
     jni$_.JString? callId,
     core$_.bool proceed,
@@ -7144,8 +7864,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getDisconnectCode(java.lang.String callId)`
   ///
   /// Why the call ended, one of {@code android.telecom.DisconnectCause} codes
-  /// (for example BUSY is 7), or -1 if it has not ended. Still available for a
-  /// while after the call was removed.
+  ///(for example BUSY is 7), or -1 if it has not ended. Still available for a
+  ///while after the call was removed.
   static core$_.int getDisconnectCode(jni$_.JString? callId) {
     final _$$classRef = _class.reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -7294,8 +8014,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Ids of the phone accounts the user can pick for a call in {@code
-  /// STATE_SELECT_PHONE_ACCOUNT} (an outgoing call on a multi SIM device with
-  /// no default SIM). Empty if the call is unknown.
+  ///STATE_SELECT_PHONE_ACCOUNT} (an outgoing call on a multi SIM device with
+  ///no default SIM). Empty if the call is unknown.
   static jni$_.JArray<jni$_.JString?>? getSelectablePhoneAccountIds(
     jni$_.JString? callId,
   ) {
@@ -7382,7 +8102,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getPhoneAccountSlot(android.content.Context context, java.lang.String accountId)`
   ///
   /// The SIM slot (0 based) of a call capable phone account, or -1 when
-  /// unknown or before Android 11.
+  ///unknown or before Android 11.
   static core$_.int getPhoneAccountSlot(
     Context? context,
     jni$_.JString? accountId,
@@ -7542,8 +8262,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean selectPhoneAccount(java.lang.String callId, java.lang.String accountId, boolean setDefault)`
   ///
   /// Places a call that waits in {@code STATE_SELECT_PHONE_ACCOUNT} on the
-  /// account with this id. {@code setDefault} also makes it the default for
-  /// calls. Returns false if the call or account is unknown.
+  ///account with this id. {@code setDefault} also makes it the default for
+  ///calls. Returns false if the call or account is unknown.
   static core$_.bool selectPhoneAccount(
     jni$_.JString? callId,
     jni$_.JString? accountId,
@@ -7664,7 +8384,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getNumberVerification(java.lang.String callId)`
   ///
   /// STIR/SHAKEN result for the caller's number: 0 not verified, 1 passed, 2
-  /// failed, or -1 when unknown or before Android 11.
+  ///failed, or -1 when unknown or before Android 11.
   static core$_.int getNumberVerification(jni$_.JString? callId) {
     final _$$classRef = _class.reference;
     final _$callId = callId?.reference ?? jni$_.jNullReference;
@@ -8370,7 +9090,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean swapCalls()`
   ///
   /// Swaps between an active and a held call: holds the active one and
-  /// resumes the other. Use for call waiting.
+  ///resumes the other. Use for call waiting.
   static core$_.bool swapCalls() {
     final _$$classRef = _class.reference;
     return _swapCalls(_$$classRef.pointer, _id_swapCalls.pointer).boolean;
@@ -8503,7 +9223,7 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The name of a Bluetooth device, or an empty string. Needs
-  /// BLUETOOTH_CONNECT on Android 12+.
+  ///BLUETOOTH_CONNECT on Android 12+.
   static jni$_.JString? getBluetoothDeviceName(jni$_.JString? address) {
     final _$$classRef = _class.reference;
     final _$address = address?.reference ?? jni$_.jNullReference;
@@ -8608,8 +9328,8 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The call the user asked to see from a notification or the call bubble
-  /// since the last call, or null. An empty string means "the current call".
-  /// Clears the request, so each one is handled once.
+  ///since the last call, or null. An empty string means "the current call".
+  ///Clears the request, so each one is handled once.
   static jni$_.JString? takeCallScreenRequest() {
     final _$$classRef = _class.reference;
     return _takeCallScreenRequest(
@@ -8632,8 +9352,8 @@ final class $CallManager$Type$ extends jni$_.JType<CallManager> {
 ///
 /// Block rules applied by TelephonyKitCallScreeningService.
 ///
-/// Rules are saved in SharedPreferences so they work even when the Flutter
-/// app is not running.
+///Rules are saved in SharedPreferences so they work even when the Flutter
+///app is not running.
 extension type CallScreening._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/CallScreening',
@@ -9231,8 +9951,8 @@ extension type CallScreening._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean isEmergencyNumber(android.content.Context context, java.lang.String number)`
   ///
   /// True if {@code number} is an emergency number in the current country,
-  /// such as 112 or 911. Uses {@code TelephonyManager.isEmergencyNumber} on
-  /// Android 10+ and {@code PhoneNumberUtils} before.
+  ///such as 112 or 911. Uses {@code TelephonyManager.isEmergencyNumber} on
+  ///Android 10+ and {@code PhoneNumberUtils} before.
   static core$_.bool isEmergencyNumber(
     Context? context,
     jni$_.JString? number,
@@ -9262,8 +9982,8 @@ final class $CallScreening$Type$ extends jni$_.JType<CallScreening> {
 ///
 /// Receives "something changed" notifications from ChangeMonitor.
 ///
-/// Implemented from Dart through jnigen. Callbacks arrive on the Android
-/// main thread and must return quickly.
+///Implemented from Dart through jnigen. Callbacks arrive on the Android
+///main thread and must return quickly.
 extension type ChangeListener._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/ChangeListener',
@@ -9412,8 +10132,8 @@ final class $ChangeListener$Type$ extends jni$_.JType<ChangeListener> {
 /// from: `dev.telephonykit.telephony_kit.ChangeMonitor`
 ///
 /// Watches a content provider URI (contacts, call log, SMS) and reports
-/// changes. ContentObserver is an abstract class, so it cannot be
-/// implemented from Dart.
+///changes. ContentObserver is an abstract class, so it cannot be
+///implemented from Dart.
 extension type ChangeMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/ChangeMonitor',
@@ -9455,7 +10175,7 @@ extension type ChangeMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `synchronized static public int start(android.content.Context context, java.lang.String uri, dev.telephonykit.telephony_kit.ChangeListener listener)`
   ///
   /// Starts watching {@code uri} (including everything below it). Returns a
-  /// token for \#stop. The caller needs read access to the provider.
+  ///token for \#stop. The caller needs read access to the provider.
   static core$_.int start(
     Context? context,
     jni$_.JString? uri,
@@ -9525,15 +10245,15 @@ final class $ChangeMonitor$Type$ extends jni$_.JType<ChangeMonitor> {
 /// from: `dev.telephonykit.telephony_kit.ContactPager`
 ///
 /// Builds the ordered list of contact ids for a search once, natively, and
-/// hands out pages of it.
+///hands out pages of it.
 ///
-/// Scanning thousands of rows through JNI one cell at a time would block
-/// the UI, so this class does the scan in Java and keeps only the ids (a few
-/// bytes per contact). Dart then loads the details of one page at a time.
+///Scanning thousands of rows through JNI one cell at a time would block
+///the UI, so this class does the scan in Java and keeps only the ids (a few
+///bytes per contact). Dart then loads the details of one page at a time.
 ///
-/// Each query keeps a snapshot until \#prepare is called again with
-/// {@code refresh} set, so offsets stay stable while the user scrolls even if
-/// contacts change. The four most recently used queries are cached.
+///Each query keeps a snapshot until \#prepare is called again with
+///{@code refresh} set, so offsets stay stable while the user scrolls even if
+///contacts change. The four most recently used queries are cached.
 extension type ContactPager._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/ContactPager',
@@ -9575,8 +10295,8 @@ extension type ContactPager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `synchronized static public int prepare(android.content.Context context, java.lang.String query, boolean refresh)`
   ///
   /// Builds (or, with {@code refresh} false, reuses) the snapshot for
-  /// {@code query} and returns how many contacts match. An empty query matches
-  /// every contact. Needs READ_CONTACTS.
+  ///{@code query} and returns how many contacts match. An empty query matches
+  ///every contact. Needs READ_CONTACTS.
   static core$_.int prepare(
     Context? context,
     jni$_.JString? query,
@@ -9631,7 +10351,7 @@ extension type ContactPager._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Up to {@code limit} contact ids starting at {@code offset}, in list order
-  /// (favorites first, then by name). Builds the snapshot first if needed.
+  ///(favorites first, then by name). Builds the snapshot first if needed.
   static jni$_.JArray<jni$_.JString?>? page(
     Context? context,
     jni$_.JString? query,
@@ -9732,8 +10452,8 @@ extension type ContactTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The contact's photo bytes (JPEG or PNG), or an empty array if it has
-  /// none. {@code full} reads the high resolution photo when there is one.
-  /// Needs READ_CONTACTS.
+  ///none. {@code full} reads the high resolution photo when there is one.
+  ///Needs READ_CONTACTS.
   static jni$_.JByteArray? readPhoto(
     Context? context,
     jni$_.JString? contactId,
@@ -9785,8 +10505,8 @@ extension type ContactTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean writePhoto(android.content.Context context, java.lang.String contactId, byte[] bytes)`
   ///
   /// Sets the contact's photo to {@code bytes} (an encoded image), or removes
-  /// it when {@code bytes} is empty. Returns false if the contact does not
-  /// exist. Needs WRITE_CONTACTS.
+  ///it when {@code bytes} is empty. Returns false if the contact does not
+  ///exist. Needs WRITE_CONTACTS.
   static core$_.bool writePhoto(
     Context? context,
     jni$_.JString? contactId,
@@ -9923,8 +10643,8 @@ extension type ContactTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void insert(android.content.Context context, java.lang.String name, java.lang.String phone, java.lang.String email)`
   ///
   /// Opens the system "new contact" screen, filled with whatever of {@code
-  /// name}, {@code phone} and {@code email} is not empty. The user saves it
-  /// there, so no permission is needed.
+  ///name}, {@code phone} and {@code email} is not empty. The user saves it
+  ///there, so no permission is needed.
   static void insert(
     Context? context,
     jni$_.JString? name,
@@ -9993,8 +10713,8 @@ extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// The device's own phone numbers, one {@code subscriptionId<TAB>slot<TAB>number}
-  /// line per active SIM. Numbers are often empty because the carrier did not
-  /// store them. Needs READ_PHONE_NUMBERS (or READ_PHONE_STATE before Android 13).
+  ///line per active SIM. Numbers are often empty because the carrier did not
+  ///store them. Needs READ_PHONE_NUMBERS (or READ_PHONE_STATE before Android 13).
   static jni$_.JArray<jni$_.JString?>? getPhoneNumbers(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -10032,8 +10752,8 @@ extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Nearby cells as a JSON array. Each item has {@code type} (lte, nr, gsm,
-  /// wcdma, cdma), {@code registered}, {@code dbm}, {@code level} and {@code
-  /// cellId} (-1 if unknown). Needs ACCESS_FINE_LOCATION.
+  ///wcdma, cdma), {@code registered}, {@code dbm}, {@code level} and {@code
+  ///cellId} (-1 if unknown). Needs ACCESS_FINE_LOCATION.
   static jni$_.JString? getCellInfoJson(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -10070,7 +10790,7 @@ extension type DeviceTools._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getSignalDbm(android.content.Context context)`
   ///
   /// The signal strength of the serving cell in dBm, or Integer\#MIN_VALUE
-  /// if unknown. Needs Android 10+ and READ_PHONE_STATE.
+  ///if unknown. Needs Android 10+ and READ_PHONE_STATE.
   static core$_.int getSignalDbm(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -10275,10 +10995,10 @@ final class $DeviceTools$Type$ extends jni$_.JType<DeviceTools> {
 /// from: `dev.telephonykit.telephony_kit.DialIntents`
 ///
 /// Reads the number from a dial intent ({@code ACTION_DIAL} or {@code
-/// ACTION_VIEW} with a {@code tel:} uri) that opened the activity.
+///ACTION_VIEW} with a {@code tel:} uri) that opened the activity.
 ///
-/// The default dialer must handle these intents. Other apps send them
-/// when the user taps a phone number.
+///The default dialer must handle these intents. Other apps send them
+///when the user taps a phone number.
 extension type DialIntents._(jni$_.JObject _$this) implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
     r'dev/telephonykit/telephony_kit/DialIntents',
@@ -10313,8 +11033,8 @@ extension type DialIntents._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Returns the number of the dial intent the activity was started with, or
-  /// an empty string, and marks the intent as handled so the number is only
-  /// returned once. Returns "" for a dial intent without a number.
+  ///an empty string, and marks the intent as handled so the number is only
+  ///returned once. Returns "" for a dial intent without a number.
   static jni$_.JString? takeNumber(Activity? activity) {
     final _$$classRef = _class.reference;
     final _$activity = activity?.reference ?? jni$_.jNullReference;
@@ -10353,7 +11073,7 @@ extension type DialIntents._(jni$_.JObject _$this) implements jni$_.JObject {
   /// The returned object must be released after use, by calling the [release] method.
   ///
   /// Extras for {@code TelecomManager.placeCall}: the SIM to use (or null) and
-  /// the starting video state ({@code VideoProfile.STATE_*}; 0 for audio).
+  ///the starting video state ({@code VideoProfile.STATE_*}; 0 for audio).
   static Bundle? callExtras(PhoneAccountHandle? handle, core$_.int videoState) {
     final _$$classRef = _class.reference;
     final _$handle = handle?.reference ?? jni$_.jNullReference;
@@ -10378,8 +11098,8 @@ final class $DialIntents$Type$ extends jni$_.JType<DialIntents> {
 /// from: `dev.telephonykit.telephony_kit.MissedCallNotifications`
 ///
 /// The missed call notification. As the default dialer the app is asked to
-/// show it through TelephonyKitMissedCallReceiver; Telecom then does not
-/// show its own.
+///show it through TelephonyKitMissedCallReceiver; Telecom then does not
+///show its own.
 extension type MissedCallNotifications._(jni$_.JObject _$this)
     implements jni$_.JObject {
   static final _class = jni$_.JClass.forName(
@@ -10710,8 +11430,8 @@ extension NetworkEventListener$$Methods on NetworkEventListener {
   /// from: `public abstract void onNetworkTypeChanged(int networkType, int overrideType)`
   ///
   /// {@code networkType} is a {@code TelephonyManager.NETWORK_TYPE_*} value.
-  /// {@code overrideType} is a {@code TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_*}
-  /// value (for example 5G NSA shown on LTE), or 0.
+  ///{@code overrideType} is a {@code TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_*}
+  ///value (for example 5G NSA shown on LTE), or 0.
   void onNetworkTypeChanged(core$_.int networkType, core$_.int overrideType) {
     final _$$selfRef = reference;
     _onNetworkTypeChanged(
@@ -10747,8 +11467,8 @@ extension NetworkEventListener$$Methods on NetworkEventListener {
   /// from: `public abstract void onCallStateChanged(int state, java.lang.String number)`
   ///
   /// Device call state: 0 idle, 1 ringing, 2 off hook. Only delivered when
-  /// READ_PHONE_STATE is granted. {@code number} is usually empty on modern
-  /// Android.
+  ///READ_PHONE_STATE is granted. {@code number} is usually empty on modern
+  ///Android.
   void onCallStateChanged(core$_.int state, jni$_.JString? number) {
     final _$$selfRef = reference;
     final _$number = number?.reference ?? jni$_.jNullReference;
@@ -10980,7 +11700,7 @@ extension type NetworkMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public int getDataNetworkType(android.content.Context context)`
   ///
   /// The current data network type ({@code TelephonyManager.NETWORK_TYPE_*}),
-  /// or 0 if unknown. Needs READ_PHONE_STATE.
+  ///or 0 if unknown. Needs READ_PHONE_STATE.
   static core$_.int getDataNetworkType(Context? context) {
     final _$$classRef = _class.reference;
     final _$context = context?.reference ?? jni$_.jNullReference;
@@ -11338,8 +12058,8 @@ extension ScreeningListener$$Methods on ScreeningListener {
   /// from: `public abstract void onCallScreened(java.lang.String number, int action, java.lang.String reason)`
   ///
   /// {@code action} is CallScreening\#ACTION_ALLOW,
-  /// CallScreening\#ACTION_SILENCE or CallScreening\#ACTION_REJECT.
-  /// {@code reason} is a short machine readable reason such as "blocked_number".
+  ///CallScreening\#ACTION_SILENCE or CallScreening\#ACTION_REJECT.
+  ///{@code reason} is a short machine readable reason such as "blocked_number".
   void onCallScreened(
     jni$_.JString? number,
     core$_.int action,
@@ -11462,8 +12182,8 @@ extension type SmsHelper._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void send(android.content.Context context, java.lang.String destination, java.lang.String text, int subscriptionId, dev.telephonykit.telephony_kit.ResultListener listener)`
   ///
   /// Sends {@code text} to {@code destination}. Long messages are split into
-  /// parts. Pass a subscription id to pick the SIM, or -1 for the default.
-  /// Needs SEND_SMS. The listener gets the number of parts on success.
+  ///parts. Pass a subscription id to pick the SIM, or -1 for the default.
+  ///Needs SEND_SMS. The listener gets the number of parts on success.
   static void send(
     Context? context,
     jni$_.JString? destination,
@@ -11551,8 +12271,8 @@ extension type SmsHelper._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public boolean requestDefaultLegacy(android.app.Activity activity, int requestCode)`
   ///
   /// Shows the system prompt that makes this app the default SMS app. Use it
-  /// before Android 10; from Android 10 the SMS role is requested instead.
-  /// Returns false if there is no activity.
+  ///before Android 10; from Android 10 the SMS role is requested instead.
+  ///Returns false if there is no activity.
   static core$_.bool requestDefaultLegacy(
     Activity? activity,
     core$_.int requestCode,
@@ -11623,7 +12343,7 @@ extension type UssdHelper._(jni$_.JObject _$this) implements jni$_.JObject {
   /// from: `static public void send(android.content.Context context, java.lang.String code, int subscriptionId, dev.telephonykit.telephony_kit.ResultListener listener)`
   ///
   /// Sends {@code code}. Pass a subscription id to use a specific SIM, or -1
-  /// for the default. Needs CALL_PHONE and Android 8.0+.
+  ///for the default. Needs CALL_PHONE and Android 8.0+.
   static void send(
     Context? context,
     jni$_.JString? code,
@@ -11958,6 +12678,96 @@ final class $BaseColumns$Type$ extends jni$_.JType<BaseColumns> {
   @jni$_.internal
   @core$_.override
   String get signature => r'Landroid/provider/BaseColumns;';
+}
+
+/// from: `android.text.Editable`
+///
+/// WARNING: Editable is a stub. To generate bindings for this class, include
+/// android.text.Editable in your config's classes list.
+///
+extension type Editable._(jni$_.JObject _$this) implements jni$_.JObject {
+  static const jni$_.JType<Editable> type = $Editable$Type$();
+}
+
+final class $Editable$Type$ extends jni$_.JType<Editable> {
+  @jni$_.internal
+  const $Editable$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/text/Editable;';
+}
+
+/// from: `android.text.TextWatcher`
+///
+/// WARNING: TextWatcher is a stub. To generate bindings for this class, include
+/// android.text.TextWatcher in your config's classes list.
+///
+extension type TextWatcher._(jni$_.JObject _$this) implements jni$_.JObject {
+  static const jni$_.JType<TextWatcher> type = $TextWatcher$Type$();
+}
+
+final class $TextWatcher$Type$ extends jni$_.JType<TextWatcher> {
+  @jni$_.internal
+  const $TextWatcher$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/text/TextWatcher;';
+}
+
+/// from: `java.lang.Appendable`
+///
+/// WARNING: Appendable is a stub. To generate bindings for this class, include
+/// java.lang.Appendable in your config's classes list.
+///
+extension type Appendable._(jni$_.JObject _$this) implements jni$_.JObject {
+  static const jni$_.JType<Appendable> type = $Appendable$Type$();
+}
+
+final class $Appendable$Type$ extends jni$_.JType<Appendable> {
+  @jni$_.internal
+  const $Appendable$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ljava/lang/Appendable;';
+}
+
+/// from: `android.text.GetChars`
+///
+/// WARNING: GetChars is a stub. To generate bindings for this class, include
+/// android.text.GetChars in your config's classes list.
+///
+extension type GetChars._(jni$_.JObject _$this) implements jni$_.JObject {
+  static const jni$_.JType<GetChars> type = $GetChars$Type$();
+}
+
+final class $GetChars$Type$ extends jni$_.JType<GetChars> {
+  @jni$_.internal
+  const $GetChars$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/text/GetChars;';
+}
+
+/// from: `android.text.Spannable`
+///
+/// WARNING: Spannable is a stub. To generate bindings for this class, include
+/// android.text.Spannable in your config's classes list.
+///
+extension type Spannable._(jni$_.JObject _$this) implements jni$_.JObject {
+  static const jni$_.JType<Spannable> type = $Spannable$Type$();
+}
+
+final class $Spannable$Type$ extends jni$_.JType<Spannable> {
+  @jni$_.internal
+  const $Spannable$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/text/Spannable;';
 }
 
 /// from: `java.util.Locale`

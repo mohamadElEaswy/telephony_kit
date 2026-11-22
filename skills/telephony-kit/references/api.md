@@ -29,6 +29,7 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 | `List<String> getPhoneAccounts()` | Account ids, usually one per SIM |
 | `List<PhoneAccount> getPhoneAccountDetails()` | `id`, `label`, `slotIndex` (Android 11+), `displayName` |
 | `bool isEmergencyNumber(String number)` | |
+| `bool silenceRinger()` | Default dialer; stops ringtone and vibration, the call keeps ringing; false if not the dialer |
 | `bool get isInCall` | Any app; READ_PHONE_STATE |
 
 ## Calls (default dialer only)
@@ -140,6 +141,24 @@ Yesterday / weekday / date), `relative(t, {ago})`, `dateTime(t)`,
 `CallTimeLabels` holds every word for translation.
 `groupByDay(items, dateOf, {formatter})` returns `MapEntry(firstTime, items)`
 per calendar day.
+
+## Phone numbers (no permission)
+
+| Member | Notes |
+| --- | --- |
+| `String get defaultCountryIso` | Upper case ISO code from network, SIM, then locale; may be empty |
+| `String formatPhoneNumber(String number, {String? countryIso})` | National for local numbers, international otherwise; input unchanged if not parseable |
+| `String formatPhoneNumberAsYouType(String input, {String? countryIso})` | Partial input, like the dialer keypad |
+| `String? phoneNumberToE164(String number, {String? countryIso})` | null if not a valid number |
+| `String normalizePhoneNumber(String number)` | Strips formatting, letters to digits |
+| `bool isSamePhoneNumber(String a, String b, {String? countryIso})` | |
+| `PhoneNumberCountry? phoneNumberCountry(String number, {String? countryIso})` | `isoCode`, `callingCode`, `nationalNumber`, `flag` |
+| `bool isGlobalPhoneNumber(String number)` | Phone number rather than email or SIP |
+| `PhoneNumberInputFormatter({String? countryIso})` | `TextInputFormatter` for number fields |
+
+Pure Dart: `callingCodeOf(number)`, `countryOfNumber(e164)`,
+`regionsForCallingCode(code)`, `callingCodeForRegion(iso)`,
+`formattedCursorOffset(raw, offset, formatted)`, `isDialableChar(c)`.
 
 ## Blocking
 

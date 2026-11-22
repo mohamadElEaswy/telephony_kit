@@ -12,6 +12,15 @@ export 'src/analysis.dart'
 export 'src/formatting.dart' show CallTimeFormatter, CallTimeLabels, groupByDay;
 export 'src/models.dart';
 export 'src/permissions.dart';
+export 'src/phone_numbers.dart'
+    show
+        PhoneNumberInputFormatter,
+        callingCodeForRegion,
+        callingCodeOf,
+        countryOfNumber,
+        formattedCursorOffset,
+        isDialableChar,
+        regionsForCallingCode;
 export 'src/telephony_kit_impl.dart'
     show CallBubbleSettings, CallScreeningSettings, PhoneCall, TelephonyKit;
 export 'src/vcard.dart' show exportVCard, parseVCard;

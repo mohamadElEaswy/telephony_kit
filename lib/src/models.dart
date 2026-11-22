@@ -1720,3 +1720,40 @@ class CallBubbleLabels {
   /// Back to the app's call screen.
   final String open;
 }
+
+/// The country of an international phone number. See
+/// `TelephonyKit.phoneNumberCountry` and `countryOfNumber`.
+class PhoneNumberCountry {
+  const PhoneNumberCountry({
+    required this.isoCode,
+    required this.callingCode,
+    required this.nationalNumber,
+  });
+
+  /// ISO 3166-1 alpha-2 region code in upper case, for example `EG`.
+  final String isoCode;
+
+  /// The country calling code, for example 20 for Egypt.
+  final int callingCode;
+
+  /// The digits after the calling code.
+  final String nationalNumber;
+
+  /// The flag emoji of [isoCode], for example 🇪🇬.
+  String get flag => isoCode.length == 2
+      ? String.fromCharCodes(isoCode.codeUnits.map((c) => c - 65 + 0x1F1E6))
+      : '';
+
+  @override
+  bool operator ==(Object other) =>
+      other is PhoneNumberCountry &&
+      other.isoCode == isoCode &&
+      other.callingCode == callingCode &&
+      other.nationalNumber == nationalNumber;
+
+  @override
+  int get hashCode => Object.hash(isoCode, callingCode, nationalNumber);
+
+  @override
+  String toString() => 'PhoneNumberCountry($isoCode, +$callingCode)';
+}

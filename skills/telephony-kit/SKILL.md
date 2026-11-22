@@ -1,6 +1,6 @@
 ---
 name: telephony-kit
-description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android, call details and per-contact call history, formatting call times and durations, or a floating call bubble over other apps.
+description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android, call details and per-contact call history, formatting call times and durations, formatting phone numbers (as you type, E.164, country), silencing the ringer, or a floating call bubble over other apps.
 ---
 
 # Using telephony_kit in a Flutter app
@@ -47,6 +47,8 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Why a call ended | `CallDisconnected` event, `PhoneCall.disconnectCause.displayText` |
 | Extensions (`;`) | `PostDialWait` event, `PhoneCall.continuePostDial(true)` |
 | Emergency | `isEmergencyNumber(number)` |
+| Silence ringing (keep the call) | `silenceRinger()` (default dialer) |
+| Format numbers | `formatPhoneNumber`, `formatPhoneNumberAsYouType`, `PhoneNumberInputFormatter()`, `phoneNumberToE164`, `isSamePhoneNumber`, `phoneNumberCountry`, `defaultCountryIso` |
 | Notifications | `showCallNotifications`, `missedCallNotificationsEnabled`, `clearMissedCallNotification()`, `proximitySensorEnabled` |
 | Mute / audio | `setMuted`, `setSpeakerOn`, `supportedAudioRoutes`, `setAudioRoute`, `bluetoothDevices`, `selectBluetoothDevice` |
 | Several calls | `swapCalls()`, `PhoneCall.merge/conferenceWith/swap/splitFromConference/children/parent` |
@@ -126,6 +128,13 @@ and when `takeCallScreenRequest()` is not null at startup and resume.
 `callBubble.requestPermission()`, and in `didChangeAppLifecycleState(resumed)`
 set `callBubble.enabled = true` if `hasPermission` is now true. `enabled` is
 saved; do not set it on every start.
+
+**Phone numbers.** Never format numbers with your own regex or add
+`libphonenumber` packages: use `formatPhoneNumber` for display,
+`PhoneNumberInputFormatter` on number fields, and `phoneNumberToE164` to
+store or compare (`isSamePhoneNumber` for equality). Leave `countryIso` out
+to use the device's country. A null E.164 means the number is not valid,
+not that formatting failed; keep the raw text then.
 
 **Searches** run synchronously on the UI isolate. Always pass a `limit`, and
 debounce search-as-you-type.
