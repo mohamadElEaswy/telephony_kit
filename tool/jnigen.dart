@@ -46,6 +46,7 @@ const _androidAllowList = <String, Set<String>>{
     'isInCall',
     'endCall',
     'getCallCapablePhoneAccounts',
+    'silenceRinger',
     'ACTION_CHANGE_DEFAULT_DIALER',
     'EXTRA_CHANGE_DEFAULT_DIALER_PACKAGE_NAME',
     'EXTRA_PHONE_ACCOUNT_HANDLE',
@@ -112,6 +113,21 @@ const _androidAllowList = <String, Set<String>>{
     'ACTION_MANAGE_OVERLAY_PERMISSION',
   },
   'android.text.format.DateFormat': {'is24HourFormat'},
+  'android.telephony.PhoneNumberUtils': {
+    'formatNumber',
+    'formatNumberToE164',
+    'normalizeNumber',
+    'areSamePhoneNumber',
+    'isGlobalPhoneNumber',
+  },
+  // As-you-type formatting: the watcher wraps Android's own libphonenumber
+  // AsYouTypeFormatter, which is not public on its own.
+  'android.telephony.PhoneNumberFormattingTextWatcher': {
+    '<init>',
+    'afterTextChanged',
+  },
+  'android.text.SpannableStringBuilder': {'<init>'},
+  'android.text.Selection': {'setSelection'},
   'java.util.TimeZone': {
     'getDefault',
     'getID',
@@ -218,6 +234,10 @@ void main() async {
         'android.provider.BlockedNumberContract',
         'android.provider.Settings',
         'android.text.format.DateFormat',
+        'android.telephony.PhoneNumberUtils',
+        'android.telephony.PhoneNumberFormattingTextWatcher',
+        'android.text.SpannableStringBuilder',
+        'android.text.Selection',
         'java.util.TimeZone',
       ],
       sourcePath: [packageRoot.resolve('android/src/main/java/')],

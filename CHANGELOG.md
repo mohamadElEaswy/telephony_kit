@@ -1,3 +1,32 @@
+## 0.9.0
+
+Silence the ringer
+* `silenceRinger()` stops the ringtone and vibration of the ringing call
+  without rejecting it (default dialer only). The call keeps ringing on
+  screen and can still be answered or declined.
+
+Phone number formatting (Android's `PhoneNumberUtils`, no extra dependency)
+* `formatPhoneNumber(number)`: national format for local numbers
+  (`010 01234567`), international for others (`+44 20 7946 0000`).
+* `formatPhoneNumberAsYouType(input)` and the `PhoneNumberInputFormatter`
+  text input formatter: format while typing like the system dialer, keeping
+  the cursor in place (deleting a space deletes the digit before it).
+* `phoneNumberToE164(number)`, `normalizePhoneNumber(number)` (letters to
+  digits), `isSamePhoneNumber(a, b)` (`areSamePhoneNumber` on Android 12+)
+  and `isGlobalPhoneNumber(number)`.
+* Country detection: `defaultCountryIso` (network, then SIM, then locale)
+  is used when no `countryIso` is passed; `phoneNumberCountry(number)`
+  returns a `PhoneNumberCountry` (`isoCode`, `callingCode`,
+  `nationalNumber`, `flag`).
+* Pure Dart `callingCodeOf`, `countryOfNumber` (North American and +7
+  numbers told apart by area code), `regionsForCallingCode`,
+  `callingCodeForRegion`, `formattedCursorOffset` and `isDialableChar`.
+
+Example
+* The keypad formats the number as you type and shows its country. The
+  incoming call screen has a Silence button. More tools has a phone number
+  section with an as-you-type field, formatting and comparing.
+
 ## 0.8.0
 
 Call details and history

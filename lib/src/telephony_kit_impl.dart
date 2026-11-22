@@ -10,6 +10,7 @@ import 'bindings.g.dart' as android;
 import 'contacts.dart';
 import 'formatting.dart';
 import 'models.dart';
+import 'phone_numbers.dart';
 import 'search.dart';
 import 'vcard.dart';
 
@@ -268,6 +269,19 @@ class TelephonyKit {
   /// Needs `TelephonyPermission.readPhoneState`.
   bool get isInCall => _guard('Checking call state', () => _telecom.isInCall);
 
+  /// Silences the ringtone and vibration of the ringing call without
+  /// rejecting it: the call keeps ringing on screen and can still be
+  /// answered or declined, and the caller hears nothing change.
+  ///
+  /// Only the default dialer may do this ([isDefaultDialer]). Returns false
+  /// when this app is not the default dialer. Does nothing when no call is
+  /// ringing.
+  bool silenceRinger() => _guard('Silencing ringer', () {
+    if (!isDefaultDialer) return false;
+    _telecom.silenceRinger();
+    return true;
+  });
+
   // ---------------------------------------------------------------------------
   // Device, SIM and network
   // ---------------------------------------------------------------------------
@@ -321,6 +335,163 @@ class TelephonyKit {
   bool isEmergencyNumber(String number) => _guard(
     'Checking emergency number',
     () => android.CallScreening.isEmergencyNumber(_context, number.toJString()),
+  );
+
+  // ---------------------------------------------------------------------------
+  // Phone number formatting
+  // ---------------------------------------------------------------------------
+
+  /// The country the device is in, as an upper case ISO 3166-1 code such as
+  /// `EG`: from the mobile network, then the SIM, then the system locale.
+  /// Empty if none is known. Used when a formatting method gets no
+  /// `countryIso`. Needs no permission.
+  String get defaultCountryIso {
+    try {
+      final tm = _telephony;
+      for (final iso in [_str(tm.networkCountryIso), _str(tm.simCountryIso)]) {
+        if (iso.length == 2) return iso.toUpperCase();
+      }
+    } on Object {
+      // No telephony on this device; fall back to the locale.
+    }
+    return (PlatformDispatcher.instance.locale.countryCode ?? '').toUpperCase();
+  }
+
+  String _countryIso(String? countryIso) {
+    final iso = (countryIso ?? defaultCountryIso).toUpperCase();
+    return iso.isEmpty ? 'US' : iso;
+  }
+
+  /// [number] formatted the way the phone shows it: in national format for
+  /// numbers of [countryIso] (for example `010 01234567`) and in
+  /// international format for others (`+44 20 7946 0000`).
+  ///
+  /// [countryIso] is the country of numbers dialled without a `+` code and
+  /// defaults to [defaultCountryIso]. Returns [number] unchanged when it
+  /// cannot be parsed (short codes, USSD, partial numbers). Uses Android's
+  /// `PhoneNumberUtils.formatNumber`. Needs no permission.
+  String formatPhoneNumber(String number, {String? countryIso}) =>
+      _guard('Formatting number', () {
+        if (number.trim().isEmpty) return number;
+        final formatted = _str(
+          android.PhoneNumberUtils.formatNumber$2(
+            number.toJString(),
+            _countryIso(countryIso).toJString(),
+          ),
+        );
+        return formatted.isEmpty ? number : formatted;
+      });
+
+  /// [number] in E.164 format, for example `+201001234567`, or null if it
+  /// is not a valid number for [countryIso] (default [defaultCountryIso]).
+  /// Store and compare numbers in this form. Needs no permission.
+  String? phoneNumberToE164(String number, {String? countryIso}) =>
+      _guard('Formatting number', () {
+        if (number.trim().isEmpty) return null;
+        final value = _str(
+          android.PhoneNumberUtils.formatNumberToE164(
+            number.toJString(),
+            _countryIso(countryIso).toJString(),
+          ),
+        );
+        return value.isEmpty ? null : value;
+      });
+
+  android.PhoneNumberFormattingTextWatcher? _watcher;
+  String _watcherIso = '';
+
+  /// Formats a number that is still being typed, like the system dialer's
+  /// keypad: `0100` stays `0100`, `01001234567` becomes `010 01234567`, and
+  /// `+4420794` becomes `+44 20 794`. Stops formatting (returns the digits
+  /// as typed) once the input cannot be a number, for example after `*` or
+  /// a pause.
+  ///
+  /// Uses Android's as-you-type formatter, the one behind
+  /// `PhoneNumberFormattingTextWatcher`. For a text field, use
+  /// [PhoneNumberInputFormatter], which also keeps the cursor in place.
+  String formatPhoneNumberAsYouType(String input, {String? countryIso}) =>
+      _guard('Formatting number', () {
+        if (input.isEmpty) return input;
+        final iso = _countryIso(countryIso);
+        var watcher = _watcher;
+        if (watcher == null || _watcherIso != iso) {
+          watcher?.release();
+          watcher = android.PhoneNumberFormattingTextWatcher.new$1(
+            iso.toJString(),
+          );
+          _watcher = watcher;
+          _watcherIso = iso;
+        }
+        final chars = input.toJString();
+        final text = android.SpannableStringBuilder.new$1(
+          chars.as(android.CharSequence.type),
+        );
+        try {
+          android.Selection.setSelection(text, input.length);
+          watcher.afterTextChanged(text);
+          return text.toString();
+        } finally {
+          text.release();
+          chars.release();
+        }
+      });
+
+  /// [number] with formatting removed and letters turned into digits, for
+  /// example `+1 (800) FLOWERS` becomes `+18003569377`. Uses
+  /// `PhoneNumberUtils.normalizeNumber`.
+  String normalizePhoneNumber(String number) => _guard(
+    'Normalizing number',
+    () => _str(android.PhoneNumberUtils.normalizeNumber(number.toJString())),
+  );
+
+  /// Whether [a] and [b] are the same phone number written differently, for
+  /// example `0100 123 4567` and `+20 100 123 4567` in Egypt.
+  ///
+  /// Uses `PhoneNumberUtils.areSamePhoneNumber` on Android 12+, and compares
+  /// E.164 forms (or the last 9 digits) before.
+  bool isSamePhoneNumber(String a, String b, {String? countryIso}) => _guard(
+    'Comparing numbers',
+    () {
+      final iso = _countryIso(countryIso);
+      if (_sdkInt >= 31) {
+        return android.PhoneNumberUtils.areSamePhoneNumber(
+          a.toJString(),
+          b.toJString(),
+          iso.toLowerCase().toJString(),
+        );
+      }
+      final e164a = phoneNumberToE164(a, countryIso: iso);
+      final e164b = phoneNumberToE164(b, countryIso: iso);
+      if (e164a != null && e164b != null) return e164a == e164b;
+      String tail(String n) {
+        final digits = n.replaceAll(RegExp(r'[^0-9]'), '');
+        return digits.length > 9 ? digits.substring(digits.length - 9) : digits;
+      }
+
+      final ta = tail(a);
+      return ta.isNotEmpty && ta == tail(b);
+    },
+  );
+
+  /// The country of [number]: from its `+` code, or [countryIso] (default
+  /// [defaultCountryIso]) for a valid national number. Null when [number] is
+  /// not a valid number. See also the pure Dart [countryOfNumber].
+  PhoneNumberCountry? phoneNumberCountry(String number, {String? countryIso}) {
+    final international = countryOfNumber(number);
+    if (international != null) return international;
+    final e164 = phoneNumberToE164(number, countryIso: countryIso);
+    return e164 == null ? null : countryOfNumber(e164);
+  }
+
+  /// Whether [number] could be a phone number in any country (digits with
+  /// an optional `+` and separators), as opposed to an email address or a
+  /// SIP address. Uses `PhoneNumberUtils.isGlobalPhoneNumber` after removing
+  /// formatting.
+  bool isGlobalPhoneNumber(String number) => _guard(
+    'Checking number',
+    () => android.PhoneNumberUtils.isGlobalPhoneNumber(
+      number.replaceAll(RegExp(r'[\s().\-/]'), '').toJString(),
+    ),
   );
 
   // ---------------------------------------------------------------------------

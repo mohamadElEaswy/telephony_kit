@@ -49,6 +49,8 @@ USSD codes and send SMS.
 | Default dialer and call screening roles | nothing |
 | Call events, answer, reject (with a text), hang up, hold, DTMF, mute, audio routes and Bluetooth, swap, merge and conference, SIM choice, why a call ended, pause digits, proximity screen off, call and missed call notifications | the app is the default dialer and declares the in-call service |
 | Emergency number check | nothing |
+| Phone number formatting (as you type, national, international, E.164), comparing numbers, country of a number | nothing |
+| Silence the ringer without rejecting the call | the app is the default dialer |
 | Call screening with block rules | default dialer or call screening role, and the screening service declared |
 | System block list | the app is the default dialer |
 
@@ -453,6 +455,17 @@ Android sends the text itself, so no SMS permission is needed.
 - `telephony.isEmergencyNumber('112')` checks the local emergency list.
   Call screening never blocks or silences emergency numbers.
 
+### Silencing the ringer
+
+`telephony.silenceRinger()` stops the ringtone and vibration of the ringing
+call, like pressing a volume key, without rejecting it. The call keeps
+ringing on screen and can still be answered or declined. Only the default
+dialer may do this; it returns false otherwise.
+
+```dart
+TextButton(onPressed: telephony.silenceRinger, child: const Text('Silence'))
+```
+
 ### Proximity sensor
 
 During a call on the earpiece the package keeps a proximity wake lock, so
@@ -712,6 +725,47 @@ Yesterday, units). `CallTimeFormatter(utcOffset: ...)` shows times at a
 fixed offset instead of the device zone, which also makes tests
 deterministic.
 
+## Phone number formatting
+
+Formatting uses Android's own `PhoneNumberUtils` (libphonenumber inside the
+platform), so there is no extra dependency and numbers look the same as in
+the system dialer. Every method takes an optional `countryIso` for numbers
+dialled without a `+` code; it defaults to `telephony.defaultCountryIso`
+(the mobile network's country, then the SIM's, then the system locale).
+
+```dart
+telephony.defaultCountryIso;                       // EG
+telephony.formatPhoneNumber('01001234567');         // 010 01234567
+telephony.formatPhoneNumber('+442079460000');       // +44 20 7946 0000
+telephony.phoneNumberToE164('0100 123 4567');       // +201001234567 (null if invalid)
+telephony.formatPhoneNumberAsYouType('+4420794');   // +44 20 794
+telephony.normalizePhoneNumber('+1 (800) FLOWERS'); // +18003569377
+telephony.isSamePhoneNumber('01001234567', '+20 100 123 4567'); // true
+
+final country = telephony.phoneNumberCountry('+447911123456');
+print('${country?.flag} ${country?.isoCode} +${country?.callingCode}'); // 🇬🇧 GB +44
+```
+
+For a text field, add `PhoneNumberInputFormatter`. It formats while typing,
+keeps the cursor after the same digit, and deleting a space deletes the
+digit before it:
+
+```dart
+TextField(
+  keyboardType: TextInputType.phone,
+  inputFormatters: [PhoneNumberInputFormatter()],
+)
+```
+
+`formatPhoneNumber` returns the input unchanged when it is not a number
+(USSD codes, short codes, partial input). Store numbers as E.164 and
+format them only for display.
+
+Pure Dart helpers that need no device: `callingCodeOf('+20 100...')`,
+`countryOfNumber(e164)` (North American numbers are told apart by area code,
+so `+1 416...` is `CA`), `regionsForCallingCode(44)` and
+`callingCodeForRegion('EG')`.
+
 ## Call log extras
 
 ```dart
@@ -824,11 +878,12 @@ is off.
 
 ## Example
 
-[`example/`](example) is a small dialer with a keypad (with SIM choice), recent
+[`example/`](example) is a small dialer with a keypad (with SIM choice and
+number formatting as you type), recent
 calls grouped by day with search and a missed filter, a call details screen
 with the full history of the number or contact, contacts with search and
 recent calls, device details (time zone, call bubble switch), and an in-call
-screen with answer, reject, hang up, mute, speaker and hold.
+screen with answer, silence, reject, hang up, mute, speaker and hold.
 
 ```sh
 cd example
