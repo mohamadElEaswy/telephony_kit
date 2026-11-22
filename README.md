@@ -941,11 +941,11 @@ is off.
 ## Example
 
 [`example/`](example) is a small dialer with a keypad (with SIM choice and
-number formatting as you type), recent
-calls grouped by day with search and a missed filter, a call details screen
-with the full history of the number or contact, contacts with search,
-recent calls, ringtone and send to voicemail, device details (time zone, call bubble switch), and an in-call
-screen with answer, silence, reject, hang up, mute, speaker and hold.
+number formatting as you type), recent calls grouped by day with search and a
+missed filter, a call details screen with the full history of the number or
+contact, contacts with search, recent calls, ringtone and send to voicemail,
+device details (time zone, call bubble switch), and an in-call screen with
+answer, silence, reject, hang up, mute, speaker and hold.
 
 ```sh
 cd example
