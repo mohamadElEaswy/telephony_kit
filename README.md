@@ -43,7 +43,7 @@ USSD codes and send SMS.
 | Open the system contact screens | nothing |
 | USSD codes such as `*100#` | `CALL_PHONE`, Android 8.0+ |
 | Send SMS / search SMS, conversations, MMS (read), new SMS stream | `SEND_SMS` / `READ_SMS` |
-| Delete SMS, mark read, default SMS role | the app is the default SMS app |
+| Become the default SMS app: receive and store SMS, notifications, sms: links, quick replies; delete SMS, mark read | the SMS role and the package's SMS components in the manifest |
 | Call forwarding and call waiting (through GSM codes) | `CALL_PHONE`, Android 8.0+ |
 | Phone numbers of the SIMs, mobile data and roaming state, eSIM, signal in dBm, nearby cells | `READ_PHONE_NUMBERS`, `READ_PHONE_STATE`, `ACCESS_FINE_LOCATION` for cells |
 | Default dialer and call screening roles | nothing |
@@ -869,15 +869,99 @@ telephony.deleteSmsMessages([message.id]);
 telephony.deleteSmsThread(threadId);
 ```
 
-`requestDefaultSmsApp` shows the system prompt, but Android only offers apps
-that declare the components a default SMS app must have: a receiver for
-`SMS_DELIVER` (permission `BROADCAST_SMS`), one for `WAP_PUSH_DELIVER`
-(`BROADCAST_WAP_PUSH`), an activity for `SENDTO` on `sms:`/`smsto:`/`mms:`/
-`mmsto:`, and a service for `RESPOND_VIA_MESSAGE` (`SEND_RESPOND_VIA_MESSAGE`).
-telephony_kit does not ship these, because a default SMS app must store the
-messages it receives; your app provides them. Sending MMS is not supported.
 `defaultSmsPackage` can be null on devices where Android does not report one;
 use `isDefaultSmsApp` to check your own role.
+
+### Becoming the default SMS app
+
+Android only offers the SMS role to apps that declare the components a
+default SMS app must have. telephony_kit ships them; add them to your
+manifest:
+
+```xml
+<!-- Next to SEND_SMS and READ_SMS. Android grants these with the SMS role. -->
+<uses-permission android:name="android.permission.RECEIVE_SMS" />
+<uses-permission android:name="android.permission.RECEIVE_MMS" />
+<uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
+
+<!-- On the main activity, next to the DIAL filters. -->
+<intent-filter>
+    <action android:name="android.intent.action.SENDTO" />
+    <action android:name="android.intent.action.SEND" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="sms" />
+    <data android:scheme="smsto" />
+    <data android:scheme="mms" />
+    <data android:scheme="mmsto" />
+</intent-filter>
+
+<!-- Inside <application>. -->
+<receiver
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitSmsDeliverReceiver"
+    android:permission="android.permission.BROADCAST_SMS"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.provider.Telephony.SMS_DELIVER" />
+    </intent-filter>
+</receiver>
+<receiver
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitMmsReceiver"
+    android:permission="android.permission.BROADCAST_WAP_PUSH"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+        <data android:mimeType="application/vnd.wap.mms-message" />
+    </intent-filter>
+</receiver>
+<service
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitRespondViaMessageService"
+    android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:scheme="sms" />
+        <data android:scheme="smsto" />
+        <data android:scheme="mms" />
+        <data android:scheme="mmsto" />
+    </intent-filter>
+</service>
+```
+
+Then ask for the role and handle what opens the app:
+
+```dart
+if (!telephony.isDefaultSmsApp) telephony.requestDefaultSmsApp();
+
+// On start and on resume:
+final request = telephony.takeSmsRequest();
+if (request != null) {
+  if (request.fromNotification) {
+    openConversation(request.recipients.first);   // a tapped notification
+  } else {
+    openCompose(request.recipients, request.body); // an sms: link
+  }
+}
+
+// When a conversation is opened:
+telephony.markSmsThreadRead(threadId);
+telephony.clearSmsNotification(address);
+```
+
+While your app holds the role, the package:
+
+- stores each incoming SMS in the inbox (unread) and shows a notification
+  per sender; turn them off with `smsNotificationsEnabled = false` and use
+  `incomingSms` to show your own;
+- stores what `sendSms` sends: in the outbox while sending, then sent or
+  failed;
+- sends "respond via message" quick replies when a call is rejected with a
+  text (also from `PhoneCall.reject(message:)`).
+
+It does **not** download MMS: an incoming MMS only shows a "Multimedia
+message" notification, and sending MMS is not supported. Tell your users
+before they switch, or keep another messaging app as the default.
 
 ## Video, caller verification, Wi-Fi calling, RTT and forwarding
 
@@ -944,8 +1028,9 @@ is off.
 number formatting as you type), recent calls grouped by day with search and a
 missed filter, a call details screen with the full history of the number or
 contact, contacts with search, recent calls, ringtone and send to voicemail,
-device details (time zone, call bubble switch), and an in-call screen with
-answer, silence, reject, hang up, mute, speaker and hold.
+device details (time zone, call bubble switch), Messages with conversations, a
+reply box and a default SMS app banner, and an in-call screen with answer,
+silence, reject, hang up, mute, speaker and hold.
 
 ```sh
 cd example

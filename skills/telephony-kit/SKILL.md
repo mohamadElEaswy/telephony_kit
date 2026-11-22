@@ -1,6 +1,6 @@
 ---
 name: telephony-kit
-description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android, call details and per-contact call history, formatting call times and durations, formatting phone numbers (as you type, E.164, country), silencing the ringer, answering or ending calls without the dialer role, per-contact ringtones or send to voicemail, SIM inserted/removed events, or a floating call bubble over other apps.
+description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android, call details and per-contact call history, formatting call times and durations, formatting phone numbers (as you type, E.164, country), silencing the ringer, answering or ending calls without the dialer role, per-contact ringtones or send to voicemail, SIM inserted/removed events, becoming the default SMS app, or a floating call bubble over other apps.
 ---
 
 # Using telephony_kit in a Flutter app
@@ -71,6 +71,7 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Show times and durations | `telephony.timeFormatter` (`CallTimeFormatter`: `relative`, `day`, `dateTime`, `full`, `duration`, `durationWords`), `groupByDay(...)`, `timeZone`, `uses24HourFormat` |
 | Open the call screen from the notification | `CallScreenRequested` event, `takeCallScreenRequest()` on start and resume |
 | Floating call bubble | `callBubble.enabled`, `.hasPermission`, `.requestPermission()`, `.labels` (needs `SYSTEM_ALERT_WINDOW`) |
+| Default SMS app | manifest components from references/manifest.md, `requestDefaultSmsApp()`, `takeSmsRequest()` on start and resume, `smsNotificationsEnabled`, `clearSmsNotification(address)` |
 | SMS threads, MMS, delete | `getSmsThreads()`, `getMmsMessages()` (read only), `isDefaultSmsApp`, `deleteSmsMessages`, `markSmsThreadRead` |
 | Video, verification, RTT | `placeCall(video: true)`, `PhoneCall.isVideo/answerWithVideo`, `numberVerification`, `isWifiCall`, `isHdAudio`, `requestRtt/sendRttText/readRttText` |
 | Forwarding, call waiting | `setCallForwarding(CallForwardingCondition.x, number)`, `cancelCallForwarding`, `queryCallForwarding`, `setCallWaiting(bool)` (USSD) |
@@ -171,10 +172,15 @@ undone: confirm with the user first. Need `WRITE_CONTACTS` as well as
 `READ_CONTACTS`; `Permission.contacts` requests both.
 
 **Changing SMS needs the SMS role.** Only the default SMS app can delete or
-mark messages read; others silently get `0`. The package does not provide the
-SMS receivers the role requires (see references/manifest.md), so do not
-promise "delete SMS" unless the app implements them. Reading, sending and
-`incomingSms` work without the role. MMS is read only.
+mark messages read; others silently get `0`. The package ships the receivers
+and service the role requires: copy all of them from
+references/manifest.md, never write your own SMS receiver. While the app is
+the default, the package stores incoming and sent SMS and shows new message
+notifications; on open of a conversation call `markSmsThreadRead` and
+`clearSmsNotification`. Handle `takeSmsRequest()` on start and resume like
+`takeDialNumber()`. MMS are not downloaded or sent: warn users before they
+make the app their default SMS app. Reading, sending and `incomingSms` work
+without the role.
 
 **Watching for changes.** Listen to `contactChanges`, `callLogChanges` or
 `smsChanges` and re-query; they only say "something changed" and are

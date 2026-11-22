@@ -12768,7 +12768,9 @@ extension type SmsHelper._(jni$_.JObject _$this) implements jni$_.JObject {
   ///
   /// Sends {@code text} to {@code destination}. Long messages are split into
   ///parts. Pass a subscription id to pick the SIM, or -1 for the default.
-  ///Needs SEND_SMS. The listener gets the number of parts on success.
+  ///Needs SEND_SMS. The listener gets the number of parts on success. As
+  ///the default SMS app, the message is also stored: in the outbox while
+  ///sending, then in the sent box (or as failed).
   static void send(
     Context? context,
     jni$_.JString? destination,
@@ -12880,6 +12882,302 @@ final class $SmsHelper$Type$ extends jni$_.JType<SmsHelper> {
   @jni$_.internal
   @core$_.override
   String get signature => r'Ldev/telephonykit/telephony_kit/SmsHelper;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.SmsIntents`
+///
+/// Reads what an SMS intent that opened the activity asks for: a {@code
+///SENDTO}, {@code SEND} or {@code VIEW} intent with an {@code sms:}, {@code
+///smsto:}, {@code mms:} or {@code mmsto:} uri, or a tap on a message
+///notification.
+extension type SmsIntents._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/SmsIntents',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<SmsIntents> type = $SmsIntents$Type$();
+  static final _id_takeRequest = _class.staticMethodId(
+    r'takeRequest',
+    r'(Landroid/app/Activity;)[Ljava/lang/String;',
+  );
+
+  static final _takeRequest =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public java.lang.String[] takeRequest(android.app.Activity activity)`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// Returns {@code [recipients, body, fromNotification]} for an SMS intent
+  ///the activity was started with, or null, and marks it handled so it is
+  ///returned once. Recipients are separated by {@code ;}. {@code
+  ///fromNotification} is "1" when the user tapped a message notification.
+  static jni$_.JArray<jni$_.JString?>? takeRequest(Activity? activity) {
+    final _$$classRef = _class.reference;
+    final _$activity = activity?.reference ?? jni$_.jNullReference;
+    return _takeRequest(
+      _$$classRef.pointer,
+      _id_takeRequest.pointer,
+      _$activity.pointer,
+    ).object<jni$_.JArray<jni$_.JString?>?>();
+  }
+}
+
+final class $SmsIntents$Type$ extends jni$_.JType<SmsIntents> {
+  @jni$_.internal
+  const $SmsIntents$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/SmsIntents;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.SmsNotifications`
+///
+/// New message notifications. Android shows none while the app is the default
+///SMS app, so TelephonyKitSmsDeliverReceiver shows them here, one per
+///sender. Tapping one opens the app; SmsIntents\#takeRequest then
+///returns the sender.
+extension type SmsNotifications._(jni$_.JObject _$this)
+    implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/SmsNotifications',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<SmsNotifications> type = $SmsNotifications$Type$();
+  static final _id_isEnabled = _class.staticMethodId(
+    r'isEnabled',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isEnabled(android.content.Context context)`
+  ///
+  /// Whether the package shows new message notifications (default true).
+  static core$_.bool isEnabled(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isEnabled(
+      _$$classRef.pointer,
+      _id_isEnabled.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+
+  static final _id_setEnabled = _class.staticMethodId(
+    r'setEnabled',
+    r'(Landroid/content/Context;Z)V',
+  );
+
+  static final _setEnabled =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public void setEnabled(android.content.Context context, boolean enabled)`
+  ///
+  /// Turns new message notifications on or off.
+  static void setEnabled(Context? context, core$_.bool enabled) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _setEnabled(
+      _$$classRef.pointer,
+      _id_setEnabled.pointer,
+      _$context.pointer,
+      enabled ? 1 : 0,
+    ).check();
+  }
+
+  static final _id_cancel = _class.staticMethodId(
+    r'cancel',
+    r'(Landroid/content/Context;Ljava/lang/String;)V',
+  );
+
+  static final _cancel =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void cancel(android.content.Context context, java.lang.String address)`
+  ///
+  /// Removes the notification for messages from {@code address}.
+  static void cancel(Context? context, jni$_.JString? address) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$address = address?.reference ?? jni$_.jNullReference;
+    _cancel(
+      _$$classRef.pointer,
+      _id_cancel.pointer,
+      _$context.pointer,
+      _$address.pointer,
+    ).check();
+  }
+
+  static final _id_cancelAll = _class.staticMethodId(
+    r'cancelAll',
+    r'(Landroid/content/Context;)V',
+  );
+
+  static final _cancelAll =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void cancelAll(android.content.Context context)`
+  ///
+  /// Removes every message notification.
+  static void cancelAll(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    _cancelAll(
+      _$$classRef.pointer,
+      _id_cancelAll.pointer,
+      _$context.pointer,
+    ).check();
+  }
+}
+
+final class $SmsNotifications$Type$ extends jni$_.JType<SmsNotifications> {
+  @jni$_.internal
+  const $SmsNotifications$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/SmsNotifications;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.SmsStore`
+///
+/// Writes messages to Android's SMS provider. Only the default SMS app may do
+///this, and it must: Android stores neither the messages it delivers to that
+///app nor the ones that app sends.
+extension type SmsStore._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/SmsStore',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<SmsStore> type = $SmsStore$Type$();
+  static final _id_isDefaultSmsApp = _class.staticMethodId(
+    r'isDefaultSmsApp',
+    r'(Landroid/content/Context;)Z',
+  );
+
+  static final _isDefaultSmsApp =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean isDefaultSmsApp(android.content.Context context)`
+  ///
+  /// Whether this app is the default SMS app.
+  static core$_.bool isDefaultSmsApp(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _isDefaultSmsApp(
+      _$$classRef.pointer,
+      _id_isDefaultSmsApp.pointer,
+      _$context.pointer,
+    ).boolean;
+  }
+}
+
+final class $SmsStore$Type$ extends jni$_.JType<SmsStore> {
+  @jni$_.internal
+  const $SmsStore$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/SmsStore;';
 }
 
 /// from: `dev.telephonykit.telephony_kit.UssdHelper`

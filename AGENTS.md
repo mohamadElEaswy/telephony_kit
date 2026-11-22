@@ -43,7 +43,9 @@ skills/telephony-kit/             Agent skill for apps that use the package.
 Write Java only for what jnigen cannot express:
 
 - Android components the system instantiates: `InCallService`,
-  `CallScreeningService`, `BroadcastReceiver`, and `CallActionActivity`
+  `CallScreeningService`, `BroadcastReceiver` (call actions, missed calls,
+  SMS and MMS delivery), the "respond via message" `Service`, and
+  `CallActionActivity`
   (notification buttons that must open the app use an activity, because
   since Android 12 a receiver may not start one).
 - Abstract callback classes Android requires you to subclass
@@ -142,9 +144,15 @@ turn it on in the Device tab, start a call and press Home. For answering from
 the notification, send the app to the background, `adb emu gsm call 5551234`,
 and tap Answer on the heads-up notification; the call screen must open.
 
+For the default SMS app run
+`adb shell cmd role add-role-holder android.app.role.SMS dev.telephonykit.telephony_kit_example`
+(it fails if a required component is missing from the manifest), then
+`adb emu sms send 5551234 hello`; the message must be in the inbox and a
+notification must show.
+
 The emulator cannot test call waiting, Bluetooth or earpiece routes, real USSD
-replies, voicemail or dual SIM; say so in your report instead of claiming
-they work.
+replies, voicemail, dual SIM, SIM insertion or MMS; say so in your report
+instead of claiming they work.
 
 ## Things that are not possible
 

@@ -161,6 +161,9 @@ const _systemOnly = {
   '${_ownPackage}CallActionReceiver',
   '${_ownPackage}TelephonyKitMissedCallReceiver',
   '${_ownPackage}CallActionActivity',
+  '${_ownPackage}TelephonyKitSmsDeliverReceiver',
+  '${_ownPackage}TelephonyKitMmsReceiver',
+  '${_ownPackage}TelephonyKitRespondViaMessageService',
 };
 
 final class _AllowListVisitor extends Visitor {

@@ -137,18 +137,65 @@ off) and the notification button receiver.
 
 ## Default SMS app
 
-Only needed to delete or mark messages (`deleteSmsMessages`, `markSmsRead`,
-`requestDefaultSmsApp`). The package does **not** provide these components;
-the app must implement them in its own Kotlin/Java, or Android will not offer
-the SMS role:
+Needed to be offered the SMS role (`requestDefaultSmsApp`) and to delete or
+mark messages. The package provides every component; declare all of them or
+Android will not offer the role. Do not write your own SMS receivers in
+Kotlin/Java.
 
-- a receiver for `android.provider.Telephony.SMS_DELIVER`, protected by
-  `android.permission.BROADCAST_SMS`;
-- a receiver for `android.provider.Telephony.WAP_PUSH_DELIVER` (mime type
-  `application/vnd.wap.mms-message`), protected by
-  `android.permission.BROADCAST_WAP_PUSH`;
-- an activity for `SEND` / `SENDTO` on `sms:`, `smsto:`, `mms:`, `mmsto:`;
-- a service for `RESPOND_VIA_MESSAGE`, protected by
-  `android.permission.SEND_RESPOND_VIA_MESSAGE`.
+```xml
+<!-- Next to SEND_SMS and READ_SMS. Android grants these with the SMS role. -->
+<uses-permission android:name="android.permission.RECEIVE_SMS" />
+<uses-permission android:name="android.permission.RECEIVE_MMS" />
+<uses-permission android:name="android.permission.RECEIVE_WAP_PUSH" />
+
+<!-- On the main activity, next to the DIAL filters. -->
+<intent-filter>
+    <action android:name="android.intent.action.SENDTO" />
+    <action android:name="android.intent.action.SEND" />
+    <category android:name="android.intent.category.DEFAULT" />
+    <category android:name="android.intent.category.BROWSABLE" />
+    <data android:scheme="sms" />
+    <data android:scheme="smsto" />
+    <data android:scheme="mms" />
+    <data android:scheme="mmsto" />
+</intent-filter>
+
+<!-- Inside <application>. -->
+<receiver
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitSmsDeliverReceiver"
+    android:permission="android.permission.BROADCAST_SMS"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.provider.Telephony.SMS_DELIVER" />
+    </intent-filter>
+</receiver>
+<receiver
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitMmsReceiver"
+    android:permission="android.permission.BROADCAST_WAP_PUSH"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
+        <data android:mimeType="application/vnd.wap.mms-message" />
+    </intent-filter>
+</receiver>
+<service
+    android:name="dev.telephonykit.telephony_kit.TelephonyKitRespondViaMessageService"
+    android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:scheme="sms" />
+        <data android:scheme="smsto" />
+        <data android:scheme="mms" />
+        <data android:scheme="mmsto" />
+    </intent-filter>
+</service>
+```
+
+While the app holds the role, the package stores incoming SMS in the inbox,
+stores sent SMS (outbox, then sent or failed), and shows a notification per
+sender (`smsNotificationsEnabled`). MMS are not downloaded: the MMS receiver
+only shows a "Multimedia message" notification.
 
 Reading, sending and the `incomingSms` stream do not need the SMS role.

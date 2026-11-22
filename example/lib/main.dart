@@ -62,6 +62,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     _refresh();
     _takeDialNumber();
     _takeCallScreenRequest();
+    _takeSmsRequest();
     _setUpCallBubble();
     _subscription = telephony.callEvents.listen((event) {
       if (event is PostDialWait && mounted) _askPostDial(event);
@@ -119,6 +120,25 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     telephony.callBubble.labels = const CallBubbleLabels();
   }
 
+  /// Opens Messages for an sms: link from another app or a tapped new
+  /// message notification (while this is the default SMS app).
+  void _takeSmsRequest() {
+    SmsRequest? request;
+    try {
+      request = telephony.takeSmsRequest();
+    } on TelephonyException {
+      request = null;
+    }
+    if (request == null || !mounted) return;
+    final r = request;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => MessagesPage(request: r)));
+    });
+  }
+
   /// Shows the number of a dial intent (a tapped tel: link) on the keypad.
   void _takeDialNumber() {
     String? number;
@@ -146,6 +166,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       _refresh();
       _takeDialNumber();
       _takeCallScreenRequest();
+      _takeSmsRequest();
     }
   }
 

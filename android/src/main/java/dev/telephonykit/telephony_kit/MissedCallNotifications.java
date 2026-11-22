@@ -115,7 +115,7 @@ public final class MissedCallNotifications {
   }
 
   /** The contact name for the number, else the number, else "". */
-  private static String callerName(Context context, String number) {
+  static String callerName(Context context, String number) {
     if (number == null || number.isEmpty()) return "";
     if (context.checkSelfPermission(android.Manifest.permission.READ_CONTACTS)
         != PackageManager.PERMISSION_GRANTED) {

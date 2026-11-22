@@ -1,3 +1,30 @@
+## 0.11.0
+
+Default SMS app
+* The package now ships the components Android requires of a default SMS
+  app, so an app only declares them in its manifest (see the README):
+  `TelephonyKitSmsDeliverReceiver` (stores incoming SMS in the inbox and
+  shows a notification), `TelephonyKitMmsReceiver` (MMS notification) and
+  `TelephonyKitRespondViaMessageService` (quick replies when a call is
+  rejected with a message). With them, `requestDefaultSmsApp()` is offered
+  by the system.
+* As the default SMS app, `sendSms` saves the message (outbox, then sent or
+  failed), as Android requires.
+* `takeSmsRequest()` returns an `SmsRequest` (`recipients`, `body`,
+  `fromNotification`) for `sms:`/`smsto:`/`mms:`/`mmsto:` links from other
+  apps and for taps on a new message notification.
+* `smsNotificationsEnabled` (saved), `clearSmsNotification(address)` and
+  `clearSmsNotifications()`.
+* Fixed: role checks in Java now use `RoleManager` on Android 10+, because
+  `Telephony.Sms.getDefaultSmsPackage` returns null on some devices.
+* Not supported: downloading or sending MMS. Incoming MMS show a
+  notification only.
+
+Example
+* Messages shows conversations, opens a conversation with bubbles and a
+  reply box (marks it read and clears its notification), has a "Set
+  default" banner, and handles sms: links and notification taps.
+
 ## 0.10.0
 
 Answer and end calls without being the default dialer

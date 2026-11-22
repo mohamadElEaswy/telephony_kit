@@ -208,6 +208,8 @@ System list (default dialer or SMS app): `bool get canBlockNumbers`,
 | `Stream<SmsMessage> get incomingSms` | READ_SMS; watches the inbox, no receiver needed |
 | `List<MmsMessage> getMmsMessages({String? threadId, int limit = 50})` | READ_SMS; read only (`text`, `parts`, `addresses`) |
 | `bool get isDefaultSmsApp`, `String? get defaultSmsPackage`, `bool requestDefaultSmsApp()` | the app must declare the SMS components, see manifest.md |
+| `SmsRequest? takeSmsRequest()` | `recipients`, `body`, `fromNotification`; sms: links and notification taps, once each |
+| `bool smsNotificationsEnabled` (get/set), `clearSmsNotification(address)`, `clearSmsNotifications()` | New message notifications while default SMS app; saved |
 | `int deleteSmsMessages(ids)`, `int deleteSmsThread(id)`, `int markSmsRead(ids)`, `int markSmsThreadRead(id)` | default SMS app only, others get 0 |
 | `Future<String> setCallForwarding(CallForwardingCondition, number)`, `cancelCallForwarding(c)`, `queryCallForwarding(c)` | via USSD (`**21*n#`); `unconditional/busy/noReply/notReachable` |
 | `Future<String> setCallWaiting(bool)`, `queryCallWaiting()` | via USSD `*43#`, `#43#`, `*#43#` |
