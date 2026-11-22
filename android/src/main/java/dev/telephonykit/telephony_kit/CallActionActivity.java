@@ -19,6 +19,8 @@ import android.os.Bundle;
 public class CallActionActivity extends Activity {
   static final String ACTION_ANSWER = "dev.telephonykit.telephony_kit.OPEN_AND_ANSWER";
   static final String ACTION_SHOW_CALL = "dev.telephonykit.telephony_kit.OPEN_CALL";
+  static final String ACTION_END_AND_ANSWER =
+      "dev.telephonykit.telephony_kit.OPEN_END_AND_ANSWER";
 
   @Override
   @SuppressWarnings("deprecation")
@@ -29,6 +31,8 @@ public class CallActionActivity extends Activity {
     String callId = intent == null ? null : intent.getStringExtra(CallActionReceiver.EXTRA_CALL_ID);
     if (ACTION_ANSWER.equals(action) && callId != null) {
       CallManager.answer(callId);
+    } else if (ACTION_END_AND_ANSWER.equals(action) && callId != null) {
+      CallManager.answerAndEndActive(callId);
     }
     CallManager.requestCallScreen(this, callId);
     finish();

@@ -54,6 +54,7 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Format numbers | `formatPhoneNumber`, `formatPhoneNumberAsYouType`, `PhoneNumberInputFormatter()`, `phoneNumberToE164`, `isSamePhoneNumber`, `phoneNumberCountry`, `defaultCountryIso` |
 | Notifications | `showCallNotifications`, `missedCallNotificationsEnabled`, `clearMissedCallNotification()`, `proximitySensorEnabled` |
 | Mute / audio | `setMuted`, `setSpeakerOn`, `supportedAudioRoutes`, `setAudioRoute`, `bluetoothDevices`, `selectBluetoothDevice` |
+| Call waiting | `waitingCall`, `isCallWaiting`, `PhoneCall.answer()` (hold & answer), `answerAndEndActive()` (end & answer) |
 | Several calls | `swapCalls()`, `PhoneCall.merge/conferenceWith/swap/splitFromConference/children/parent` |
 | Search call log | `searchCallLog(query:, types:, from:, to:, limit:)` |
 | Change call log | `deleteCallLogEntries(ids)`, `deleteCallLogForNumber`, `markMissedCallsRead()` |
@@ -98,6 +99,12 @@ telephony.callEvents.listen((_) {
   setState(() => _calls = live);
 });
 ```
+
+**Call waiting.** A second call rings as `CallState.ringing` while the
+first is still live; there is no separate state. When `telephony.waitingCall`
+is not null, show "Call waiting" with Decline, Hold & answer (`answer()`)
+and End & answer (`answerAndEndActive()`) instead of the normal incoming
+screen, and keep the first call visible.
 
 **Handle every call state.** Besides ringing and active, show a SIM picker
 for `CallState.selectPhoneAccount`, a "Send remaining digits?" prompt on

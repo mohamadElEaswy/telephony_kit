@@ -201,6 +201,54 @@ public final class CallManager {
     return true;
   }
 
+  /**
+   * The id of a call that rings while another call is live (call waiting),
+   * or null. Android has no separate state for it: the call is ringing and
+   * another top level call is active, on hold or dialing.
+   */
+  public static String getWaitingCallId() {
+    String ringing = null;
+    boolean otherLive = false;
+    synchronized (lock) {
+      for (Map.Entry<String, Call> e : calls.entrySet()) {
+        Call c = e.getValue();
+        if (c.getParent() != null) continue;
+        int state = c.getState();
+        if (state == Call.STATE_RINGING) {
+          if (ringing == null) ringing = e.getKey();
+        } else if (state != Call.STATE_DISCONNECTED && state != Call.STATE_DISCONNECTING) {
+          otherLive = true;
+        }
+      }
+    }
+    return otherLive ? ringing : null;
+  }
+
+  /**
+   * Answers a waiting call and ends the active call (and dialing ones)
+   * first. Held calls stay on hold. Plain {@link #answer} holds the active
+   * call instead.
+   */
+  public static boolean answerAndEndActive(String callId) {
+    Call call = find(callId);
+    if (call == null) return false;
+    java.util.List<Call> toEnd = new java.util.ArrayList<>();
+    synchronized (lock) {
+      for (Call c : calls.values()) {
+        if (c == call || c.getParent() != null) continue;
+        int state = c.getState();
+        if (state == Call.STATE_ACTIVE
+            || state == Call.STATE_DIALING
+            || state == Call.STATE_CONNECTING) {
+          toEnd.add(c);
+        }
+      }
+    }
+    for (Call c : toEnd) c.disconnect();
+    call.answer(VideoProfile.STATE_AUDIO_ONLY);
+    return true;
+  }
+
   /** Rejects a ringing call. */
   public static boolean reject(String callId) {
     Call call = find(callId);
@@ -952,7 +1000,8 @@ public final class CallManager {
       }
     }
     if (ringingId != null) {
-      CallNotifications.showIncoming(ctx, ringingId, callerLabel(ringingId));
+      CallNotifications.showIncoming(
+          ctx, ringingId, callerLabel(ringingId), liveId != null);
     } else if (liveId != null) {
       int state = getState(liveId);
       String status =

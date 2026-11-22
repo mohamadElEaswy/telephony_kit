@@ -7878,6 +7878,79 @@ extension type CallManager._(jni$_.JObject _$this) implements jni$_.JObject {
     ).boolean;
   }
 
+  static final _id_get$waitingCallId = _class.staticMethodId(
+    r'getWaitingCallId',
+    r'()Ljava/lang/String;',
+  );
+
+  static final _get$waitingCallId =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public java.lang.String getWaitingCallId()`
+  /// The returned object must be released after use, by calling the [release] method.
+  ///
+  /// The id of a call that rings while another call is live (call waiting),
+  ///or null. Android has no separate state for it: the call is ringing and
+  ///another top level call is active, on hold or dialing.
+  static jni$_.JString? get waitingCallId {
+    final _$$classRef = _class.reference;
+    return _get$waitingCallId(
+      _$$classRef.pointer,
+      _id_get$waitingCallId.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_answerAndEndActive = _class.staticMethodId(
+    r'answerAndEndActive',
+    r'(Ljava/lang/String;)Z',
+  );
+
+  static final _answerAndEndActive =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallStaticBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public boolean answerAndEndActive(java.lang.String callId)`
+  ///
+  /// Answers a waiting call and ends the active call (and dialing ones)
+  ///first. Held calls stay on hold. Plain \#answer holds the active
+  ///call instead.
+  static core$_.bool answerAndEndActive(jni$_.JString? callId) {
+    final _$$classRef = _class.reference;
+    final _$callId = callId?.reference ?? jni$_.jNullReference;
+    return _answerAndEndActive(
+      _$$classRef.pointer,
+      _id_answerAndEndActive.pointer,
+      _$callId.pointer,
+    ).boolean;
+  }
+
   static final _id_reject = _class.staticMethodId(
     r'reject',
     r'(Ljava/lang/String;)Z',

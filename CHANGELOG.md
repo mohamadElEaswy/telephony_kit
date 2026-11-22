@@ -1,3 +1,17 @@
+## 0.12.0
+
+Call waiting (a call ringing while you are on another call)
+* `TelephonyKit.waitingCall` and `isCallWaiting`. Android has no separate
+  state: the new call is `CallState.ringing` while another call is live.
+* `PhoneCall.answerAndEndActive()` ("End & answer") ends the active call
+  and answers. `PhoneCall.answer()` ("Hold & answer") holds it, as before.
+* The incoming call notification says "Call waiting" and adds an "End &
+  answer" button.
+
+Example
+* The call screen shows "Call waiting", who you are talking to, and
+  Decline, Hold & answer and End & answer buttons.
+
 ## 0.11.0
 
 Default SMS app
