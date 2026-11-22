@@ -51,6 +51,9 @@ USSD codes and send SMS.
 | Emergency number check | nothing |
 | Phone number formatting (as you type, national, international, E.164), comparing numbers, country of a number | nothing |
 | Silence the ringer without rejecting the call | the app is the default dialer |
+| Answer or end calls without being the default dialer | `ANSWER_PHONE_CALLS`, Android 8+ (end: 9+) |
+| Per-contact ringtone and send to voicemail, list and preview ringtones | `READ_CONTACTS`, `WRITE_CONTACTS` to change |
+| SIM inserted, removed or swapped events | `READ_PHONE_STATE` |
 | Call screening with block rules | default dialer or call screening role, and the screening service declared |
 | System block list | the app is the default dialer |
 
@@ -217,6 +220,8 @@ the ones you use in `android/app/src/main/AndroidManifest.xml`:
 <uses-permission android:name="android.permission.READ_CONTACTS" />
 <!-- Only to add, edit or delete contacts -->
 <uses-permission android:name="android.permission.WRITE_CONTACTS" />
+<!-- Only to answer or end calls without being the default dialer -->
+<uses-permission android:name="android.permission.ANSWER_PHONE_CALLS" />
 <!-- Only for SIM phone numbers and nearby cells -->
 <uses-permission android:name="android.permission.READ_PHONE_NUMBERS" />
 <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -593,6 +598,44 @@ final reply2 = await telephony.sendUssd('*100#', subscriptionId: 2);
 
 USSD codes that open a multi-step menu only return the first screen.
 
+### SIM inserted, removed or swapped
+
+```dart
+telephony.simChanges.listen((event) {          // needs READ_PHONE_STATE
+  switch (event) {
+    case SimInserted(:final sim):
+      print('New SIM in slot ${sim.slotIndex + 1}: ${sim.displayName}');
+    case SimRemoved(:final sim):
+      print('${sim.displayName} removed');
+    case SimChanged(:final before, :final after):
+      print('${before.displayName} replaced by ${after.displayName}');
+  }
+});
+```
+
+The stream reports changes after it starts; read `getSimCards()` for the
+current SIMs. eSIM profiles turned on or off count too. Some phones restart
+the radio when a SIM is inserted, so a removal can be followed by an
+insertion of the same SIM.
+
+## Answering and ending calls without the dialer role
+
+Apps that are not the default dialer (car, headset, wearable or
+accessibility apps) can answer the ringing call and end the current one
+with the `ANSWER_PHONE_CALLS` permission:
+
+```dart
+if (telephony.hasPermission(TelephonyPermission.answerPhoneCalls)) {
+  telephony.answerRingingCall();   // Android 8+; video: true for video calls
+  telephony.endCurrentCall();      // Android 9+; declines a ringing call
+}
+```
+
+Both return false without the permission or on older Android. Emergency
+calls are never ended. Use `networkEvents` (`DeviceCallStateChanged`) to
+know when a call rings. The default dialer should use `PhoneCall.answer`
+and `PhoneCall.hangUp` instead.
+
 ## Call log changes
 
 ```dart
@@ -625,6 +668,25 @@ you use. Read the
 before you publish.
 
 ## Contacts in depth
+
+### Ringtone and send to voicemail per contact
+
+```dart
+final settings = telephony.getContactCallSettings(contactId);
+print(settings?.ringtoneTitle);            // empty for the default ringtone
+
+final ringtones = telephony.getRingtones();  // title + uri, like the system picker
+telephony.playRingtonePreview(ringtones.first.uri);
+telephony.stopRingtonePreview();
+
+telephony.setContactRingtone(contactId, ringtones.first.uri); // null = default
+telephony.setContactSendToVoicemail(contactId, true);         // never rings
+```
+
+Android applies both itself when the contact calls, also while your app is
+the default dialer. Changing them needs `WRITE_CONTACTS`.
+
+### More contact fields
 
 Contacts also hold IM handles, relatives and SIP addresses
 (`ContactDetails.ims`, `relations`, `sipAddresses`), and these are saved by
@@ -879,11 +941,11 @@ is off.
 ## Example
 
 [`example/`](example) is a small dialer with a keypad (with SIM choice and
-number formatting as you type), recent
-calls grouped by day with search and a missed filter, a call details screen
-with the full history of the number or contact, contacts with search and
-recent calls, device details (time zone, call bubble switch), and an in-call
-screen with answer, silence, reject, hang up, mute, speaker and hold.
+number formatting as you type), recent calls grouped by day with search and a
+missed filter, a call details screen with the full history of the number or
+contact, contacts with search, recent calls, ringtone and send to voicemail,
+device details (time zone, call bubble switch), and an in-call screen with
+answer, silence, reject, hang up, mute, speaker and hold.
 
 ```sh
 cd example

@@ -1,6 +1,6 @@
 ---
 name: telephony-kit
-description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android, call details and per-contact call history, formatting call times and durations, formatting phone numbers (as you type, E.164, country), silencing the ringer, or a floating call bubble over other apps.
+description: Build Android phone, dialer, call screening, call log, contacts, SIM/network, USSD or SMS features in a Flutter app with the telephony_kit package. Use when a Flutter project depends on telephony_kit, or the user wants a Flutter dialer, in-call screen, call blocker, caller ID, call log, contacts search or contact editing (add, edit, delete, groups, photos, merge, vCard), SMS conversations, video or RTT calls, call forwarding, USSD balance check or SMS sending on Android, call details and per-contact call history, formatting call times and durations, formatting phone numbers (as you type, E.164, country), silencing the ringer, answering or ending calls without the dialer role, per-contact ringtones or send to voicemail, SIM inserted/removed events, or a floating call bubble over other apps.
 ---
 
 # Using telephony_kit in a Flutter app
@@ -48,6 +48,9 @@ final telephony = TelephonyKit.instance; // singleton, all calls synchronous
 | Extensions (`;`) | `PostDialWait` event, `PhoneCall.continuePostDial(true)` |
 | Emergency | `isEmergencyNumber(number)` |
 | Silence ringing (keep the call) | `silenceRinger()` (default dialer) |
+| Answer / end without the dialer role | `answerRingingCall()`, `endCurrentCall()` (ANSWER_PHONE_CALLS) |
+| Contact ringtone / voicemail | `getContactCallSettings(id)`, `setContactRingtone(id, uri)`, `setContactSendToVoicemail(id, bool)`, `getRingtones()`, `playRingtonePreview(uri)` |
+| SIM inserted / removed | `simChanges` (`SimInserted`, `SimRemoved`, `SimChanged`) |
 | Format numbers | `formatPhoneNumber`, `formatPhoneNumberAsYouType`, `PhoneNumberInputFormatter()`, `phoneNumberToE164`, `isSamePhoneNumber`, `phoneNumberCountry`, `defaultCountryIso` |
 | Notifications | `showCallNotifications`, `missedCallNotificationsEnabled`, `clearMissedCallNotification()`, `proximitySensorEnabled` |
 | Mute / audio | `setMuted`, `setSpeakerOn`, `supportedAudioRoutes`, `setAudioRoute`, `bluetoothDevices`, `selectBluetoothDevice` |
@@ -135,6 +138,15 @@ saved; do not set it on every start.
 store or compare (`isSamePhoneNumber` for equality). Leave `countryIso` out
 to use the device's country. A null E.164 means the number is not valid,
 not that formatting failed; keep the raw text then.
+
+**Which answer call to use.** The default dialer answers and ends with
+`PhoneCall.answer/hangUp/reject`. Any other app uses
+`answerRingingCall()`/`endCurrentCall()` with `ANSWER_PHONE_CALLS`; check
+their bool result, it is false without the permission or on old Android.
+
+**Ringtone pickers.** List with `getRingtones()`, preview with
+`playRingtonePreview(uri)` and always call `stopRingtonePreview()` when the
+picker closes. Pass null to `setContactRingtone` for the default ringtone.
 
 **Searches** run synchronously on the UI isolate. Always pass a `limit`, and
 debounce search-as-you-type.

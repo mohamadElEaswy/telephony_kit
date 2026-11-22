@@ -1757,3 +1757,92 @@ class PhoneNumberCountry {
   @override
   String toString() => 'PhoneNumberCountry($isoCode, +$callingCode)';
 }
+
+/// A change in the device's active SIMs, from `TelephonyKit.simChanges`.
+sealed class SimEvent {
+  const SimEvent();
+}
+
+/// A SIM was inserted or an eSIM profile was turned on.
+class SimInserted extends SimEvent {
+  const SimInserted(this.sim);
+
+  final SimCard sim;
+
+  @override
+  String toString() => 'SimInserted(${sim.slotIndex}, ${sim.displayName})';
+}
+
+/// A SIM was removed or an eSIM profile was turned off.
+class SimRemoved extends SimEvent {
+  const SimRemoved(this.sim);
+
+  final SimCard sim;
+
+  @override
+  String toString() => 'SimRemoved(${sim.slotIndex}, ${sim.displayName})';
+}
+
+/// The SIM in a slot was swapped for another one.
+class SimChanged extends SimEvent {
+  const SimChanged(this.before, this.after);
+
+  final SimCard before;
+  final SimCard after;
+
+  /// The slot, starting at 0.
+  int get slotIndex => after.slotIndex;
+
+  @override
+  String toString() =>
+      'SimChanged($slotIndex, ${before.displayName} -> ${after.displayName})';
+}
+
+/// A ringtone installed on the device. See `TelephonyKit.getRingtones`.
+class RingtoneInfo {
+  const RingtoneInfo({required this.title, required this.uri});
+
+  /// The name shown to the user.
+  final String title;
+
+  /// The `content://` uri to pass to `TelephonyKit.setContactRingtone`.
+  final String uri;
+
+  @override
+  bool operator ==(Object other) =>
+      other is RingtoneInfo && other.uri == uri && other.title == title;
+
+  @override
+  int get hashCode => Object.hash(title, uri);
+
+  @override
+  String toString() => 'RingtoneInfo($title)';
+}
+
+/// How incoming calls from a contact are handled. See
+/// `TelephonyKit.getContactCallSettings`.
+class ContactCallSettings {
+  const ContactCallSettings({
+    this.ringtoneUri,
+    this.ringtoneTitle = '',
+    this.sendToVoicemail = false,
+  });
+
+  /// The contact's own ringtone, or null for the phone's default ringtone.
+  final String? ringtoneUri;
+
+  /// The name of [ringtoneUri], or an empty string for the default.
+  final String ringtoneTitle;
+
+  /// Whether calls from the contact go straight to voicemail without
+  /// ringing.
+  final bool sendToVoicemail;
+
+  /// Whether the contact uses the phone's default ringtone.
+  bool get usesDefaultRingtone => ringtoneUri == null;
+
+  @override
+  String toString() =>
+      'ContactCallSettings(ringtone: ${ringtoneUri ?? 'default'}, '
+      'voicemail: $sendToVoicemail)';
+}

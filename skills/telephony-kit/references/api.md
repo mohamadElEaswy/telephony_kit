@@ -29,6 +29,8 @@ they return a `Future` or `Stream`. Failures throw `TelephonyException`.
 | `List<String> getPhoneAccounts()` | Account ids, usually one per SIM |
 | `List<PhoneAccount> getPhoneAccountDetails()` | `id`, `label`, `slotIndex` (Android 11+), `displayName` |
 | `bool isEmergencyNumber(String number)` | |
+| `bool answerRingingCall({bool video = false})` | Any app with ANSWER_PHONE_CALLS, Android 8+; false otherwise |
+| `bool endCurrentCall()` | Any app with ANSWER_PHONE_CALLS, Android 9+; declines a ringing call; false otherwise |
 | `bool silenceRinger()` | Default dialer; stops ringtone and vibration, the call keeps ringing; false if not the dialer |
 | `bool get isInCall` | Any app; READ_PHONE_STATE |
 
@@ -141,6 +143,23 @@ Yesterday / weekday / date), `relative(t, {ago})`, `dateTime(t)`,
 `CallTimeLabels` holds every word for translation.
 `groupByDay(items, dateOf, {formatter})` returns `MapEntry(firstTime, items)`
 per calendar day.
+
+## Contact ringtone and voicemail
+
+| Member | Notes |
+| --- | --- |
+| `ContactCallSettings? getContactCallSettings(String id)` | `ringtoneUri` (null = default), `ringtoneTitle`, `sendToVoicemail`, `usesDefaultRingtone`; READ_CONTACTS |
+| `bool setContactRingtone(String id, String? uri)` | WRITE_CONTACTS; null = default ringtone |
+| `bool setContactSendToVoicemail(String id, bool enabled)` | WRITE_CONTACTS |
+| `List<RingtoneInfo> getRingtones()` / `RingtoneInfo? get defaultRingtone` | `title`, `uri`; no permission |
+| `String getRingtoneTitle(String uri)` | |
+| `void playRingtonePreview(String uri)` / `void stopRingtonePreview()` | |
+
+## SIM changes
+
+`Stream<SimEvent> get simChanges` (READ_PHONE_STATE): `SimInserted(sim)`,
+`SimRemoved(sim)`, `SimChanged(before, after)`. Pure Dart
+`diffSimCards(before, after)`.
 
 ## Phone numbers (no permission)
 

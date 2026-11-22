@@ -6,6 +6,7 @@ export 'src/analysis.dart'
     show
         callLogEntryFromRow,
         callLogStats,
+        diffSimCards,
         findDuplicateGroups,
         groupCallLog,
         groupSmsThreads;

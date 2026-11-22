@@ -2285,6 +2285,71 @@ extension type TelecomManager._(jni$_.JObject _$this) implements jni$_.JObject {
 }
 
 extension TelecomManager$$Methods on TelecomManager {
+  static final _id_acceptRingingCall = TelecomManager._class.instanceMethodId(
+    r'acceptRingingCall',
+    r'()V',
+  );
+
+  static final _acceptRingingCall =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public void acceptRingingCall()`
+  @core$_.Deprecated('This Java method is deprecated.')
+  void acceptRingingCall() {
+    final _$$selfRef = reference;
+    _acceptRingingCall(
+      _$$selfRef.pointer,
+      _id_acceptRingingCall.pointer,
+    ).check();
+  }
+
+  static final _id_acceptRingingCall$1 = TelecomManager._class.instanceMethodId(
+    r'acceptRingingCall',
+    r'(I)V',
+  );
+
+  static final _acceptRingingCall$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public void acceptRingingCall(int i)`
+  @core$_.Deprecated('This Java method is deprecated.')
+  void acceptRingingCall$1(core$_.int i) {
+    final _$$selfRef = reference;
+    _acceptRingingCall$1(
+      _$$selfRef.pointer,
+      _id_acceptRingingCall$1.pointer,
+      i,
+    ).check();
+  }
+
   static final _id_endCall = TelecomManager._class.instanceMethodId(
     r'endCall',
     r'()Z',
@@ -5599,6 +5664,434 @@ final class $Selection$Type$ extends jni$_.JType<Selection> {
   @jni$_.internal
   @core$_.override
   String get signature => r'Landroid/text/Selection;';
+}
+
+/// from: `android.media.RingtoneManager`
+extension type RingtoneManager._(jni$_.JObject _$this)
+    implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(r'android/media/RingtoneManager');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<RingtoneManager> type = $RingtoneManager$Type$();
+
+  /// from: `static public final int TITLE_COLUMN_INDEX`
+  static const TITLE_COLUMN_INDEX = 1;
+
+  /// from: `static public final int TYPE_RINGTONE`
+  static const TYPE_RINGTONE = 1;
+  static final _id_new$ = _class.constructorId(r'(Landroid/app/Activity;)V');
+
+  static final _new$ =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void <init>(android.app.Activity activity)`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory RingtoneManager(Activity? activity) {
+    final _$$classRef = _class.reference;
+    final _$activity = activity?.reference ?? jni$_.jNullReference;
+    return _new$(
+      _$$classRef.pointer,
+      _id_new$.pointer,
+      _$activity.pointer,
+    ).object<RingtoneManager>();
+  }
+
+  static final _id_new$1 = _class.constructorId(
+    r'(Landroid/content/Context;)V',
+  );
+
+  static final _new$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_NewObject')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public void <init>(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  factory RingtoneManager.new$1(Context? context) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _new$1(
+      _$$classRef.pointer,
+      _id_new$1.pointer,
+      _$context.pointer,
+    ).object<RingtoneManager>();
+  }
+
+  static final _id_getActualDefaultRingtoneUri = _class.staticMethodId(
+    r'getActualDefaultRingtoneUri',
+    r'(Landroid/content/Context;I)Landroid/net/Uri;',
+  );
+
+  static final _getActualDefaultRingtoneUri =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>, jni$_.Int32)>,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              core$_.int,
+            )
+          >();
+
+  /// from: `static public android.net.Uri getActualDefaultRingtoneUri(android.content.Context context, int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static Uri? getActualDefaultRingtoneUri(Context? context, core$_.int i) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getActualDefaultRingtoneUri(
+      _$$classRef.pointer,
+      _id_getActualDefaultRingtoneUri.pointer,
+      _$context.pointer,
+      i,
+    ).object<Uri?>();
+  }
+
+  static final _id_getRingtone = _class.staticMethodId(
+    r'getRingtone',
+    r'(Landroid/content/Context;Landroid/net/Uri;)Landroid/media/Ringtone;',
+  );
+
+  static final _getRingtone =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public android.media.Ringtone getRingtone(android.content.Context context, android.net.Uri uri)`
+  /// The returned object must be released after use, by calling the [release] method.
+  static Ringtone? getRingtone(Context? context, Uri? uri) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$uri = uri?.reference ?? jni$_.jNullReference;
+    return _getRingtone(
+      _$$classRef.pointer,
+      _id_getRingtone.pointer,
+      _$context.pointer,
+      _$uri.pointer,
+    ).object<Ringtone?>();
+  }
+}
+
+extension RingtoneManager$$Methods on RingtoneManager {
+  static final _id_get$cursor = RingtoneManager._class.instanceMethodId(
+    r'getCursor',
+    r'()Landroid/database/Cursor;',
+  );
+
+  static final _get$cursor =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public android.database.Cursor getCursor()`
+  /// The returned object must be released after use, by calling the [release] method.
+  Cursor? get cursor {
+    final _$$selfRef = reference;
+    return _get$cursor(
+      _$$selfRef.pointer,
+      _id_get$cursor.pointer,
+    ).object<Cursor?>();
+  }
+
+  static final _id_getRingtone$1 = RingtoneManager._class.instanceMethodId(
+    r'getRingtone',
+    r'(I)Landroid/media/Ringtone;',
+  );
+
+  static final _getRingtone$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public android.media.Ringtone getRingtone(int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  Ringtone? getRingtone$1(core$_.int i) {
+    final _$$selfRef = reference;
+    return _getRingtone$1(
+      _$$selfRef.pointer,
+      _id_getRingtone$1.pointer,
+      i,
+    ).object<Ringtone?>();
+  }
+
+  static final _id_getRingtoneUri = RingtoneManager._class.instanceMethodId(
+    r'getRingtoneUri',
+    r'(I)Landroid/net/Uri;',
+  );
+
+  static final _getRingtoneUri =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public android.net.Uri getRingtoneUri(int i)`
+  /// The returned object must be released after use, by calling the [release] method.
+  Uri? getRingtoneUri(core$_.int i) {
+    final _$$selfRef = reference;
+    return _getRingtoneUri(
+      _$$selfRef.pointer,
+      _id_getRingtoneUri.pointer,
+      i,
+    ).object<Uri?>();
+  }
+
+  static final _id_set$type$1 = RingtoneManager._class.instanceMethodId(
+    r'setType',
+    r'(I)V',
+  );
+
+  static final _set$type$1 =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Int32,)>,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              core$_.int,
+            )
+          >();
+
+  /// from: `public void setType(int i)`
+  set type$1(core$_.int i) {
+    final _$$selfRef = reference;
+    _set$type$1(_$$selfRef.pointer, _id_set$type$1.pointer, i).check();
+  }
+}
+
+final class $RingtoneManager$Type$ extends jni$_.JType<RingtoneManager> {
+  @jni$_.internal
+  const $RingtoneManager$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/media/RingtoneManager;';
+}
+
+/// from: `android.media.Ringtone`
+extension type Ringtone._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(r'android/media/Ringtone');
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<Ringtone> type = $Ringtone$Type$();
+}
+
+extension Ringtone$$Methods on Ringtone {
+  static final _id_getTitle = Ringtone._class.instanceMethodId(
+    r'getTitle',
+    r'(Landroid/content/Context;)Ljava/lang/String;',
+  );
+
+  static final _getTitle =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<(jni$_.Pointer<jni$_.Void>,)>,
+              )
+            >
+          >('globalEnv_CallObjectMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `public java.lang.String getTitle(android.content.Context context)`
+  /// The returned object must be released after use, by calling the [release] method.
+  jni$_.JString? getTitle(Context? context) {
+    final _$$selfRef = reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    return _getTitle(
+      _$$selfRef.pointer,
+      _id_getTitle.pointer,
+      _$context.pointer,
+    ).object<jni$_.JString?>();
+  }
+
+  static final _id_get$isPlaying = Ringtone._class.instanceMethodId(
+    r'isPlaying',
+    r'()Z',
+  );
+
+  static final _get$isPlaying =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JniResult Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallBooleanMethod')
+          .asFunction<
+            jni$_.JniResult Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public boolean isPlaying()`
+  core$_.bool get isPlaying {
+    final _$$selfRef = reference;
+    return _get$isPlaying(
+      _$$selfRef.pointer,
+      _id_get$isPlaying.pointer,
+    ).boolean;
+  }
+
+  static final _id_play = Ringtone._class.instanceMethodId(r'play', r'()V');
+
+  static final _play =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public void play()`
+  void play() {
+    final _$$selfRef = reference;
+    _play(_$$selfRef.pointer, _id_play.pointer).check();
+  }
+
+  static final _id_stop = Ringtone._class.instanceMethodId(r'stop', r'()V');
+
+  static final _stop =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `public void stop()`
+  void stop() {
+    final _$$selfRef = reference;
+    _stop(_$$selfRef.pointer, _id_stop.pointer).check();
+  }
+}
+
+final class $Ringtone$Type$ extends jni$_.JType<Ringtone> {
+  @jni$_.internal
+  const $Ringtone$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Landroid/media/Ringtone;';
 }
 
 /// from: `java.util.TimeZone`
@@ -12132,6 +12625,98 @@ final class $ScreeningListener$Type$ extends jni$_.JType<ScreeningListener> {
   @jni$_.internal
   @core$_.override
   String get signature => r'Ldev/telephonykit/telephony_kit/ScreeningListener;';
+}
+
+/// from: `dev.telephonykit.telephony_kit.SimMonitor`
+///
+/// Reports when the active SIMs change (a SIM inserted, removed or swapped, an
+///eSIM profile turned on or off). SubscriptionManager.OnSubscriptionsChangedListener is a class, so it cannot
+///be implemented from Dart. Dart reads the SIM list again on each change and
+///works out what changed.
+extension type SimMonitor._(jni$_.JObject _$this) implements jni$_.JObject {
+  static final _class = jni$_.JClass.forName(
+    r'dev/telephonykit/telephony_kit/SimMonitor',
+  );
+
+  /// The type which includes information such as the signature of this class.
+  static const jni$_.JType<SimMonitor> type = $SimMonitor$Type$();
+  static final _id_start = _class.staticMethodId(
+    r'start',
+    r'(Landroid/content/Context;Ldev/telephonykit/telephony_kit/ChangeListener;)V',
+  );
+
+  static final _start =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+                jni$_.VarArgs<
+                  (jni$_.Pointer<jni$_.Void>, jni$_.Pointer<jni$_.Void>)
+                >,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.Pointer<jni$_.Void>,
+            )
+          >();
+
+  /// from: `static public void start(android.content.Context context, dev.telephonykit.telephony_kit.ChangeListener listener)`
+  ///
+  /// Starts sending changes to {@code listener} as {@code onChange("sim")}.
+  ///Android also calls it once right after registering. Replaces any earlier
+  ///listener.
+  static void start(Context? context, ChangeListener? listener) {
+    final _$$classRef = _class.reference;
+    final _$context = context?.reference ?? jni$_.jNullReference;
+    final _$listener = listener?.reference ?? jni$_.jNullReference;
+    _start(
+      _$$classRef.pointer,
+      _id_start.pointer,
+      _$context.pointer,
+      _$listener.pointer,
+    ).check();
+  }
+
+  static final _id_stop = _class.staticMethodId(r'stop', r'()V');
+
+  static final _stop =
+      jni$_.ProtectedJniExtensions.lookup<
+            jni$_.NativeFunction<
+              jni$_.JThrowablePtr Function(
+                jni$_.Pointer<jni$_.Void>,
+                jni$_.JMethodIDPtr,
+              )
+            >
+          >('globalEnv_CallStaticVoidMethod')
+          .asFunction<
+            jni$_.JThrowablePtr Function(
+              jni$_.Pointer<jni$_.Void>,
+              jni$_.JMethodIDPtr,
+            )
+          >();
+
+  /// from: `static public void stop()`
+  ///
+  /// Stops sending changes.
+  static void stop() {
+    final _$$classRef = _class.reference;
+    _stop(_$$classRef.pointer, _id_stop.pointer).check();
+  }
+}
+
+final class $SimMonitor$Type$ extends jni$_.JType<SimMonitor> {
+  @jni$_.internal
+  const $SimMonitor$Type$();
+
+  @jni$_.internal
+  @core$_.override
+  String get signature => r'Ldev/telephonykit/telephony_kit/SimMonitor;';
 }
 
 /// from: `dev.telephonykit.telephony_kit.SmsHelper`

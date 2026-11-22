@@ -1,3 +1,32 @@
+## 0.10.0
+
+Answer and end calls without being the default dialer
+* `answerRingingCall({video})` (Android 8+) and `endCurrentCall()`
+  (Android 9+) for apps with `ANSWER_PHONE_CALLS`, for example car,
+  headset or accessibility apps. They return false without the permission.
+
+Per-contact ringtone and send to voicemail
+* `getContactCallSettings(id)` returns `ContactCallSettings`
+  (`ringtoneUri`, `ringtoneTitle`, `sendToVoicemail`).
+* `setContactRingtone(id, uri)` (null for the default) and
+  `setContactSendToVoicemail(id, bool)`. Android applies them itself, also
+  while the app is the default dialer.
+* Ringtones: `getRingtones()` (`RingtoneInfo` title and uri),
+  `defaultRingtone`, `getRingtoneTitle(uri)`, `playRingtonePreview(uri)`
+  and `stopRingtonePreview()`.
+
+SIM changes
+* `simChanges` streams `SimInserted`, `SimRemoved` and `SimChanged` (a
+  different SIM in the same slot), also for eSIM profiles. Needs
+  `READ_PHONE_STATE`. New `SimMonitor` Java helper, since Android's
+  subscription listener is a class.
+* Pure Dart `diffSimCards(before, after)`.
+
+Example
+* Contact details have a ringtone picker with preview and a send to
+  voicemail switch. More tools can answer and end calls without the
+  dialer role and logs SIM changes.
+
 ## 0.9.0
 
 Silence the ringer

@@ -39,6 +39,9 @@ class _ToolsPageState extends State<ToolsPage> {
       }
     }
 
+    if (_telephony.hasPermission(TelephonyPermission.readPhoneState)) {
+      watch('SIM', _telephony.simChanges);
+    }
     if (_telephony.hasPermission(TelephonyPermission.readContacts)) {
       watch('Contacts', _telephony.contactChanges);
     }
@@ -277,6 +280,28 @@ class _ToolsPageState extends State<ToolsPage> {
           _section('Live changes', [
             for (final line in _log) ListTile(dense: true, title: Text(line)),
           ]),
+        _section('Calls without the dialer role', [
+          _tile(
+            'Answer ringing call',
+            'ANSWER_PHONE_CALLS, Android 8+',
+            () => _run(
+              'Answer',
+              () => _telephony.answerRingingCall()
+                  ? 'Answering.'
+                  : 'Needs ANSWER_PHONE_CALLS and Android 8+.',
+            ),
+          ),
+          _tile(
+            'End current call',
+            'ANSWER_PHONE_CALLS, Android 9+',
+            () => _run(
+              'End call',
+              () => _telephony.endCurrentCall()
+                  ? 'Call ended.'
+                  : 'No call ended (no call, no permission or Android < 9).',
+            ),
+          ),
+        ]),
         _section('Phone numbers', [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),

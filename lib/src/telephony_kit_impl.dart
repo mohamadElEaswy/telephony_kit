@@ -10,6 +10,7 @@ import 'bindings.g.dart' as android;
 import 'contacts.dart';
 import 'formatting.dart';
 import 'models.dart';
+import 'permissions.dart';
 import 'phone_numbers.dart';
 import 'search.dart';
 import 'vcard.dart';
@@ -268,6 +269,41 @@ class TelephonyKit {
   ///
   /// Needs `TelephonyPermission.readPhoneState`.
   bool get isInCall => _guard('Checking call state', () => _telecom.isInCall);
+
+  /// Answers the ringing call from any app, without being the default
+  /// dialer: for example a car, headset or accessibility app. Pass
+  /// [video] to answer a video call with video.
+  ///
+  /// Needs `TelephonyPermission.answerPhoneCalls` and Android 8+. Returns
+  /// false without the permission or on older Android. Does nothing when no
+  /// call is ringing. The default dialer should use `PhoneCall.answer`.
+  bool answerRingingCall({bool video = false}) => _guard('Answering call', () {
+    if (_sdkInt < 26 || !hasPermission(TelephonyPermission.answerPhoneCalls)) {
+      return false;
+    }
+    if (video) {
+      // VideoProfile.STATE_BIDIRECTIONAL
+      _telecom.acceptRingingCall$1(3);
+    } else {
+      _telecom.acceptRingingCall();
+    }
+    return true;
+  });
+
+  /// Ends the ringing or active call from any app, without being the
+  /// default dialer. A ringing call is declined. Returns whether a call was
+  /// ended.
+  ///
+  /// Needs `TelephonyPermission.answerPhoneCalls` and Android 9+. Returns
+  /// false without the permission or on older Android. Emergency calls are
+  /// never ended. The default dialer should use `PhoneCall.hangUp` or
+  /// `PhoneCall.reject`.
+  bool endCurrentCall() => _guard('Ending call', () {
+    if (_sdkInt < 28 || !hasPermission(TelephonyPermission.answerPhoneCalls)) {
+      return false;
+    }
+    return _telecom.endCall();
+  });
 
   /// Silences the ringtone and vibration of the ringing call without
   /// rejecting it: the call keeps ringing on screen and can still be
@@ -1177,6 +1213,139 @@ class TelephonyKit {
             ) >
             0;
       });
+
+  /// The ringtone and voicemail setting of the contact with [id], or null if
+  /// the contact does not exist. Needs `TelephonyPermission.readContacts`.
+  ContactCallSettings? getContactCallSettings(String id) =>
+      _guard('Reading contact settings', () {
+        if (id.isEmpty) return null;
+        final rows = _queryRows(
+          _contactsUri,
+          projection: const ['custom_ringtone', 'send_to_voicemail'],
+          selection: '_id = ?',
+          selectionArgs: [id],
+          limit: 1,
+        );
+        if (rows.isEmpty) return null;
+        final uri = rows.first['custom_ringtone'];
+        final ringtone = uri == null || uri.isEmpty ? null : uri;
+        return ContactCallSettings(
+          ringtoneUri: ringtone,
+          ringtoneTitle: ringtone == null ? '' : getRingtoneTitle(ringtone),
+          sendToVoicemail: rows.first['send_to_voicemail'] == '1',
+        );
+      });
+
+  /// Gives the contact with [id] its own ringtone. [ringtoneUri] is a uri
+  /// from [getRingtones] (or any audio `content://` uri); null goes back to
+  /// the phone's default ringtone. Returns false if the contact does not
+  /// exist. Needs `TelephonyPermission.writeContacts`.
+  ///
+  /// Android plays it when the contact calls, also while this app is the
+  /// default dialer (the system rings).
+  bool setContactRingtone(String id, String? ringtoneUri) =>
+      _guard('Changing contact ringtone', () {
+        if (id.isEmpty) return false;
+        final values = android.ContentValues()
+          ..put$8(
+            'custom_ringtone'.toJString(),
+            ringtoneUri == null || ringtoneUri.isEmpty
+                ? null
+                : ringtoneUri.toJString(),
+          );
+        return _updateRows(_contactsUri, values, '_id = ?', [id]) > 0;
+      });
+
+  /// Sends calls from the contact with [id] straight to voicemail (they do
+  /// not ring; the call log shows them as rejected or blocked, depending on
+  /// the phone), or stops
+  /// doing so. Returns false if the contact does not exist. Needs
+  /// `TelephonyPermission.writeContacts`.
+  bool setContactSendToVoicemail(String id, bool enabled) =>
+      _guard('Changing contact voicemail setting', () {
+        if (id.isEmpty) return false;
+        final values = android.ContentValues()
+          ..put$5(
+            'send_to_voicemail'.toJString(),
+            (enabled ? 1 : 0).toJInteger(),
+          );
+        return _updateRows(_contactsUri, values, '_id = ?', [id]) > 0;
+      });
+
+  /// The ringtones installed on the device, sorted as the system ringtone
+  /// picker shows them. Needs no permission.
+  List<RingtoneInfo> getRingtones() => _guard('Reading ringtones', () {
+    final manager = android.RingtoneManager.new$1(_context)
+      ..type$1 = android.RingtoneManager.TYPE_RINGTONE;
+    final cursor = manager.cursor;
+    if (cursor == null) return const <RingtoneInfo>[];
+    final result = <RingtoneInfo>[];
+    var position = 0;
+    try {
+      while (cursor.moveToNext()) {
+        final title = _str(
+          cursor.getString(android.RingtoneManager.TITLE_COLUMN_INDEX),
+        );
+        final uri = _str(manager.getRingtoneUri(position));
+        position++;
+        if (uri.isNotEmpty) result.add(RingtoneInfo(title: title, uri: uri));
+      }
+    } finally {
+      cursor.close();
+      manager.release();
+    }
+    return result;
+  });
+
+  /// The phone's default ringtone, or null if it is silent.
+  RingtoneInfo? get defaultRingtone => _guard('Reading default ringtone', () {
+    final uri = _str(
+      android.RingtoneManager.getActualDefaultRingtoneUri(
+        _context,
+        android.RingtoneManager.TYPE_RINGTONE,
+      ),
+    );
+    if (uri.isEmpty) return null;
+    return RingtoneInfo(title: getRingtoneTitle(uri), uri: uri);
+  });
+
+  /// The name of the ringtone at [uri], or an empty string if unknown.
+  String getRingtoneTitle(String uri) => _guard('Reading ringtone', () {
+    final ringtone = android.RingtoneManager.getRingtone(
+      _context,
+      android.Uri.parse(uri.toJString()),
+    );
+    if (ringtone == null) return '';
+    try {
+      return _str(ringtone.getTitle(_context));
+    } finally {
+      ringtone.release();
+    }
+  });
+
+  android.Ringtone? _preview;
+
+  /// Plays the ringtone at [uri] so the user can hear it in a picker. Stops
+  /// any earlier preview. Stop it with [stopRingtonePreview].
+  void playRingtonePreview(String uri) => _guard('Playing ringtone', () {
+    stopRingtonePreview();
+    final ringtone = android.RingtoneManager.getRingtone(
+      _context,
+      android.Uri.parse(uri.toJString()),
+    );
+    if (ringtone == null) return;
+    _preview = ringtone;
+    ringtone.play();
+  });
+
+  /// Stops the ringtone started by [playRingtonePreview].
+  void stopRingtonePreview() {
+    final ringtone = _preview;
+    _preview = null;
+    if (ringtone == null) return;
+    _guard('Stopping ringtone', ringtone.stop);
+    ringtone.release();
+  }
 
   /// Deletes the contacts with these ids (all their raw contacts, so a
   /// contact merged from several accounts is removed everywhere). Returns how
@@ -2269,6 +2438,59 @@ class TelephonyKit {
   // ---------------------------------------------------------------------------
   // Network and signal
   // ---------------------------------------------------------------------------
+
+  StreamController<SimEvent>? _sim;
+  android.ChangeListener? _simListener;
+
+  /// SIMs inserted, removed or swapped while listening (also eSIM profiles
+  /// turned on or off). Compare with [getSimCards] to show the current
+  /// SIMs; this stream only reports changes after it starts.
+  ///
+  /// Needs `TelephonyPermission.readPhoneState`; listen again after
+  /// granting it. Some phones restart the radio when a SIM is inserted, so
+  /// a [SimRemoved] can be followed by a [SimInserted] for the same SIM.
+  Stream<SimEvent> get simChanges {
+    final existing = _sim;
+    if (existing != null) return existing.stream;
+    late final StreamController<SimEvent> controller;
+    List<SimCard>? known;
+    List<SimCard> read() {
+      try {
+        return getSimCards();
+      } on TelephonyException {
+        return const [];
+      }
+    }
+
+    controller = StreamController<SimEvent>.broadcast(
+      onListen: () {
+        known = read();
+        final listener = android.ChangeListener.implement(
+          android.$ChangeListener(
+            onChange: (_) {
+              final now = read();
+              final before = known ?? now;
+              known = now;
+              for (final event in diffSimCards(before, now)) {
+                controller.add(event);
+              }
+            },
+            onChange$async: true,
+          ),
+        );
+        _simListener = listener;
+        android.SimMonitor.start(_context, listener);
+      },
+      onCancel: () {
+        android.SimMonitor.stop();
+        final old = _simListener;
+        _simListener = null;
+        Future<void>.delayed(const Duration(seconds: 2), () => old?.release());
+      },
+    );
+    _sim = controller;
+    return controller.stream;
+  }
 
   StreamController<NetworkEvent>? _network;
   android.NetworkEventListener? _networkListener;

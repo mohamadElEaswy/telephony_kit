@@ -278,3 +278,33 @@ String forwardingUssd(
   }
   return '**$code*$target#';
 }
+
+/// What changed between two lists of active SIMs: a SIM that disappeared is
+/// [SimRemoved], a new one [SimInserted], and a different SIM in the same
+/// slot [SimChanged]. SIMs are matched by subscription id, so a renamed SIM
+/// is not a change.
+List<SimEvent> diffSimCards(List<SimCard> before, List<SimCard> after) {
+  final beforeIds = {for (final s in before) s.subscriptionId};
+  final afterIds = {for (final s in after) s.subscriptionId};
+  final gone = [
+    for (final s in before)
+      if (!afterIds.contains(s.subscriptionId)) s,
+  ];
+  final added = [
+    for (final s in after)
+      if (!beforeIds.contains(s.subscriptionId)) s,
+  ];
+  final events = <SimEvent>[];
+  for (final old in gone) {
+    final i = old.slotIndex < 0
+        ? -1
+        : added.indexWhere((s) => s.slotIndex == old.slotIndex);
+    if (i >= 0) {
+      events.add(SimChanged(old, added.removeAt(i)));
+    } else {
+      events.add(SimRemoved(old));
+    }
+  }
+  events.addAll(added.map(SimInserted.new));
+  return events;
+}
